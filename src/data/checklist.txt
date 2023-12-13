@@ -1,0 +1,126 @@
+
+Tahasin Shadat - Soul Knight
+
+>
+>>
+>>> Basic Components Needed:
+>>
+>
+
+    [ X ] -> Rectangle ( or square )
+    [  ] -> Grid ( A set of squares and rectangles )
+    [  ] -> Logic ( Calculations for Math )
+    [  ] -> Basic Mouse Interactions
+    [  ] -> Buttons
+    [  ] -> Checkboxes
+    [  ] -> Text
+    [  ] -> Handle Data from txt file ( GET and POST )
+    [  ] -> Testing Method
+
+
+Game Name Ideas:
+- Realm Raiders
+- Celestial Crusade
+- Adventurer's Ascent
+- Dungeon Delvers
+==================================================================================================================================================================================================
+==================================================================================================================================================================================================
+==================================================================================================================================================================================================
+
+
+
+>
+>>
+>>> Game Elements:
+>>
+>
+
+================================================================================================================
+
+    [  ] -> Player:
+        [  ] -> Movement
+        [  ] -> Interact with Objects ( Doors, Weapons, Crates, PowerUps )
+
+================================================================================================================
+
+    [  ] -> Enemy:
+        [  ] -> Movement
+        [  ] -> Chase Player
+        [  ] -> Variablility
+
+================================================================================================================
+
+    [  ] -> Level:
+
+        [  ] -> Rooms
+            [  ] -> Floor
+            [  ] -> Walls
+            [  ] -> Doors
+
+        [  ] -> Corridor ( connect rooms )
+            [  ] -> Floor
+            [  ] -> Walls
+            [  ] -> Doors
+
+================================================================================================================
+
+    [  ] -> Weapons:
+        [  ] -> Projectile ( Square )
+        [  ] -> Direction
+        [  ] -> Mouse being clicked
+        [  ] -> Comes from Crate
+
+================================================================================================================
+
+    [  ] -> Crate:
+        [  ] -> Square that opens up
+        [  ] -> Reveals Random Weapon
+
+================================================================================================================
+
+    [  ] -> Game Window:
+        [  ] -> Game Window 
+        [  ] -> Fps of Game
+        [  ] -> Constant Background refresh + rendering
+
+================================================================================================================
+
+    [  ] -> Scenes:
+
+        [  ] -> Start Game Scene:
+            [  ] -> Difficultly Selection
+
+        [  ] -> End Scene:
+            [  ] -> Score
+            [  ] -> Lose or Win
+
+        [  ] -> High Score Board
+
+        [  ] -> How To Play
+
+================================================================================================================
+        
+
+
+Steps:
+    [  ] -> Set Up and display Window
+    [  ] -> Create a Game loop
+    [  ] -> Check if game loop works by printing things rapidly
+    [  ] -> Add a rectangle into the window
+    [  ] -> Make the rectangle move via W A S D
+    [  ] -> Make the rectangle always be at the CENTER of the window
+    [  ] -> Make the Camera follow the rectangle
+    [  ] -> Add background image into the window to check:
+        [  ] -> if the rectangle is moving accross the image
+        [  ] -> if the rectangle is always in the middle of the window
+    [  ] -> Add a sprite to the rectangle
+    [  ] -> Create a Tile (Square) that is an image of a tile
+    [  ] -> Create a grid of tiles
+        [  ] -> Player should always be above the tiles
+    [  ] -> Create a Wall piece that is an image of a wall
+    [  ] -> Add collision detection for the wall to make sure that NO ENTITY can pass through it
+    [  ] -> Create a Row / Col of Walls
+        [  ] -> Player should NEVER be able to pass through the walls
+    [  ] -> Create a closed room with tiles and a wall
+        [  ] -> Player should never be able to get out of the room
+    [  ] -> Create a hallway with the same grid of walls and tiles
