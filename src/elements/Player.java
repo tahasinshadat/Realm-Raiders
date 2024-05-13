@@ -2,6 +2,7 @@ package elements;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -15,23 +16,46 @@ public class Player extends Entity {
     
     GamePanel gamePanel;
     KeyHandler keyHandler;
+
     public BufferedImage idleR1, idleR2, idleL1, idleL2;
     private boolean wasRight;
+    private String drawDirection;
+
+    public final double screenX;
+    public final double screenY;
+    public final int trueSpeed = 10;
 
     public Player(GamePanel gamePanel, KeyHandler keyHandler) {
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
-        setDefaults();
-        getPlayerImage();
+
+        this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
+        this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
+
+        hitbox = new Rectangle();
+        hitbox.x = 8;
+        hitbox.y = 16;
+        hitbox.width = 32;
+        hitbox.height = 32;
+
+        this.setDefaults();
+        this.getPlayerImage();
     }
 
     public void setDefaults() {
-        this.x = 100;
-        this.y = 100;
-        this.speed = 4 ;
-        this.diagnolSpeed = 2.83;
+        this.worldX = this.gamePanel.worldWidth / 2;
+        this.worldY = this.gamePanel.worldHeight / 2;
+        // Keep the speed relative to the zoom factor (keep the speed at 4 relative to mapSize)
+        this.speed = this.gamePanel.worldWidth / (this.gamePanel.worldWidth / this.trueSpeed);
+        this.diagnolSpeed = calculateDiagnolSpeed(this.speed);
         this.direction = "right";
+        this.drawDirection = this.direction;
         this.wasRight = true;
+    }
+
+    // Keeps the speed the same even when moving diagnallay
+    public double calculateDiagnolSpeed(double hypotenuse) {
+        return hypotenuse / Math.sqrt(2);
     }
 
     public void getPlayerImage() {
@@ -56,51 +80,83 @@ public class Player extends Entity {
 
     public void update() {
         if (keyHandler.upPressed && keyHandler.leftPressed) {
-            this.y -= this.diagnolSpeed;
-            this.x -= this.diagnolSpeed;
-            this.direction = "left";
+            this.direction = "up-left";
+            this.drawDirection = "left";
             this.wasRight = false;
 
         } else if (keyHandler.upPressed && keyHandler.rightPressed) {
-            this.y -= this.diagnolSpeed;
-            this.x += this.diagnolSpeed;
-            this.direction = "right";
+            this.direction = "up-right";
+            this.drawDirection = "right";
             this.wasRight = true;
 
         } else if (keyHandler.downPressed && keyHandler.leftPressed) {
-            this.y += this.diagnolSpeed;
-            this.x -= this.diagnolSpeed;
-            this.direction = "left";
+            this.direction = "down-left";
+            this.drawDirection = "left";
             this.wasRight = false;
 
         } else if (keyHandler.downPressed && keyHandler.rightPressed) {
-            this.y += this.diagnolSpeed;
-            this.x += this.diagnolSpeed;
-            this.direction = "right";
+            this.direction = "down-right";
+            this.drawDirection = "right";
             this.wasRight = true;
 
         } else if (keyHandler.upPressed) {
-            this.y -= this.speed;
-            if (this.wasRight) this.direction = "right";
-            else this.direction = "left";
-
+            this.direction = "up";
+            if (this.wasRight) this.drawDirection = "right";
+            else this.drawDirection = "left";
+            
         } else if (keyHandler.downPressed) {
-            this.y += this.speed;
-            if (this.wasRight) this.direction = "right";
-            else this.direction = "left";
+            this.direction = "down";
+            if (this.wasRight) this.drawDirection = "right";
+            else this.drawDirection = "left";
 
         } else if (keyHandler.leftPressed) {
-            this.x -= this.speed;
             this.direction = "left";
+            this.drawDirection = "left";
+
             this.wasRight = false;
 
         } else if (keyHandler.rightPressed) {
-            this.x += this.speed;
             this.direction = "right";
+            this.drawDirection = "right";
             this.wasRight = true;
 
         } else {
+            this.drawDirection = "idle";
             this.direction = "idle";
+        }
+
+        // Check For tile collisions
+        this.collisionEnabled = false;
+        this.gamePanel.collisionHandler.checkTile(this);
+
+        // If there is no collision, move
+        if (collisionEnabled == false) {
+
+            switch (this.direction) {
+                case "up-left":
+                    this.worldY -= this.diagnolSpeed;
+                    this.worldX -= this.diagnolSpeed;
+                    break;
+                case "up-right":
+                    this.worldY -= this.diagnolSpeed;
+                    this.worldX += this.diagnolSpeed;
+                    break;
+                case "down-left":
+                    this.worldY += this.diagnolSpeed;
+                    this.worldX -= this.diagnolSpeed;
+                    break;
+                case "down-right":
+                    this.worldY += this.diagnolSpeed;
+                    this.worldX += this.diagnolSpeed;
+                    break;
+                case "up": this.worldY -= this.speed; break;
+                case "down": this.worldY += this.speed; break;
+                case "right": this.worldX += this.speed; break;
+                case "left": this.worldX -= this.speed; break;
+                case "idle": break;
+                default: break;
+            }
+
         }
 
         this.spriteCounter++;
@@ -120,7 +176,7 @@ public class Player extends Entity {
 
         BufferedImage image = null;
 
-        switch (direction) {
+        switch (this.drawDirection) {
             case "idle":
                 if (spriteNum == 1) {
                     if (this.wasRight) image = this.idleR1;
@@ -139,8 +195,8 @@ public class Player extends Entity {
                 else image = this.left2;
                 break;
         }
-
-        g2.drawImage(image, (int) this.x, (int) this.y, this.gamePanel.tileSize, this.gamePanel.tileSize, null);
+        // System.out.println(this.worldX + " " + this.worldY);
+        g2.drawImage(image, (int) this.screenX, (int) this.screenY, this.gamePanel.tileSize, this.gamePanel.tileSize, null);
     }
 
 }

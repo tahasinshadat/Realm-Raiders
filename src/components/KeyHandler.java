@@ -3,9 +3,21 @@ package components;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import main.GamePanel;
+
 public class KeyHandler implements KeyListener {
     
     public boolean upPressed, downPressed, leftPressed, rightPressed;
+    GamePanel gamePanel;
+
+    // Limit amount player can zoom in and out to a certain range
+    private int zoomInAmt = 0;
+    private int zoomOutAmt = 0;
+    private final int maxZoomAmt = 12;
+
+    public KeyHandler(GamePanel gamePanel) {
+        this.gamePanel = gamePanel;
+    }
 
     @Override
     public void keyTyped(KeyEvent event) {
@@ -19,6 +31,20 @@ public class KeyHandler implements KeyListener {
         if (code == KeyEvent.VK_S) this.downPressed = true;
         if (code == KeyEvent.VK_A) this.leftPressed = true;
         if (code == KeyEvent.VK_D) this.rightPressed = true;
+        if (code == KeyEvent.VK_UP) {
+            if (this.zoomInAmt <= maxZoomAmt) {
+                // this.zoomInAmt++;
+                // this.zoomOutAmt--;
+                this.gamePanel.zoom(1);
+            }
+        }
+        if (code == KeyEvent.VK_DOWN) {
+            if (this.zoomOutAmt <= maxZoomAmt) {
+                // this.zoomOutAmt++;
+                // this.zoomInAmt--;
+                this.gamePanel.zoom(-1);
+            }
+        }
     
     }
 

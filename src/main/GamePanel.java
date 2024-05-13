@@ -4,9 +4,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JPanel;
 
+import components.CollisionHandler;
+// import components.DataHandler;
 import components.KeyHandler;
+import components.MapCreator;
+import components.MouseInteractions;
 import elements.Player;
 import elements.TileManager;
 
@@ -15,29 +22,55 @@ public class GamePanel extends JPanel implements Runnable {
     // Tile settings
     final int originalTileSize = 16; // 16 x 16
     final int scale = 3;
-    public final int tileSize = originalTileSize * scale; // 48 x 48
+    public int tileSize = originalTileSize * scale; // 48 x 48
 
     // 22 : 13 Aspect Ratio
-    public final int maxScreenCol = 15 * 3/2; // 16 * 2
-    public final int maxScreenRow = 9 * 3/2; // 9 * 2
-    public final int screenWidth = tileSize * maxScreenCol; // 1536 px
-    public final int screenHeight = tileSize * maxScreenRow; // 864 px
+    public int maxScreenCol = 15 * 3/2; // 16 * 2
+    public int maxScreenRow = 9 * 3/2; // 9 * 2
+    public int screenWidth = tileSize * maxScreenCol; // 1536 px
+    public int screenHeight = tileSize * maxScreenRow; // 864 px
+
+    // World Settings (Room Sizes must be even)
+    public final int enemyRoomSize = 20;
+    public final int startingRoomSize = 18;
+    public final int lootRoomSize = 14;
+    public final int portalRoomSize = 12;
+    public final int corridorLength = 22;
+    public final int corridorHeight = 6;
+
+    // !!! determines world size !!!
+    public int sectionSize = 50; 
+    public int sections = 7;
+    public int worldSize = this.sectionSize * this.sections;
+
+    public final int maxWorldCol = this.worldSize;
+    public final int maxWorldRow = this.worldSize;
+    public final int worldWidth = this.tileSize * this.maxWorldCol;
+    public final int worldHeight = this.tileSize * this.maxWorldRow;
 
     final int FPS = 60;
 
-    TileManager tileManager = new TileManager(this);
-    KeyHandler keyHandler = new KeyHandler();
+    public TileManager tileManager = new TileManager(this);
+    KeyHandler keyHandler = new KeyHandler(this);
+    MouseInteractions mouse = new MouseInteractions(this);
     Thread gameThread;
-    Player player = new Player(this, this.keyHandler);
+    MapCreator mapCreator = new MapCreator(this, true, 1);
+    public CollisionHandler collisionHandler = new CollisionHandler(this);
+    public Player player = new Player(this, this.keyHandler);
 
     public GamePanel() {
+
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true); // Redered in the background, and then shown
         this.setBackground(Color.decode("#010b19"));
         this.addKeyListener(keyHandler);
         this.setFocusable(true);
-        this.tileManager.initPreset(1);
+
+        mapCreator.setWorldSize(sections, sectionSize);
+        this.worldSize = mapCreator.getWorldSize();
+        mapCreator.setEnvironment(20);
+        tileManager.mapTileNum = mapCreator.getWorldMap();
     }
 
     public void startGameThread() {
@@ -77,6 +110,8 @@ public class GamePanel extends JPanel implements Runnable {
                 timer = 0;
             }
 
+            // this.mouse.getMousePosition();
+            // System.out.println(mapCreator.validateDirection(4, 0, "left"));
         }
 
     }
@@ -93,5 +128,27 @@ public class GamePanel extends JPanel implements Runnable {
         this.player.draw(g2);
 
         g2.dispose(); 
+        // System.out.println(this.tileSize * this.maxWorldCol);
+    }
+
+    public void zoom(int zoomAmt) {
+
+        int oldWorldWidth = this.tileSize * this.maxWorldCol; // 10080
+        tileSize += zoomAmt;
+        int newWorldWidth = this.tileSize * this.maxWorldCol;
+
+        this.player.speed = newWorldWidth / (this.worldWidth / this.player.trueSpeed);
+        this.player.diagnolSpeed = this.player.calculateDiagnolSpeed(this.player.speed);
+
+        // Multiplier keeps track of how much the player zoomed in and out
+        double multiplier = (double) newWorldWidth / oldWorldWidth;
+
+        // Use multiplier to make the players position stay in the center
+        double newPlayerWorldX = this.player.worldX * multiplier;
+        double newPlayerWorldY = this.player.worldY * multiplier;
+
+        this.player.worldX = newPlayerWorldX;
+        this.player.worldY = newPlayerWorldY;
+
     }
 }
