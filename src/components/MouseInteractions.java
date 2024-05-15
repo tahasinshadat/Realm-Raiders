@@ -28,7 +28,7 @@ public class MouseInteractions {
         this.mouseX = (int) mousePoint.getX();
         this.mouseY = (int) mousePoint.getY();
 
-        System.out.println("Mouse X: " + mouseX + ", Mouse Y: " + mouseY);
+        // System.out.println("Mouse X: " + mouseX + ", Mouse Y: " + mouseY);
     }
 
     public int getMouseX() {
