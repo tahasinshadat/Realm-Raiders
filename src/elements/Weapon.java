@@ -14,8 +14,8 @@ public class Weapon {
     KeyHandler keyHandler;
     MouseInteractions mouse;
     
-    public final double screenX;
-    public final double screenY;
+    public double screenX;
+    public double screenY;
 
     private final int width = 60;
     private final int height = 10;
@@ -27,8 +27,8 @@ public class Weapon {
         this.mouse = mouse;
         
         // x and y of player on screen
-        this.screenX = this.gamePanel.screenWidth / 2;
-        this.screenY = this.gamePanel.screenHeight / 2;
+        this.screenX = this.gamePanel.player.screenX + this.gamePanel.tileSize/2;
+        this.screenY = this.gamePanel.player.screenY + this.gamePanel.tileSize/2;
     }
 
     public double getAngleToMouse() {
@@ -56,6 +56,12 @@ public class Weapon {
     }
 
     public void draw(Graphics2D g2) {
+        int tileSize = this.gamePanel.tileSize;
+
+        // x and y of player on screen
+        this.screenX = this.gamePanel.player.screenX + tileSize/2;
+        this.screenY = this.gamePanel.player.screenY + tileSize/2;
+        
         double angle = getAngleToMouse();
         double deltaX = mouse.getMouseX() - this.screenX;
 
@@ -68,7 +74,7 @@ public class Weapon {
         }
 
         // rectangle with center that is colinear to y=0 and left side is at x=0 so that it orbits player when rotating
-        Rectangle rect2 = new Rectangle(this.gamePanel.tileSize/2, -height/2, width, height); 
+        Rectangle rect2 = new Rectangle(tileSize/2, -tileSize/4, tileSize*2, tileSize/2); 
         g2.translate(screenX, screenY); // translates origin and therefore weapon (rect atm) origin to center of player
         g2.rotate(-Math.toRadians(angle)); // rotated so y=0 aims at mouse
         g2.draw(rect2);
