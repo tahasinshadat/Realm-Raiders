@@ -10,7 +10,7 @@ import javax.swing.SwingUtilities;
 
 import main.GamePanel;
 
-public class MouseInteractions {
+public class MouseInteractions implements MouseListener{
 
     private GamePanel gamePanel;
     public int mouseX;
@@ -18,6 +18,7 @@ public class MouseInteractions {
     
     public MouseInteractions(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
+        this.gamePanel.addMouseListener(this);
     }
 
     public void getMousePosition() {
@@ -39,5 +40,34 @@ public class MouseInteractions {
     public int getMouseY() {
         this.getMousePosition();
         return this.mouseY;
+    }
+
+    public boolean isLeftClick(MouseEvent e) {
+        return false;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
     }
 }

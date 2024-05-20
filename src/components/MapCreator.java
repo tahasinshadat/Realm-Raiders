@@ -105,6 +105,7 @@ public class MapCreator {
     // Random Arrangements of 2 corridor rooms work, but not 3 or 4.
     public void setEnvironment(int amtOfRooms) {
         int startRoomX = this.sections / 2;
+        
         int startRoomY = this.sections / 2;
         // this.placeRoom(startRoomX, startRoomY, this.createRoom(this.gamePanel.startingRoomSize)); // Place Starting Room (always in the middle of map)
 
@@ -121,10 +122,10 @@ public class MapCreator {
         // this.placeRoom(endRoomX, endRoomY, createRoom(this.gamePanel.startingRoomSize)); // Place End Room somewhere on the edge of the map
 
         ArrayList<int[]> path =  new ArrayList<>();
-        int currentPathX = startRoomX;
-        int currentPathY = startRoomY;
+        int currentPathX = endRoomX;
+        int currentPathY = endRoomY;
 
-        while (currentPathX != endRoomX || currentPathY != endRoomY) { // create path
+        while (currentPathX != startRoomX || currentPathY != startRoomY) { // create path
             int[] currentSection = {currentPathX, currentPathY};
             path.add(currentSection);
             String randomDirection = this.randomDirection(null);
