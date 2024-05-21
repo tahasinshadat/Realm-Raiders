@@ -37,6 +37,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int portalRoomSize = 12;
     public final int corridorLength = 22;
     public final int corridorHeight = 6;
+    public int currentPreset = 1;
 
     // !!! determines world size !!!
     public int sectionSize = 50; 
@@ -54,7 +55,7 @@ public class GamePanel extends JPanel implements Runnable {
     KeyHandler keyHandler = new KeyHandler(this);
     MouseInteractions mouse = new MouseInteractions(this);
     Thread gameThread;
-    MapCreator mapCreator = new MapCreator(this, true, 1);
+    MapCreator mapCreator = new MapCreator(this, true, this.currentPreset);
     public CollisionHandler collisionHandler = new CollisionHandler(this);
     public Player player = new Player(this, this.keyHandler);
 
