@@ -37,7 +37,7 @@ public class Player extends Entity {
         this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
         this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
 
-        this.weapon = new Weapon(this.gamePanel, this.keyHandler, this.mouse);
+        this.weapon = new Weapon(this.gamePanel, this.keyHandler, this.mouse, this);
 
         hitbox = new Rectangle();
         hitbox.x = 8;

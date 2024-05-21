@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
+import components.Entity;
 import components.KeyHandler;
 import components.MouseInteractions;
 import components.Projectile;
@@ -24,12 +25,15 @@ public class Weapon {
     public int height;
     private boolean flipped = false;
 
+    private Entity owner;
     private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 
-    public Weapon(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse) {
+    public Weapon(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse, Entity owner) {
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
         this.mouse = mouse;
+
+        this.owner = owner;
         
         // x and y of player on screen
         this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
@@ -96,6 +100,6 @@ public class Weapon {
     }
 
     public void shoot() {
-        projectiles.add(new Projectile(gamePanel, angle, this));
+        projectiles.add(new Projectile(gamePanel, angle, this, this.owner));
     }
 }
