@@ -110,8 +110,7 @@ public class GamePanel extends JPanel implements Runnable {
                 timer = 0;
             }
 
-            // this.mouse.getMousePosition();
-            // System.out.println(mapCreator.validateDirection(4, 0, "left"));
+            this.mouse.getMousePosition();
         }
 
     }

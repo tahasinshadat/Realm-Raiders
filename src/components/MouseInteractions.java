@@ -4,20 +4,22 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionAdapter;
-
 import javax.swing.SwingUtilities;
-
 import main.GamePanel;
 
-public class MouseInteractions {
+public class MouseInteractions implements MouseListener {
 
     private GamePanel gamePanel;
     public int mouseX;
     public int mouseY;
+    private boolean leftMouseClicked;
+    private boolean rightMouseClicked;
     
     public MouseInteractions(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
+        this.leftMouseClicked = false;
+        this.rightMouseClicked = false;
+        this.gamePanel.addMouseListener(this); // Add this as a MouseListener to the GamePanel
     }
 
     public void getMousePosition() {
@@ -28,7 +30,7 @@ public class MouseInteractions {
         this.mouseX = (int) mousePoint.getX();
         this.mouseY = (int) mousePoint.getY();
 
-        System.out.println("Mouse X: " + mouseX + ", Mouse Y: " + mouseY);
+        // System.out.println("Mouse X: " + mouseX + ", Mouse Y: " + mouseY);
     }
 
     public int getMouseX() {
@@ -40,4 +42,33 @@ public class MouseInteractions {
         this.getMousePosition();
         return this.mouseY;
     }
+
+    public boolean isLeftMouseClicked() {
+        return this.leftMouseClicked;
+    }
+
+    public boolean isRightMouseClicked() {
+        return this.rightMouseClicked;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {}
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isLeftMouseButton(e)) this.leftMouseClicked = true;
+        if (SwingUtilities.isRightMouseButton(e)) this.rightMouseClicked = true;
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (SwingUtilities.isLeftMouseButton(e)) this.leftMouseClicked = false;
+        if (SwingUtilities.isRightMouseButton(e)) this.rightMouseClicked = false;
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {}
+
+    @Override
+    public void mouseExited(MouseEvent e) {}
 }
