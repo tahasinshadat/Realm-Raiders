@@ -10,12 +10,14 @@ import javax.imageio.ImageIO;
 
 import components.Entity;
 import components.KeyHandler;
+import components.MouseInteractions;
 import main.GamePanel;
 
 public class Player extends Entity {
     
     GamePanel gamePanel;
     KeyHandler keyHandler;
+    MouseInteractions mouse;
 
     public BufferedImage idleR1, idleR2, idleL1, idleL2;
     private boolean wasRight;
@@ -25,12 +27,17 @@ public class Player extends Entity {
     public final double screenY;
     public final int trueSpeed = 10;
 
-    public Player(GamePanel gamePanel, KeyHandler keyHandler) {
+    public Weapon weapon;
+
+    public Player(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse) {
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
+        this.mouse = mouse;
 
         this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
         this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
+
+        this.weapon = new Weapon(this.gamePanel, this.keyHandler, this.mouse);
 
         hitbox = new Rectangle();
         hitbox.x = 8;
@@ -168,6 +175,10 @@ public class Player extends Entity {
             }
             this.spriteCounter = 0;
         }
+
+        if (mouse.BUTTON1) {
+            weapon.shoot();
+        }
     }
 
     public void draw(Graphics2D g2) {
@@ -197,6 +208,7 @@ public class Player extends Entity {
         }
         // System.out.println(this.worldX + " " + this.worldY);
         g2.drawImage(image, (int) this.screenX, (int) this.screenY, this.gamePanel.tileSize, this.gamePanel.tileSize, null);
+        this.weapon.draw(g2);
     }
 
 }

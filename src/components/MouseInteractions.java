@@ -15,6 +15,7 @@ public class MouseInteractions implements MouseListener{
     private GamePanel gamePanel;
     public int mouseX;
     public int mouseY;
+    public boolean BUTTON1;
     
     public MouseInteractions(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
@@ -42,10 +43,6 @@ public class MouseInteractions implements MouseListener{
         return this.mouseY;
     }
 
-    public boolean isLeftClick(MouseEvent e) {
-        return false;
-    }
-
     @Override
     public void mouseClicked(MouseEvent e) {
         
@@ -53,12 +50,16 @@ public class MouseInteractions implements MouseListener{
 
     @Override
     public void mousePressed(MouseEvent e) {
-        
+        if (e.getButton() == 1) {
+            this.BUTTON1 = true;
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        
+        if (e.getButton() == 1) {
+            this.BUTTON1 = false;
+        }
     }
 
     @Override

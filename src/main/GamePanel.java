@@ -57,8 +57,7 @@ public class GamePanel extends JPanel implements Runnable {
     Thread gameThread;
     MapCreator mapCreator = new MapCreator(this, true, 1);
     public CollisionHandler collisionHandler = new CollisionHandler(this);
-    public Player player = new Player(this, this.keyHandler);
-    public Weapon weapon = new Weapon(this, this.keyHandler, this.mouse);
+    public Player player = new Player(this, this.keyHandler, this.mouse);
 
     public GamePanel() {
 
@@ -128,7 +127,6 @@ public class GamePanel extends JPanel implements Runnable {
 
         this.tileManager.draw(g2);
         this.player.draw(g2);
-        this.weapon.draw(g2);
 
         g2.dispose(); 
         // System.out.println(this.tileSize * this.maxWorldCol);

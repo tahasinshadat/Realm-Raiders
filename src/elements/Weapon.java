@@ -3,9 +3,11 @@ package elements;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 
 import components.KeyHandler;
 import components.MouseInteractions;
+import components.Projectile;
 import main.GamePanel;
 
 public class Weapon {
@@ -17,9 +19,12 @@ public class Weapon {
     public double screenX;
     public double screenY;
 
-    private final int width = 60;
-    private final int height = 10;
+    public double angle;
+    public int width;
+    public int height;
     private boolean flipped = false;
+
+    private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 
     public Weapon(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse) {
         this.gamePanel = gamePanel;
@@ -27,8 +32,8 @@ public class Weapon {
         this.mouse = mouse;
         
         // x and y of player on screen
-        this.screenX = this.gamePanel.player.screenX + this.gamePanel.tileSize/2;
-        this.screenY = this.gamePanel.player.screenY + this.gamePanel.tileSize/2;
+        this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
+        this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
     }
 
     public double getAngleToMouse() {
@@ -61,8 +66,11 @@ public class Weapon {
         // x and y of player on screen
         this.screenX = this.gamePanel.player.screenX + tileSize/2;
         this.screenY = this.gamePanel.player.screenY + tileSize/2;
+
+        this.width = tileSize*2;
+        this.height = tileSize/2;
         
-        double angle = getAngleToMouse();
+        this.angle = getAngleToMouse();
         double deltaX = mouse.getMouseX() - this.screenX;
 
         if (deltaX > 0) { // Keep image upright
@@ -74,10 +82,20 @@ public class Weapon {
         }
 
         // rectangle with center that is colinear to y=0 and left side is at x=0 so that it orbits player when rotating
-        Rectangle rect2 = new Rectangle(tileSize/2, -tileSize/4, tileSize*2, tileSize/2); 
+        Rectangle rect2 = new Rectangle(tileSize/2, -this.height/2, this.width, this.height); 
         g2.translate(screenX, screenY); // translates origin and therefore weapon (rect atm) origin to center of player
         g2.rotate(-Math.toRadians(angle)); // rotated so y=0 aims at mouse
         g2.draw(rect2);
         g2.fill(rect2);
+        g2.rotate(Math.toRadians(angle)); // rotate back
+        g2.translate(-screenX, -screenY); // translate back
+
+        for (Projectile projectile : projectiles) {
+            projectile.draw(g2);
+        }
+    }
+
+    public void shoot() {
+        projectiles.add(new Projectile(gamePanel, angle, this));
     }
 }
