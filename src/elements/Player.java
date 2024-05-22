@@ -178,7 +178,7 @@ public class Player extends Entity {
 
         this.weapon.update();
 
-        if (mouse.BUTTON1) {
+        if (mouse.isLeftMouseClicked()) {
             weapon.shoot();
         }
     }

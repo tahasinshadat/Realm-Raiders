@@ -30,7 +30,7 @@ public class TileManager {
         // this.dataHandler = new DataHandler(this.gamePanel, this.mapTileNum);
         // this.dataHandler.setFile("../data/map02.txt");
         // this.mapTileNum = this.dataHandler.readFileData();
-        this.initPreset(1);
+        this.initPreset(this.gamePanel.currentPreset);
     }
 
     public void initPreset(int preset) {
