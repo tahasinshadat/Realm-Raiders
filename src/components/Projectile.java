@@ -15,7 +15,7 @@ public class Projectile extends Entity {
     private double screenY;
     private double worldX;
     private double worldY;
-    private int originalTileSize;
+    private int prevTileSize;
 
     private Weapon originalWeapon;
     private Entity owner;
@@ -26,9 +26,9 @@ public class Projectile extends Entity {
         
         this.originalWeapon = originalWeapon;
         this.owner = owner;
-        this.originalTileSize = this.gamePanel.tileSize;
-        // this.screenX = originalWeapon.screenX + (originalWeapon.width * Math.cos(Math.toRadians(angle)));
-        // this.screenY = originalWeapon.screenY + (originalWeapon.width * -Math.sin(Math.toRadians(angle))); // down is positive
+        this.prevTileSize = this.gamePanel.tileSize;
+        
+        this.speed = this.originalWeapon.weaponSpeed;
 
         this.worldX = this.owner.worldX + (this.originalWeapon.width * Math.cos(Math.toRadians(angle)));
         this.worldY = this.owner.worldY + (this.originalWeapon.width * -Math.sin(Math.toRadians(angle)));
@@ -39,16 +39,14 @@ public class Projectile extends Entity {
     }
 
     public void update() {
-        this.worldX += this.originalWeapon.weaponSpeed * Math.cos(Math.toRadians(angle));
-        this.worldY += this.originalWeapon.weaponSpeed * -Math.sin(Math.toRadians(angle));
+        updateValuesOnZoom();
+        this.worldX += this.speed * Math.cos(Math.toRadians(angle));
+        this.worldY += this.speed * -Math.sin(Math.toRadians(angle));
     }
 
     public void draw(Graphics2D g2) {
         int tileSize = this.gamePanel.tileSize;
         int playerCenterOffset = tileSize/2;
-
-        // player worldX and worldY update on zoom, this updates projectile worldX worldY as well
-        updatePositionOnZoom();
 
         // screen pos = difference in pos in world + player origin offset + player center offset
         this.screenX = (this.worldX - this.gamePanel.player.worldX) + this.gamePanel.player.screenX + playerCenterOffset;
@@ -65,13 +63,18 @@ public class Projectile extends Entity {
         g2.translate(-screenX, -screenY); // translate back
     }
 
-    public void updatePositionOnZoom() {
+    public void updateValuesOnZoom() {
         // see gamePanel zoom method
         // updating projectile worldX and worldY on zoom similar to player
-        double multiplier = ((double)this.gamePanel.tileSize / this.originalTileSize);
+        double multiplier = ((double)this.gamePanel.tileSize / this.prevTileSize);
         this.worldX *= multiplier;
         this.worldY *= multiplier;
-        this.originalTileSize = this.gamePanel.tileSize;
+
+        // updating projectile speed on zoom similar to player
+        int newWorldWidth = this.gamePanel.tileSize * this.gamePanel.maxWorldCol;
+        this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.originalWeapon.weaponSpeed);
+
+        this.prevTileSize = this.gamePanel.tileSize;
     }
 }
 

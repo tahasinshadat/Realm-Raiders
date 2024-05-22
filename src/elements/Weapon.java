@@ -19,12 +19,13 @@ public class Weapon {
     
     public double screenX;
     public double screenY;
+    private int prevTileSize;
 
     public double angle;
     public int width;
     public int height;
     private boolean flipped = false;
-    public int weaponSpeed = 5;
+    public double weaponSpeed = 5;
     public double weaponDamage;
 
     private Entity owner;
@@ -40,6 +41,7 @@ public class Weapon {
         // x and y of player on screen
         this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
         this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
+        this.prevTileSize = this.gamePanel.tileSize;
     }
 
     public double getAngleToMouse() {
@@ -65,6 +67,19 @@ public class Weapon {
         // System.out.println(degrees + " degrees");
         return degrees;
     }
+
+    public void update() {
+        // updateSpeed();
+        for (Projectile projectile : projectiles) {
+            projectile.update();
+        }
+    }
+
+    // public void updateSpeed() {
+    //     this.weaponSpeed *= (double) this.prevTileSize / this.gamePanel.tileSize;
+    //     // System.out.println(this.weaponSpeed);
+    //     this.prevTileSize = this.gamePanel.tileSize;
+    // }
 
     public void draw(Graphics2D g2) {
         int tileSize = this.gamePanel.tileSize;
