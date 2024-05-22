@@ -16,6 +16,8 @@ public class Projectile extends Entity {
     private double worldX;
     private double worldY;
     private int prevTileSize;
+    private int width;
+    private int height;
 
     private Weapon originalWeapon;
     private Entity owner;
@@ -32,6 +34,30 @@ public class Projectile extends Entity {
 
         this.worldX = this.owner.worldX + (this.originalWeapon.width * Math.cos(Math.toRadians(angle)));
         this.worldY = this.owner.worldY + (this.originalWeapon.width * -Math.sin(Math.toRadians(angle)));
+
+
+        this.width = this.gamePanel.tileSize;
+        this.height = this.gamePanel.tileSize;
+
+        this.hitbox = new Rectangle();
+        this.hitbox.x = -this.width/2;
+        this.hitbox.y = -this.height/2;
+        this.hitbox.width = this.width;
+        this.hitbox.height = this.height;
+
+        setDirection();
+    }
+
+    public void setDirection() {
+        double threshold = 45.0/2;
+        String[] directions = {"right", "up-right", "up", "up-left", "left", "down-left", "down", "down-right"};
+        for (int a = 0; a < 360; a += 45) {
+            if (angle > a - threshold && angle < a + threshold) {
+                this.direction = directions[a/45];
+                return;
+            }
+        }
+        this.direction = directions[7];
     }
 
     public void delete() {
@@ -40,8 +66,16 @@ public class Projectile extends Entity {
 
     public void update() {
         updateValuesOnZoom();
-        this.worldX += this.speed * Math.cos(Math.toRadians(angle));
-        this.worldY += this.speed * -Math.sin(Math.toRadians(angle));
+
+        // Check For tile collisions
+        this.collisionEnabled = false;
+        this.gamePanel.collisionHandler.checkTile(this);
+
+        // If there is no collision, move
+        if (collisionEnabled == false) {
+            this.worldX += this.speed * Math.cos(Math.toRadians(angle));
+            this.worldY += this.speed * -Math.sin(Math.toRadians(angle));
+        }
     }
 
     public void draw(Graphics2D g2) {
@@ -74,6 +108,15 @@ public class Projectile extends Entity {
         int newWorldWidth = this.gamePanel.tileSize * this.gamePanel.maxWorldCol;
         this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.originalWeapon.weaponSpeed);
 
+        // HITBOX
+        this.width = this.gamePanel.tileSize;
+        this.height = this.gamePanel.tileSize;
+
+        this.hitbox.x = -this.width/2;
+        this.hitbox.y = -this.height/2;
+        this.hitbox.width = this.width;
+        this.hitbox.height = this.height;
+
         this.prevTileSize = this.gamePanel.tileSize;
     }
 }
@@ -85,6 +128,7 @@ TODO:
 [X] Make bullet at angle when LMB clicked
 [X] Track bullet position in world
     [X] Get initial world position
-[ ] Change bullet position in world with speed
-
+[X] Change bullet position in world with speed
+[ ] Detect collisions
+[ ] Delete projectile on collision
 */
