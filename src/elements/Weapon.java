@@ -24,6 +24,8 @@ public class Weapon {
     public int width;
     public int height;
     private boolean flipped = false;
+    public int weaponSpeed = 5;
+    public double weaponDamage;
 
     private Entity owner;
     private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();

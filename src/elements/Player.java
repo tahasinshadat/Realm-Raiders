@@ -176,6 +176,8 @@ public class Player extends Entity {
             this.spriteCounter = 0;
         }
 
+        this.weapon.update();
+
         if (mouse.BUTTON1) {
             weapon.shoot();
         }

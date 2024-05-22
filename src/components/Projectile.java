@@ -39,7 +39,8 @@ public class Projectile extends Entity {
     }
 
     public void update() {
-
+        this.worldX += this.originalWeapon.weaponSpeed * Math.cos(Math.toRadians(angle));
+        this.worldY += this.originalWeapon.weaponSpeed * -Math.sin(Math.toRadians(angle));
     }
 
     public void draw(Graphics2D g2) {
