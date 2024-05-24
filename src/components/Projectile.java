@@ -13,14 +13,13 @@ public class Projectile extends Entity {
 
     private double screenX;
     private double screenY;
-    private double worldX;
-    private double worldY;
     private int prevTileSize;
     private int width;
     private int height;
 
     private Weapon originalWeapon;
     private Entity owner;
+    public boolean active = true;
 
     public Projectile(GamePanel gamePanel, double angle, Weapon originalWeapon, Entity owner) {
         this.gamePanel = gamePanel;
@@ -40,10 +39,7 @@ public class Projectile extends Entity {
         this.height = this.gamePanel.tileSize;
 
         this.hitbox = new Rectangle();
-        this.hitbox.x = -this.width/2;
-        this.hitbox.y = -this.height/2;
-        this.hitbox.width = this.width;
-        this.hitbox.height = this.height;
+        updateValuesOnZoom(); // set hitbox values
 
         setDirection();
     }
@@ -60,8 +56,8 @@ public class Projectile extends Entity {
         this.direction = directions[7];
     }
 
-    public void delete() {
-
+    public void deactivate() {
+        this.active = false;
     }
 
     public void update() {
@@ -75,6 +71,8 @@ public class Projectile extends Entity {
         if (collisionEnabled == false) {
             this.worldX += this.speed * Math.cos(Math.toRadians(angle));
             this.worldY += this.speed * -Math.sin(Math.toRadians(angle));
+        } else {
+            deactivate();
         }
     }
 
@@ -112,8 +110,6 @@ public class Projectile extends Entity {
         this.width = this.gamePanel.tileSize;
         this.height = this.gamePanel.tileSize;
 
-        this.hitbox.x = -this.width/2;
-        this.hitbox.y = -this.height/2;
         this.hitbox.width = this.width;
         this.hitbox.height = this.height;
 
@@ -129,6 +125,6 @@ TODO:
 [X] Track bullet position in world
     [X] Get initial world position
 [X] Change bullet position in world with speed
-[ ] Detect collisions
-[ ] Delete projectile on collision
+[X] Detect collisions
+[X] Delete projectile on collision
 */

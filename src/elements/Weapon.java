@@ -70,9 +70,16 @@ public class Weapon {
 
     public void update() {
         // updateSpeed();
+        ArrayList<Projectile> toRemove = new ArrayList<Projectile>();
+        
         for (Projectile projectile : projectiles) {
             projectile.update();
+
+            if (projectile.active == false) {
+                toRemove.add(projectile);
+            }
         }
+        projectiles.removeAll(toRemove);
     }
 
     // public void updateSpeed() {
