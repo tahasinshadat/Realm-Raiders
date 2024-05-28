@@ -1,21 +1,19 @@
 package main;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JPanel;
-
 import components.CollisionHandler;
-// import components.DataHandler;
+import components.Entity;
 import components.KeyHandler;
 import components.MapCreator;
 import components.MouseInteractions;
 import elements.Player;
 import elements.TileManager;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.util.ArrayList;
+import javax.swing.JPanel;
+import objects.GameObject;
 
 public class GamePanel extends JPanel implements Runnable {
     
@@ -51,13 +49,19 @@ public class GamePanel extends JPanel implements Runnable {
 
     final int FPS = 60;
 
+    // Game Components
     public TileManager tileManager = new TileManager(this);
+    public CollisionHandler collisionHandler = new CollisionHandler(this);
     KeyHandler keyHandler = new KeyHandler(this);
     MouseInteractions mouse = new MouseInteractions(this);
     Thread gameThread;
     MapCreator mapCreator = new MapCreator(this, true, this.currentPreset);
-    public CollisionHandler collisionHandler = new CollisionHandler(this);
+    UI gameUI = new UI(this);
+
+    // Entities
     public Player player = new Player(this, this.keyHandler);
+    public ArrayList<GameObject> obj = new ArrayList<>();
+    public ArrayList<Entity> enemies = new ArrayList<>();
 
     public GamePanel() {
 
@@ -120,12 +124,21 @@ public class GamePanel extends JPanel implements Runnable {
         this.player.update();
     }
 
-    public void paintComponent(Graphics g) {
+    @Override
+    public void paintComponent(Graphics g) { // what gets drawn last is ontop
         super.paintComponent(g); // Reference the parent class of this class (JPanel) - It's JPanels Method
         Graphics2D g2 = (Graphics2D)g;
 
+        // Draw Tiles
         this.tileManager.draw(g2);
+
+        // Draw Objects
+
+        // Draw the Player
         this.player.draw(g2);
+
+        // Draw UI
+        this.gameUI.draw(g2);
 
         g2.dispose(); 
         // System.out.println(this.tileSize * this.maxWorldCol);

@@ -1,15 +1,12 @@
 package elements;
 
-import java.awt.Color;
+import components.Entity;
+import components.KeyHandler;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
-
-import components.Entity;
-import components.KeyHandler;
 import main.GamePanel;
 
 public class Player extends Entity {
@@ -24,6 +21,12 @@ public class Player extends Entity {
     public final double screenX;
     public final double screenY;
     public final int trueSpeed = 10;
+
+    public final int maxShield = 300;
+    public final int maxHealth = 300;
+
+    public int shield = this.maxShield;
+    public int health = this.maxHealth;
 
     public Player(GamePanel gamePanel, KeyHandler keyHandler) {
         this.gamePanel = gamePanel;
