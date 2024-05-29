@@ -35,8 +35,8 @@ public class Projectile extends Entity {
         this.worldY = this.owner.worldY + (this.originalWeapon.width * -Math.sin(Math.toRadians(angle)));
 
 
-        this.width = this.gamePanel.tileSize;
-        this.height = this.gamePanel.tileSize;
+        this.width = this.gamePanel.tileSize/10;
+        this.height = this.gamePanel.tileSize/10;
 
         this.hitbox = new Rectangle();
         updateValuesOnZoom(); // set hitbox values
@@ -84,7 +84,7 @@ public class Projectile extends Entity {
         this.screenX = (this.worldX - this.gamePanel.player.worldX) + this.gamePanel.player.screenX + playerCenterOffset;
         this.screenY = (this.worldY - this.gamePanel.player.worldY) + this.gamePanel.player.screenY + playerCenterOffset;
 
-        Rectangle rect2 = new Rectangle(-tileSize/2, -tileSize/2, tileSize, tileSize); 
+        Rectangle rect2 = new Rectangle(-this.width/2, -this.height/2, this.width, this.height); 
         g2.setColor(Color.WHITE);
         
         g2.translate(screenX, screenY); 
@@ -107,8 +107,8 @@ public class Projectile extends Entity {
         this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.originalWeapon.weaponSpeed);
 
         // HITBOX
-        this.width = this.gamePanel.tileSize;
-        this.height = this.gamePanel.tileSize;
+        this.width = this.gamePanel.tileSize/10;
+        this.height = this.gamePanel.tileSize/10;
 
         this.hitbox.width = this.width;
         this.hitbox.height = this.height;

@@ -4,6 +4,9 @@ import components.Entity;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+
+import javax.sound.sampled.SourceDataLine;
+
 import main.GamePanel;
 
 public class Enemy extends Entity {
@@ -22,6 +25,10 @@ public class Enemy extends Entity {
     public int speed, attackSpeed;
     public int size;
     public boolean isBoss;
+    public int trueSpeed;
+    public int frameCounter = 0;
+    public boolean chasing = true;
+    double angle = 0;
 
     public Enemy(GamePanel gamePanel, int startX, int startY, int enemyType, String enemyName, boolean isBoss) {
         this.gamePanel = gamePanel;
@@ -48,6 +55,7 @@ public class Enemy extends Entity {
             this.damage = 15;
             this.defense = 30;
             this.speed = 8;
+            this.trueSpeed = this.speed;
             this.attackSpeed = 5;
         } else {
             this.size = 50;
@@ -57,6 +65,7 @@ public class Enemy extends Entity {
                 this.damage = 7;
                 this.defense = 20;
                 this.speed = 7;
+                this.trueSpeed = this.speed;
                 this.attackSpeed = 10;
             } else if (this.type == 2) { // ranged unit
                 this.health = 50;
@@ -64,6 +73,7 @@ public class Enemy extends Entity {
                 this.damage = 20;
                 this.defense = 10;
                 this.speed = 5;
+                this.trueSpeed = this.speed;
                 this.attackSpeed = 8;
             }
         }
@@ -76,24 +86,61 @@ public class Enemy extends Entity {
         this.setDirection();
     
         int playerAngle = getPlayerAngle();
+        this.collisionEnabled = false;
         this.gamePanel.collisionHandler.checkTile(this);
     
         // If there is no collision, move
         if (!collisionEnabled) {
-            // Calculate movement based on player angle
-            double deltaX = this.speed * Math.cos(Math.toRadians(playerAngle));
-            double deltaY = this.speed * Math.sin(Math.toRadians(playerAngle));
-    
-            this.worldX += deltaX;
-            this.worldY += deltaY;
+            this.chasing = true;
+
+            if (this.frameCounter > this.gamePanel.FPS*5) {
+                this.chasing = false;
+            }
+
+            if (this.frameCounter > this.gamePanel.FPS*10) {
+                this.frameCounter = 0;
+            }
             
+            if (this.chasing) {
+                // Calculate movement based on player angle
+                this.angle = playerAngle;
+                double deltaX = this.speed * Math.cos(Math.toRadians(angle));
+                double deltaY = this.speed * Math.sin(Math.toRadians(angle));
+        
+                this.worldX += deltaX;
+                this.worldY += deltaY;
+            } else {
+                double deltaX = this.speed * Math.cos(Math.toRadians(angle));
+                double deltaY = this.speed * Math.sin(Math.toRadians(angle));
+        
+                this.worldX += deltaX;
+                this.worldY += deltaY;
+            }
+            
+        } else {
+            while (collisionEnabled == true) {
+                // this.angle = (this.angle + 45) % 360;
+                this.angle = this.getRandomAngle();
+                this.setDirection();
+            
+                this.collisionEnabled = false;
+                this.gamePanel.collisionHandler.checkTile(this);
+            }
+
+
+            double deltaX = this.speed * Math.cos(Math.toRadians(angle));
+            double deltaY = this.speed * Math.sin(Math.toRadians(angle));
+    
+            this.worldX -= deltaX;
+            this.worldY -= deltaY;
         }
+        this.frameCounter++;
     }
 
     public void setDirection() {
         double threshold = 45.0 / 2;
         String[] directions = {"right", "up-right", "up", "up-left", "left", "down-left", "down", "down-right"};
-        double angle = getPlayerAngle();
+        double angle = this.angle;
         for (int a = 0; a < 360; a += 45) {
             if (angle > a - threshold && angle < a + threshold) {
                 this.direction = directions[a / 45];
@@ -124,7 +171,7 @@ public class Enemy extends Entity {
 
         // Update enemy speed on zoom similar to player
         int newWorldWidth = this.gamePanel.tileSize * this.gamePanel.maxWorldCol;
-        this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.speed);
+        this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.trueSpeed);
 
         // Update hitbox
         this.width = this.gamePanel.tileSize;
@@ -141,6 +188,18 @@ public class Enemy extends Entity {
     }
 
     public void doRandomAction() {
-        
+        if (this.angle == this.getPlayerAngle()) {
+            this.angle = getRandomAngle();
+        }
+          
+        double deltaX = this.speed * Math.cos(Math.toRadians(angle));
+        double deltaY = this.speed * Math.sin(Math.toRadians(angle));
+
+        this.worldX += deltaX;
+        this.worldY += deltaY;
+    }
+
+    public double getRandomAngle() {
+        return (Math.random() * 360);
     }
 }
