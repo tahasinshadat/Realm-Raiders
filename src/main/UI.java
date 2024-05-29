@@ -9,7 +9,7 @@ public class UI {
     Font gameFont;
 
     private int healthBarHeight = 25;
-    private int shieldBarHeight = healthBarHeight / 2;
+    private int shieldBarHeight = this.healthBarHeight / 2;
 
     int spacing = 3;
     private int cornerX = 10;

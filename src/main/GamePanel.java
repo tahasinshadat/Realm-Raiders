@@ -5,9 +5,9 @@ import components.Entity;
 import components.KeyHandler;
 import components.MapCreator;
 import components.MouseInteractions;
+import elements.Enemy;
 import elements.Player;
 import elements.TileManager;
-import elements.Weapon;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -47,7 +47,6 @@ public class GamePanel extends JPanel implements Runnable {
     public final int maxWorldRow = this.worldSize;
     public final int worldWidth = this.tileSize * this.maxWorldCol;
     public final int worldHeight = this.tileSize * this.maxWorldRow;
-
     final int FPS = 60;
 
     // Game Components
@@ -77,7 +76,13 @@ public class GamePanel extends JPanel implements Runnable {
         this.worldSize = mapCreator.getWorldSize();
         mapCreator.setEnvironment(20);
         tileManager.mapTileNum = mapCreator.getWorldMap();
+
+        // Add some enemies to the map for testing
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY, 1, "Goblin", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY, 2, "Archer", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY, 1, "Orc", false));
     }
+
 
     public void startGameThread() {
         this.gameThread = new Thread(this); // Pass in itself (the gamepanel) to instanciate the thread
@@ -123,6 +128,9 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void update() {
         this.player.update();
+        for (Entity enemy : enemies) {
+            ((Enemy) enemy).update();
+        }
     }
 
     @Override
@@ -137,6 +145,11 @@ public class GamePanel extends JPanel implements Runnable {
 
         // Draw the Player
         this.player.draw(g2);
+
+        // Draw Enemies
+        for (Entity enemy : enemies) {
+            ((Enemy) enemy).draw(g2);
+        }
 
         // Draw UI
         this.gameUI.draw(g2);
