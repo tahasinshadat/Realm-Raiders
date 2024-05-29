@@ -89,11 +89,11 @@ public class Enemy extends Entity {
         int playerAngle = getPlayerAngle();
         this.collisionEnabled = false;
         this.gamePanel.collisionHandler.checkTile(this);
-        System.out.println(this.angle);
+        // System.out.println(this.angle);
     
         // If there is no collision, move
         if (!collisionEnabled) {
-            this.chasing = true;
+            this.chasing = true; // true until overriden after 5 secs
 
             if (this.frameCounter > this.gamePanel.FPS*5) {
                 // after 5 seconds of chasing, stop
@@ -101,8 +101,8 @@ public class Enemy extends Entity {
             }
 
             if (this.frameCounter > this.gamePanel.FPS*10) {
-                // after not chasing for 5 seconds, reset
-                this.gotNewAngle = false;
+                // after not chasing for 5 more seconds, reset
+                this.gotNewAngle = false; // reset for next no chase time
                 this.frameCounter = 0;
             }
             
@@ -110,17 +110,18 @@ public class Enemy extends Entity {
                 // Calculate movement based on player angle
                 this.angle = playerAngle;
                 double deltaX = this.speed * Math.cos(Math.toRadians(angle));
-                double deltaY = this.speed * Math.sin(Math.toRadians(angle));
+                double deltaY = this.speed * -Math.sin(Math.toRadians(angle));
         
                 this.worldX += deltaX;
                 this.worldY += deltaY;
-            } else {
-                if (!this.gotNewAngle) {
+            } else { // not chasing mode
+                if (!this.gotNewAngle) { // get new angle only once
                     this.angle = this.getRandomAngle();
                     this.gotNewAngle = true;
                 }
+                // move in new angle
                 double deltaX = this.speed * Math.cos(Math.toRadians(angle));
-                double deltaY = this.speed * Math.sin(Math.toRadians(angle));
+                double deltaY = this.speed * -Math.sin(Math.toRadians(angle));
         
                 this.worldX += deltaX;
                 this.worldY += deltaY;
@@ -128,20 +129,21 @@ public class Enemy extends Entity {
             
         } else { // collided
             while (collisionEnabled == true) {
-                this.angle = (this.angle + 10) % 360;
-                // this.angle = this.getRandomAngle();
+                // get new angle that does not cause collision
+                // this.angle = (this.angle + 10) % 360;
+                this.angle = this.getRandomAngle();
                 this.setDirection();
             
                 this.collisionEnabled = false;
                 this.gamePanel.collisionHandler.checkTile(this);
             }
 
-
+            // travel in this new direction for a frame to not get stuck on wall
             double deltaX = this.speed * Math.cos(Math.toRadians(angle));
-            double deltaY = this.speed * Math.sin(Math.toRadians(angle));
+            double deltaY = this.speed * -Math.sin(Math.toRadians(angle));
     
-            this.worldX -= deltaX;
-            this.worldY -= deltaY;
+            this.worldX += deltaX;
+            this.worldY += deltaY;
         }
         this.frameCounter++;
     }
@@ -193,12 +195,12 @@ public class Enemy extends Entity {
 
     public int getPlayerAngle() {
         double dx = gamePanel.player.worldX - this.worldX;
-        double dy = gamePanel.player.worldY - this.worldY;
+        double dy = this.worldY - gamePanel.player.worldY; // down is positive for y
 
         double radians = Math.atan(dy / dx);
         double degrees = Math.toDegrees(radians);
         
-        // System.out.println("deltaX: " + deltaX + ", deltaY: " + deltaY);
+        // System.out.println("deltaX: " + dx + ", deltaY: " + dy);
 
         if (dx < 0) {
             // offsets to give positive angle where initial side is to the right (0 degrees)
@@ -214,17 +216,17 @@ public class Enemy extends Entity {
         return (int) degrees;
     }
 
-    public void doRandomAction() {
-        if (this.angle == this.getPlayerAngle()) {
-            this.angle = getRandomAngle();
-        }
+    // public void doRandomAction() {
+    //     if (this.angle == this.getPlayerAngle()) {
+    //         this.angle = getRandomAngle();
+    //     }
           
-        double deltaX = this.speed * Math.cos(Math.toRadians(angle));
-        double deltaY = this.speed * Math.sin(Math.toRadians(angle));
+    //     double deltaX = this.speed * Math.cos(Math.toRadians(angle));
+    //     double deltaY = this.speed * -Math.sin(Math.toRadians(angle));
 
-        this.worldX += deltaX;
-        this.worldY += deltaY;
-    }
+    //     this.worldX += deltaX;
+    //     this.worldY += deltaY;
+    // }
 
     public double getRandomAngle() {
         return (Math.random() * 360);
