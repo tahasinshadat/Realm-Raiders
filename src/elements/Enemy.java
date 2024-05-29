@@ -29,6 +29,7 @@ public class Enemy extends Entity {
     public int frameCounter = 0;
     public boolean chasing = true;
     double angle = 0;
+    private boolean gotNewAngle = false;
 
     public Enemy(GamePanel gamePanel, int startX, int startY, int enemyType, String enemyName, boolean isBoss) {
         this.gamePanel = gamePanel;
@@ -49,7 +50,7 @@ public class Enemy extends Entity {
 
     public void setDefaults() {
         if (this.isBoss) {
-            this.size = 100;
+            this.size = this.gamePanel.tileSize*2;
             this.health = 300;
             this.maxHealth = 300;
             this.damage = 15;
@@ -58,7 +59,7 @@ public class Enemy extends Entity {
             this.trueSpeed = this.speed;
             this.attackSpeed = 5;
         } else {
-            this.size = 50;
+            this.size = this.gamePanel.tileSize;
             if (this.type == 1) { // melee unit
                 this.health = 100;
                 this.maxHealth = 100;
@@ -88,16 +89,20 @@ public class Enemy extends Entity {
         int playerAngle = getPlayerAngle();
         this.collisionEnabled = false;
         this.gamePanel.collisionHandler.checkTile(this);
+        System.out.println(this.angle);
     
         // If there is no collision, move
         if (!collisionEnabled) {
             this.chasing = true;
 
             if (this.frameCounter > this.gamePanel.FPS*5) {
+                // after 5 seconds of chasing, stop
                 this.chasing = false;
             }
 
             if (this.frameCounter > this.gamePanel.FPS*10) {
+                // after not chasing for 5 seconds, reset
+                this.gotNewAngle = false;
                 this.frameCounter = 0;
             }
             
@@ -110,6 +115,10 @@ public class Enemy extends Entity {
                 this.worldX += deltaX;
                 this.worldY += deltaY;
             } else {
+                if (!this.gotNewAngle) {
+                    this.angle = this.getRandomAngle();
+                    this.gotNewAngle = true;
+                }
                 double deltaX = this.speed * Math.cos(Math.toRadians(angle));
                 double deltaY = this.speed * Math.sin(Math.toRadians(angle));
         
@@ -117,10 +126,10 @@ public class Enemy extends Entity {
                 this.worldY += deltaY;
             }
             
-        } else {
+        } else { // collided
             while (collisionEnabled == true) {
-                // this.angle = (this.angle + 45) % 360;
-                this.angle = this.getRandomAngle();
+                this.angle = (this.angle + 10) % 360;
+                // this.angle = this.getRandomAngle();
                 this.setDirection();
             
                 this.collisionEnabled = false;
@@ -151,8 +160,7 @@ public class Enemy extends Entity {
     }
     
     public void draw(Graphics2D g2) {
-        int tileSize = this.gamePanel.tileSize;
-        int playerCenterOffset = tileSize / 2;
+        int playerCenterOffset = this.size / 2;
 
         // screen pos = difference in pos in world + player origin offset + player center offset
         this.screenX = (this.worldX - this.gamePanel.player.worldX) + this.gamePanel.player.screenX + playerCenterOffset;
@@ -160,7 +168,7 @@ public class Enemy extends Entity {
 
         // Draw the enemy
         g2.setColor(isBoss ? Color.RED : Color.GREEN);
-        g2.fillRect((int) screenX, (int) screenY, tileSize, tileSize);
+        g2.fillRect((int) screenX - this.size/2, (int) screenY - this.size/2, this.size, this.size);
     }
 
     public void updateValuesOnZoom() {
@@ -174,8 +182,10 @@ public class Enemy extends Entity {
         this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.trueSpeed);
 
         // Update hitbox
-        this.width = this.gamePanel.tileSize;
-        this.height = this.gamePanel.tileSize;
+        this.size = (this.isBoss) ? this.gamePanel.tileSize * 2 : this.gamePanel.tileSize; 
+
+        this.width = this.size;
+        this.height = this.size;
         this.hitbox.width = this.width;
         this.hitbox.height = this.height;
         this.prevTileSize = this.gamePanel.tileSize;
@@ -184,7 +194,24 @@ public class Enemy extends Entity {
     public int getPlayerAngle() {
         double dx = gamePanel.player.worldX - this.worldX;
         double dy = gamePanel.player.worldY - this.worldY;
-        return (int) Math.toDegrees(Math.atan2(dy, dx));
+
+        double radians = Math.atan(dy / dx);
+        double degrees = Math.toDegrees(radians);
+        
+        // System.out.println("deltaX: " + deltaX + ", deltaY: " + deltaY);
+
+        if (dx < 0) {
+            // offsets to give positive angle where initial side is to the right (0 degrees)
+            // Quadrant 2 - degrees returns -90 to 0, this offsets negative
+            // Quadrant 3 - degrees returns 0 to 90. this offsets 180 degrees
+            degrees += 180; 
+        } else if (dy < 0) {
+            // offsets to give positive angle where initial side is to the right (0 degrees)
+            // Quadrant 4 - degrees returns -90 to 0, this offsets negative and 270 degrees
+            degrees = 360 + degrees; // (degrees is negative)
+        }
+
+        return (int) degrees;
     }
 
     public void doRandomAction() {
