@@ -20,48 +20,48 @@ public class CollisionHandler {
         int entityRightCol = (int) (entityRight / this.gamePanel.tileSize);
         int entityTopRow = (int) (entityTop / this.gamePanel.tileSize);
         int entityBottomRow = (int) (entityBottom / this.gamePanel.tileSize);
-
+        
         int tileNum1, tileNum2;
 
         switch(entity.direction) {
 
-            case "up":
+            case "up" -> {
                 entityTopRow = (int) (entityTop - entity.speed) / this.gamePanel.tileSize;
                 tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
                 tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
                 if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
                     entity.collisionEnabled = true;
                 }
-                break;
+            }
 
-            case "down":
+            case "down" -> {
                 entityBottomRow = (int) (entityBottom + entity.speed) / this.gamePanel.tileSize;
                 tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
                 tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
                 if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
                     entity.collisionEnabled = true;
                 }
-                break;
+            }
 
-            case "left":
+            case "left" -> {
                 entityLeftCol = (int) (entityLeft - entity.speed) / this.gamePanel.tileSize;
                 tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
                 tileNum2 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
                 if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
                     entity.collisionEnabled = true;
                 }
-                break;
+            }
 
-            case "right":
+            case "right" -> {
                 entityRightCol = (int) (entityRight + entity.speed) / this.gamePanel.tileSize;
                 tileNum1 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
                 tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
                 if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
                     entity.collisionEnabled = true;
                 }
-                break;
+            }
             
-            case "up-left":
+            case "up-left" -> {
                 entityTopRow = (int) (entityTop - entity.speed) / this.gamePanel.tileSize;
                 tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
                 tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
@@ -74,9 +74,9 @@ public class CollisionHandler {
                 if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
                     entity.collisionEnabled = true;
                 }
-                break;
+            }
 
-            case "up-right":
+            case "up-right" -> {
                 entityTopRow = (int) (entityTop - entity.speed) / this.gamePanel.tileSize;
                 tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
                 tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
@@ -89,9 +89,9 @@ public class CollisionHandler {
                 if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
                     entity.collisionEnabled = true;
                 }
-                break;
+            }
 
-            case "down-left":
+            case "down-left" -> {
                 entityBottomRow = (int) (entityBottom + entity.speed) / this.gamePanel.tileSize;
                 tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
                 tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
@@ -104,9 +104,9 @@ public class CollisionHandler {
                 if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
                     entity.collisionEnabled = true;
                 }
-                break;
+            }
 
-            case "down-right":
+            case "down-right" -> {
                 entityBottomRow = (int) (entityBottom + entity.speed) / this.gamePanel.tileSize;
                 tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
                 tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
@@ -119,13 +119,12 @@ public class CollisionHandler {
                 if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
                     entity.collisionEnabled = true;
                 }
-                break;
+            }
 
-            case "idle":
-                entity.collisionEnabled = false;
-                break;
+            case "idle" -> entity.collisionEnabled = false;
 
-            default: break;
+            default -> {
+            }
 
         }
     }

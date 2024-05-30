@@ -1,15 +1,10 @@
 package elements;
 
-import java.awt.Graphics2D;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import javax.imageio.ImageIO;
-
 import components.DataHandler;
 import components.Tile;
+import java.awt.Graphics2D;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import main.GamePanel;
 
 public class TileManager {
@@ -41,60 +36,51 @@ public class TileManager {
     public void getTileImage(int preset) {
         try {
 
-            if (preset == 1) {
-                // Floors
-                this.tile[0] = new Tile();
-                this.tile[0].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile1.png"));
-
-                this.tile[1] = new Tile();
-                this.tile[1].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile2.png"));
-
-                this.tile[2] = new Tile();
-                this.tile[2].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile3.png"));
-
-                this.tile[3] = new Tile();
-                this.tile[3].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile4.png"));
-
-                this.tile[4] = new Tile();
-                this.tile[4].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile5.png"));
-
-                // Walls
-                this.tile[5] = new Tile();
-                this.tile[5].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType1/tile.png"));
-                this.tile[5].collision = true;
-            }
-
-            else if (preset == 2) {
-                // Floors
-                this.tile[0] = new Tile();
-                this.tile[0].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType2/tile1.png"));
-
-                this.tile[1] = new Tile();
-                this.tile[1].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType2/tile2.png"));
-
-                this.tile[2] = new Tile();
-                this.tile[2].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType2/tile3.png"));
-
-                // Walls
-                this.tile[3] = new Tile();
-                this.tile[3].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType2/tile1.png"));
-                this.tile[3].collision = true;
-
-                this.tile[4] = new Tile();
-                this.tile[4].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType2/tile2.png"));
-                this.tile[4].collision = true;
-
-            }
-
-            else if (preset == 3) {
-                // Floors
-                this.tile[0] = new Tile();
-                this.tile[0].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType3/tile.png"));
-
-                // Walls
-                this.tile[1] = new Tile();
-                this.tile[1].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType3/tile.png"));
-                this.tile[1].collision = true;
+            switch (preset) {
+                case 1 -> {
+                    // Floors
+                    this.tile[0] = new Tile();
+                    this.tile[0].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile1.png"));
+                    this.tile[1] = new Tile();
+                    this.tile[1].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile2.png"));
+                    this.tile[2] = new Tile();
+                    this.tile[2].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile3.png"));
+                    this.tile[3] = new Tile();
+                    this.tile[3].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile4.png"));
+                    this.tile[4] = new Tile();
+                    this.tile[4].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile5.png"));
+                    // Walls
+                    this.tile[5] = new Tile();
+                    this.tile[5].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType1/tile.png"));
+                    this.tile[5].collision = true;
+                }
+                case 2 -> {
+                    // Floors
+                    this.tile[0] = new Tile();
+                    this.tile[0].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType2/tile1.png"));
+                    this.tile[1] = new Tile();
+                    this.tile[1].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType2/tile2.png"));
+                    this.tile[2] = new Tile();
+                    this.tile[2].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType2/tile3.png"));
+                    // Walls
+                    this.tile[3] = new Tile();
+                    this.tile[3].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType2/tile1.png"));
+                    this.tile[3].collision = true;
+                    this.tile[4] = new Tile();
+                    this.tile[4].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType2/tile2.png"));
+                    this.tile[4].collision = true;
+                }
+                case 3 -> {
+                    // Floors
+                    this.tile[0] = new Tile();
+                    this.tile[0].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType3/tile.png"));
+                    // Walls
+                    this.tile[1] = new Tile();
+                    this.tile[1].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType3/tile.png"));
+                    this.tile[1].collision = true;
+                }
+                default -> {
+                }
             }
 
             // Void / Empty Space Tiles

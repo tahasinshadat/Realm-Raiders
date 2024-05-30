@@ -19,14 +19,11 @@ public class MapCreator {
     private int[][] worldMap; // Rooms combined
     private GamePanel gamePanel;
     private int sections;
-
-    // Game Settings
-    private int numOfChestRooms = 1;
-    private int numOfPortalRooms = 1;
-    private int numOfEnemyRooms = this.sections * this.sections - this.numOfChestRooms - this.numOfPortalRooms;
-
-    // private int gapRow;
-    // private int gapCol;
+    
+    private int startRoomX;
+    private int startRoomY;
+    private int endRoomX;
+    private int endRoomY;
 
     public MapCreator(GamePanel gamePanel, boolean wallsEnabled, int presetNum) {
         this.gamePanel = gamePanel;
@@ -53,15 +50,6 @@ public class MapCreator {
         } else if (num == 3) {
             this.floorVarieties = 1;
             this.wallVarieties = 1;
-        }
-    }
-
-    private void printArray(int[][] arr) {  
-        for (int i = 0; i < arr.length; i++) {
-            for (int j = 0; j < arr.length; j++) {
-                System.out.print(arr[i][j] + " ");
-            }
-            System.out.println();
         }
     }
 
@@ -103,29 +91,28 @@ public class MapCreator {
 
 
     // Random Arrangements of 2 corridor rooms work, but not 3 or 4.
-    public void setEnvironment(int amtOfRooms) {
-        int startRoomX = this.sections / 2;
-        
-        int startRoomY = this.sections / 2;
+    public void setEnvironment() {
+        this.startRoomX = this.sections / 2;
+        this.startRoomY = this.sections / 2;
         // this.placeRoom(startRoomX, startRoomY, this.createRoom(this.gamePanel.startingRoomSize)); // Place Starting Room (always in the middle of map)
 
-        int endRoomX = 0;
-        int endRoomY = 0;
+        this.endRoomX = 0;
+        this.endRoomY = 0;
         if (this.randomNum(0, 1) == 0) {
-            endRoomX = (this.randomNum(0, 1) == 0) ? this.sections - 1 : 0;
-            endRoomY = this.randomNum(0, this.sections - 1);
+            this.endRoomX = (this.randomNum(0, 1) == 0) ? this.sections - 1 : 0;
+            this.endRoomY = this.randomNum(0, this.sections - 1);
         } else {
-            endRoomX = this.randomNum(0, this.sections - 1);
-            endRoomY = (this.randomNum(0, 1) == 0) ? this.sections - 1 : 0;
+            this.endRoomX = this.randomNum(0, this.sections - 1);
+            this.endRoomY = (this.randomNum(0, 1) == 0) ? this.sections - 1 : 0;
         }
 
         // this.placeRoom(endRoomX, endRoomY, createRoom(this.gamePanel.startingRoomSize)); // Place End Room somewhere on the edge of the map
 
         ArrayList<int[]> path =  new ArrayList<>();
-        int currentPathX = endRoomX;
-        int currentPathY = endRoomY;
+        int currentPathX = this.endRoomX;
+        int currentPathY = this.endRoomY;
 
-        while (currentPathX != startRoomX || currentPathY != startRoomY) { // create path
+        while (currentPathX != this.startRoomX || currentPathY != this.startRoomY) { // create path
             int[] currentSection = {currentPathX, currentPathY};
             path.add(currentSection);
             String randomDirection = this.randomDirection(null);
@@ -162,23 +149,12 @@ public class MapCreator {
             }
         }
 
-        path.add(new int[]{endRoomX, endRoomY});
+        path.add(new int[]{this.endRoomX, this.endRoomY});
         // this.printPath(path);
         this.constructMap(path); // consturct path on matrix
 
     }
 
-    private void printPath(ArrayList<int[]> path) {
-        StringBuilder sb = new StringBuilder("[ ");
-        for (int[] point : path) {
-            sb.append("( ").append(point[0]).append(", ").append(point[1]).append("), ");
-        }
-        if (!path.isEmpty()) {
-            sb.setLength(sb.length() - 2); // Remove the trailing comma and space
-        }
-        sb.append(" ]");
-        System.out.println(sb.toString());
-    }
 
     // Creator Methods (Creates Rooms with hallways in different orientations and orders, creating a full section)
     private int[][] createRoom(int size) {
@@ -197,6 +173,7 @@ public class MapCreator {
     }
 
     private void constructMap(ArrayList<int[]> path) {
+        
         for (int x = 0; x < this.sections; x++) {
             for (int y = 0; y < this.sections; y++) {
                 ArrayList<String> corridorDirections = new ArrayList<String>();
@@ -213,21 +190,17 @@ public class MapCreator {
 
                 }
 
-                switch (corridorDirections.size()) {
-                    case 1:
-                        this.placeRoom(x, y, this.room1(this.gamePanel.enemyRoomSize, corridorDirections.get(0)));
-                        break;
-                    case 2:
-                        this.placeRoom(x, y, this.room2(this.gamePanel.enemyRoomSize, corridorDirections.get(0), corridorDirections.get(1)));
-                        break;
-                    case 3:
-                        this.placeRoom(x, y, this.room3(this.gamePanel.enemyRoomSize, corridorDirections.get(0), corridorDirections.get(1), corridorDirections.get(2)));
-                        break;
-                    case 4:
-                        this.placeRoom(x, y, this.room4(this.gamePanel.enemyRoomSize));
-                        break;
-                    default: break;
+                int typeOfRoom = (this.randomNum(0, 100) <= 15) ? this.gamePanel.lootRoomSize : this.gamePanel.enemyRoomSize;
+                if (this.startRoomX == x && this.startRoomY == y) typeOfRoom = this.gamePanel.startingRoomSize;  
+                if (this.endRoomX == x && this.endRoomY == y) typeOfRoom = this.gamePanel.endRoomSize;      
 
+                switch (corridorDirections.size()) {
+                    case 1 -> this.placeRoom(x, y, this.room1(typeOfRoom, corridorDirections.get(0)));
+                    case 2 -> this.placeRoom(x, y, this.room2(typeOfRoom, corridorDirections.get(0), corridorDirections.get(1)));
+                    case 3 -> this.placeRoom(x, y, this.room3(typeOfRoom, corridorDirections.get(0), corridorDirections.get(1), corridorDirections.get(2)));
+                    case 4 -> this.placeRoom(x, y, this.room4(typeOfRoom));
+                    default -> {
+                    }
                 }
                 
             }
@@ -496,7 +469,7 @@ public class MapCreator {
         }
     }
 
-    private int randomNum(int min, int max) {
+    private int randomNum(int min, int max) { // Inclusive
         return (int) (Math.random() * ((max - min) + 1)) + min;
     }
     
@@ -583,6 +556,27 @@ public class MapCreator {
                 list.remove(i);
                 i--;
             }
+        }
+    }
+
+    private void printPath(ArrayList<int[]> path) {
+        StringBuilder sb = new StringBuilder("[ ");
+        for (int[] point : path) {
+            sb.append("( ").append(point[0]).append(", ").append(point[1]).append("), ");
+        }
+        if (!path.isEmpty()) {
+            sb.setLength(sb.length() - 2); // Remove the trailing comma and space
+        }
+        sb.append(" ]");
+        System.out.println(sb.toString());
+    }
+
+    private void printArray(int[][] arr) {  
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = 0; j < arr.length; j++) {
+                System.out.print(arr[i][j] + " ");
+            }
+            System.out.println();
         }
     }
 

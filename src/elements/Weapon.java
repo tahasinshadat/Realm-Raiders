@@ -25,11 +25,13 @@ public class Weapon {
     public int width;
     public int height;
     private boolean flipped = false;
-    public double weaponSpeed = 5;
-    public double weaponDamage;
+    public double weaponAttackSpeed = 5; // per second
+    public double weaponProjectileSpeed = 10;
+    public double weaponDamage = 20;
 
     private Entity owner;
     private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
+    private int cooldown;
 
     public Weapon(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse, Entity owner) {
         this.gamePanel = gamePanel;
@@ -80,11 +82,12 @@ public class Weapon {
             }
         }
         projectiles.removeAll(toRemove);
+        this.cooldown++;
     }
 
     // public void updateSpeed() {
-    //     this.weaponSpeed *= (double) this.prevTileSize / this.gamePanel.tileSize;
-    //     // System.out.println(this.weaponSpeed);
+    //     this.weaponProjectileSpeed *= (double) this.prevTileSize / this.gamePanel.tileSize;
+    //     // System.out.println(this.weaponProjectileSpeed);
     //     this.prevTileSize = this.gamePanel.tileSize;
     // }
 
@@ -124,6 +127,9 @@ public class Weapon {
     }
 
     public void shoot() {
-        projectiles.add(new Projectile(gamePanel, angle, this, this.owner));
+        if (this.cooldown > this.gamePanel.FPS / this.weaponAttackSpeed) {
+            projectiles.add(new Projectile(gamePanel, angle, this, this.owner));
+            this.cooldown = 0;
+        }
     }
 }

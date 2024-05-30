@@ -3,15 +3,11 @@ package elements;
 import components.Entity;
 import components.KeyHandler;
 import components.MouseInteractions;
-
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
-
-import components.Entity;
-import components.KeyHandler;
 import main.GamePanel;
 
 public class Player extends Entity {
@@ -36,6 +32,8 @@ public class Player extends Entity {
     public int shield = this.maxShield;
     public int health = this.maxHealth;
 
+    public int frameCount;
+    public boolean dead = false;
 
     public Player(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse) {
         this.gamePanel = gamePanel;
@@ -185,9 +183,34 @@ public class Player extends Entity {
         }
 
         this.weapon.update();
+        if (this.frameCount % 300 == 0 && !this.dead) this.regenerateShield(); // every 5 seconds regenerate shield a little bit
+        if (mouse.isLeftMouseClicked()) weapon.shoot();
+        this.frameCount++;
+    }
 
-        if (mouse.isLeftMouseClicked()) {
-            weapon.shoot();
+    public void takeDamage(int damage) {
+        // damage to shield first
+        if (this.shield >= damage) {
+            this.shield -= damage;
+        } else {
+            // If damage exceeds shield, subtract remaining damage from health
+            int remainingDamage = damage - this.shield;
+            this.shield = 0;
+            this.health -= remainingDamage;
+            if (this.health < 0) {
+                this.health = 0; // Ensure health does not go below 0
+                this.dead = true;
+            }
+        }
+    }
+
+    private void regenerateShield() {
+        int shieldRegenRate = 20; // Adjust the regeneration rate as needed
+        if (this.shield < this.maxShield) {
+            this.shield += shieldRegenRate;
+            if (this.shield > this.maxShield) {
+                this.shield = this.maxShield; // Ensure shield does not exceed maxShield
+            }
         }
     }
 

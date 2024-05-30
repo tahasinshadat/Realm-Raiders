@@ -30,10 +30,10 @@ public class GamePanel extends JPanel implements Runnable {
     public int screenHeight = tileSize * maxScreenRow; // 864 px
 
     // World Settings (Room Sizes must be even)
-    public final int enemyRoomSize = 20;
-    public final int startingRoomSize = 18;
+    public final int enemyRoomSize = 22;
+    public final int startingRoomSize = 20;
     public final int lootRoomSize = 14;
-    public final int portalRoomSize = 12;
+    public final int endRoomSize = 34;
     public final int corridorLength = 22;
     public final int corridorHeight = 6;
     public int currentPreset = 1;
@@ -52,37 +52,74 @@ public class GamePanel extends JPanel implements Runnable {
     // Game Components
     public TileManager tileManager = new TileManager(this);
     public CollisionHandler collisionHandler = new CollisionHandler(this);
-    KeyHandler keyHandler = new KeyHandler(this);
-    MouseInteractions mouse = new MouseInteractions(this);
-    Thread gameThread;
-    MapCreator mapCreator = new MapCreator(this, true, this.currentPreset);
-    UI gameUI = new UI(this);
+    public KeyHandler keyHandler = new KeyHandler(this);
+    public MouseInteractions mouse = new MouseInteractions(this);
+    public Thread gameThread;
+    public MapCreator mapCreator = new MapCreator(this, true, this.currentPreset);
+    public UI gameUI = new UI(this);
+    public AssetManager assetManager = new AssetManager(this);
     
     // Entities
     public Player player = new Player(this, this.keyHandler, this.mouse);
     public ArrayList<GameObject> obj = new ArrayList<>();
+    public ArrayList<GameObject> objToRemove = new ArrayList<>();
     public ArrayList<Entity> enemies = new ArrayList<>();
+    public ArrayList<Entity> enemiesToRemove = new ArrayList<>();
+
+    // Game States
+    public boolean titleScreen = false;
+    public boolean endScreen = false; // Only comes in if game is over
+    public boolean paused = false; // Pauses Game
+    public boolean menuScreen = false; // 
+
+    // Game Progress Checking:
+    public int levelEnhancer = 3;
+    public int score = 0;
+    public int currentLevel = 0;
 
     public GamePanel() {
 
-        this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+        this.setPreferredSize(new Dimension(this.screenWidth, this.screenHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true); // Redered in the background, and then shown
         this.setBackground(Color.decode("#010b19"));
         this.addKeyListener(keyHandler);
         this.setFocusable(true);
 
-        mapCreator.setWorldSize(sections, sectionSize);
-        this.worldSize = mapCreator.getWorldSize();
-        mapCreator.setEnvironment(20);
-        tileManager.mapTileNum = mapCreator.getWorldMap();
+        this.mapCreator.setWorldSize(this.sections, this.sectionSize);
+        this.worldSize = this.mapCreator.getWorldSize();
+        this.mapCreator.setEnvironment();
+        this.tileManager.mapTileNum = mapCreator.getWorldMap();
 
         // Add some enemies to the map for testing
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY, 1, "Goblin", false));
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY, 2, "Archer", false));
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY, 1, "Orc", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 1, "Goblin", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 2, "BOSS", true));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 1, "Orc", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 2, "Archer", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 1, "Orc", false));
     }
 
+    public void setupGame() {
+        this.assetManager.setObjects();
+        this.assetManager.setEnemies();
+    }
+
+    public void generateNewLevel() { // Passed Previous Level So Load New One
+        currentLevel++;
+
+        if (currentLevel % levelEnhancer == 0) {
+            this.sections += 2;
+            this.currentPreset = (int) (1 + Math.random() * 3); // Choose Random Preset
+            this.mapCreator.preset(this.currentPreset);
+        }
+
+        this.assetManager.reset();
+
+        this.mapCreator.setWorldSize(this.sections, this.sectionSize);
+        this.worldSize = this.mapCreator.getWorldSize();
+        this.mapCreator.setEnvironment();
+        this.tileManager.mapTileNum = mapCreator.getWorldMap();
+    }
 
     public void startGameThread() {
         this.gameThread = new Thread(this); // Pass in itself (the gamepanel) to instanciate the thread
@@ -130,7 +167,11 @@ public class GamePanel extends JPanel implements Runnable {
         this.player.update();
         for (Entity enemy : enemies) {
             ((Enemy) enemy).update();
+            if (((Enemy)enemy).isDead) {
+                enemiesToRemove.add(enemy);
+            }
         }
+        enemies.removeAll(enemiesToRemove);
     }
 
     @Override
@@ -138,21 +179,19 @@ public class GamePanel extends JPanel implements Runnable {
         super.paintComponent(g); // Reference the parent class of this class (JPanel) - It's JPanels Method
         Graphics2D g2 = (Graphics2D)g;
 
-        // Draw Tiles
-        this.tileManager.draw(g2);
+        if (!this.titleScreen || !this.endScreen || !this.paused || !this.menuScreen) {
 
-        // Draw Objects
+            this.tileManager.draw(g2); // Draw Tiles
+            // Draw Objects
+            this.player.draw(g2); // Draw the Player
 
-        // Draw the Player
-        this.player.draw(g2);
+            for (Entity enemy : enemies) { // Draw Enemies
+                ((Enemy) enemy).draw(g2);
+            }
 
-        // Draw Enemies
-        for (Entity enemy : enemies) {
-            ((Enemy) enemy).draw(g2);
+            this.gameUI.draw(g2); // Draw UI
+
         }
-
-        // Draw UI
-        this.gameUI.draw(g2);
 
         g2.dispose(); 
         // System.out.println(this.tileSize * this.maxWorldCol);
@@ -178,4 +217,5 @@ public class GamePanel extends JPanel implements Runnable {
         this.player.worldY = newPlayerWorldY;
 
     }
+
 }

@@ -1,10 +1,10 @@
 package components;
 
+import elements.Enemy;
+import elements.Weapon;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-
-import elements.Weapon;
 import main.GamePanel;
 
 public class Projectile extends Entity {
@@ -29,7 +29,7 @@ public class Projectile extends Entity {
         this.owner = owner;
         this.prevTileSize = this.gamePanel.tileSize;
         
-        this.speed = this.originalWeapon.weaponSpeed;
+        this.speed = this.originalWeapon.weaponProjectileSpeed;
 
         this.worldX = this.owner.worldX + (this.originalWeapon.width * Math.cos(Math.toRadians(angle)));
         this.worldY = this.owner.worldY + (this.originalWeapon.width * -Math.sin(Math.toRadians(angle)));
@@ -61,7 +61,7 @@ public class Projectile extends Entity {
     }
 
     public void update() {
-        updateValuesOnZoom();
+        this.updateValuesOnZoom();
 
         // Check For tile collisions
         this.collisionEnabled = false;
@@ -72,7 +72,15 @@ public class Projectile extends Entity {
             this.worldX += this.speed * Math.cos(Math.toRadians(angle));
             this.worldY += this.speed * -Math.sin(Math.toRadians(angle));
         } else {
-            deactivate();
+            this.deactivate();
+        }
+
+        Rectangle uhh = new Rectangle((int)this.worldX, (int)this.worldY, this.hitbox.width, this.hitbox.height);
+        for (int i = 0; i < this.gamePanel.enemies.size(); i++) {
+            if (((Enemy) this.gamePanel.enemies.get(i)).getHitBox().intersects(uhh)) {
+                ((Enemy)this.gamePanel.enemies.get(i)).takeDamage( (int) this.originalWeapon.weaponDamage);
+                this.deactivate();
+            }
         }
     }
 
@@ -104,7 +112,7 @@ public class Projectile extends Entity {
 
         // updating projectile speed on zoom similar to player
         int newWorldWidth = this.gamePanel.tileSize * this.gamePanel.maxWorldCol;
-        this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.originalWeapon.weaponSpeed);
+        this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.originalWeapon.weaponProjectileSpeed);
 
         // HITBOX
         this.width = this.gamePanel.tileSize/10;
