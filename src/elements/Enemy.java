@@ -31,7 +31,7 @@ public class Enemy extends Entity {
     private boolean gotNewAngle = false;
 
     public int barWidth = this.size;
-    public int barHeight = 5;
+    public int barHeight = this.size / 10;
     public boolean isDead = false;
 
     public Enemy(GamePanel gamePanel, int startX, int startY, int enemyType, String enemyName, boolean isBoss) {
@@ -82,6 +82,7 @@ public class Enemy extends Entity {
             }
         }
         this.barWidth = this.size;
+        this.barHeight = this.size / 10;
     }
 
     public void update() {
@@ -220,6 +221,8 @@ public class Enemy extends Entity {
         this.hitbox.width = this.width;
         this.hitbox.height = this.height;
         this.prevTileSize = this.gamePanel.tileSize;
+        this.barWidth = this.size;
+        this.barHeight = this.size / 10;
     }
 
     public int getPlayerAngle() {

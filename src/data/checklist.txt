@@ -8,14 +8,14 @@ Tahasin Shadat - Soul Knight
 >
 
     [ X ] -> Rectangle ( or square )
-    [  ] -> Grid ( A set of squares and rectangles )
-    [  ] -> Logic ( Calculations for Math )
-    [  ] -> Basic Mouse Interactions
+    [ X ] -> Grid ( A set of squares and rectangles )
+    [ X ] -> Logic ( Calculations for Math )
+    [ X ] -> Basic Mouse Interactions
     [  ] -> Buttons
-    [  ] -> Checkboxes
-    [  ] -> Text
-    [  ] -> Handle Data from txt file ( GET and POST )
-    [  ] -> Testing Method
+    [ X] -> Hitboxes
+    [ X ] -> Text
+    [ X ] -> Handle Data from txt file ( GET and POST )
+    [ X ] -> Testing Method
 
 
 Game Name Ideas:
@@ -38,36 +38,38 @@ Game Name Ideas:
 ================================================================================================================
 
     [  ] -> Player:
-        [  ] -> Movement
+        [ X ] -> Movement
+        [ X ] -> Wepon Shooting
+        [  ] -> Weapon Switching
         [  ] -> Interact with Objects ( Doors, Weapons, Crates, PowerUps )
 
 ================================================================================================================
 
     [  ] -> Enemy:
-        [  ] -> Movement
-        [  ] -> Chase Player
+        [ X ] -> Movement
+        [ X ] -> Chase Player
         [  ] -> Variablility
 
 ================================================================================================================
 
     [  ] -> Level:
 
-        [  ] -> Rooms
-            [  ] -> Floor
-            [  ] -> Walls
+        [ X ] -> Rooms
+            [ X ] -> Floor
+            [ X ] -> Walls
             [  ] -> Doors
 
-        [  ] -> Corridor ( connect rooms )
-            [  ] -> Floor
-            [  ] -> Walls
+        [ X ] -> Corridor ( connect rooms )
+            [ X ] -> Floor
+            [ X ] -> Walls
             [  ] -> Doors
 
 ================================================================================================================
 
     [  ] -> Weapons:
-        [  ] -> Projectile ( Square )
-        [  ] -> Direction
-        [  ] -> Mouse being clicked
+        [ X ] -> Projectile ( Square )
+        [ X ] -> Direction
+        [ X ] -> Mouse being clicked
         [  ] -> Comes from Crate
 
 ================================================================================================================
@@ -78,10 +80,11 @@ Game Name Ideas:
 
 ================================================================================================================
 
-    [  ] -> Game Window:
-        [  ] -> Game Window 
-        [  ] -> Fps of Game
-        [  ] -> Constant Background refresh + rendering
+    [ X ] -> Game Window:
+        [ X ] -> Game Window 
+        [ X ] -> Fps of Game
+        [ X ] -> Constant Background refresh + rendering
+        [  ] -> FullScreen Option
 
 ================================================================================================================
 
@@ -103,24 +106,24 @@ Game Name Ideas:
 
 
 Steps:
-    [  ] -> Set Up and display Window
-    [  ] -> Create a Game loop
-    [  ] -> Check if game loop works by printing things rapidly
-    [  ] -> Add a rectangle into the window
-    [  ] -> Make the rectangle move via W A S D
-    [  ] -> Make the rectangle always be at the CENTER of the window
-    [  ] -> Make the Camera follow the rectangle
-    [  ] -> Add background image into the window to check:
-        [  ] -> if the rectangle is moving accross the image
-        [  ] -> if the rectangle is always in the middle of the window
-    [  ] -> Add a sprite to the rectangle
-    [  ] -> Create a Tile (Square) that is an image of a tile
-    [  ] -> Create a grid of tiles
-        [  ] -> Player should always be above the tiles
-    [  ] -> Create a Wall piece that is an image of a wall
-    [  ] -> Add collision detection for the wall to make sure that NO ENTITY can pass through it
-    [  ] -> Create a Row / Col of Walls
-        [  ] -> Player should NEVER be able to pass through the walls
-    [  ] -> Create a closed room with tiles and a wall
-        [  ] -> Player should never be able to get out of the room
-    [  ] -> Create a hallway with the same grid of walls and tiles
+    [ X ] -> Set Up and display Window
+    [ X ] -> Create a Game loop
+    [ X ] -> Check if game loop works by printing things rapidly
+    [ X ] -> Add a rectangle into the window
+    [ X ] -> Make the rectangle move via W A S D
+    [ X ] -> Make the rectangle always be at the CENTER of the window
+    [ X ] -> Make the Camera follow the rectangle
+    [ X ] -> Add background image into the window to check:
+        [ X ] -> if the rectangle is moving accross the image
+        [ X ] -> if the rectangle is always in the middle of the window
+    [ X ] -> Add a sprite to the rectangle
+    [ X ] -> Create a Tile (Square) that is an image of a tile
+    [ X ] -> Create a grid of tiles
+        [ X ] -> Player should always be above the tiles
+    [ X ] -> Create a Wall piece that is an image of a wall
+    [ X ] -> Add collision detection for the wall to make sure that NO ENTITY can pass through it
+    [ X ] -> Create a Row / Col of Walls
+        [ X ] -> Player should NEVER be able to pass through the walls
+    [ X ] -> Create a closed room with tiles and a wall
+        [ X ] -> Player should never be able to get out of the room
+    [ X ] -> Create a hallway with the same grid of walls and tiles

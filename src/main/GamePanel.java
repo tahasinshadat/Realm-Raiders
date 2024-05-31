@@ -67,7 +67,7 @@ public class GamePanel extends JPanel implements Runnable {
     public ArrayList<Entity> enemiesToRemove = new ArrayList<>();
 
     // Game States
-    public boolean titleScreen = false;
+    public boolean titleScreen = true;
     public boolean endScreen = false; // Only comes in if game is over
     public boolean paused = false; // Pauses Game
     public boolean menuScreen = false; // 
@@ -92,11 +92,11 @@ public class GamePanel extends JPanel implements Runnable {
         this.tileManager.mapTileNum = mapCreator.getWorldMap();
 
         // Add some enemies to the map for testing
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 1, "Goblin", false));
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 2, "BOSS", true));
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 1, "Orc", false));
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 2, "Archer", false));
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 50, 1, "Orc", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 100, 1, "Goblin", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 100, 2, "BOSS", true));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 100, 1, "Orc", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 100, 2, "Archer", false));
+        enemies.add(new Enemy(this, (int) this.player.worldX, (int)this.player.worldY - 100, 1, "Orc", false));
     }
 
     public void setupGame() {
@@ -179,19 +179,15 @@ public class GamePanel extends JPanel implements Runnable {
         super.paintComponent(g); // Reference the parent class of this class (JPanel) - It's JPanels Method
         Graphics2D g2 = (Graphics2D)g;
 
-        if (!this.titleScreen || !this.endScreen || !this.paused || !this.menuScreen) {
+        this.tileManager.draw(g2); // Draw Tiles
+        // Draw Objects
+        this.player.draw(g2); // Draw the Player
 
-            this.tileManager.draw(g2); // Draw Tiles
-            // Draw Objects
-            this.player.draw(g2); // Draw the Player
-
-            for (Entity enemy : enemies) { // Draw Enemies
-                ((Enemy) enemy).draw(g2);
-            }
-
-            this.gameUI.draw(g2); // Draw UI
-
+        for (Entity enemy : enemies) { // Draw Enemies
+            ((Enemy) enemy).draw(g2);
         }
+
+        this.gameUI.draw(g2); // Draw UI
 
         g2.dispose(); 
         // System.out.println(this.tileSize * this.maxWorldCol);

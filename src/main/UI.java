@@ -4,6 +4,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 
+import javax.swing.JButton;
+
+import java.awt.FontMetrics;
+
 public class UI {
     GamePanel gamePanel;
     Font gameFont;
@@ -17,8 +21,7 @@ public class UI {
 
     public UI(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
-        this.gameFont = new Font("Arial", Font.ITALIC, 40);
-        
+        this.gameFont = new Font("Virgil", Font.PLAIN, 40);
     }
 
     public void draw(Graphics2D g2) {
@@ -31,7 +34,11 @@ public class UI {
         // Draw health bar and shield bar
         this.drawShieldBar(g2, this.gamePanel.player.shield);
         this.drawHealthBar(g2, this.gamePanel.player.health);
-        this.drawMenu();
+        // this.drawMenu();
+        if (this.gamePanel.titleScreen) this.drawTitleScreen(g2);
+        else if (this.gamePanel.endScreen) this.drawEndScreen(g2);
+        else if (this.gamePanel.paused) this.pause(g2);
+        else if (this.gamePanel.menuScreen) this.drawMenu(g2);
     }
 
     // Draw Shield indicator
@@ -50,7 +57,29 @@ public class UI {
         g2.fillRect(this.cornerX, this.cornerY + this.shieldBarHeight + this.spacing*3, health, this.healthBarHeight);
     }
 
-    private void drawMenu() {
-        
+    private void drawMenu(Graphics2D g2) {
+        g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight);
+    }
+
+    private void pause(Graphics2D g2) {
+        g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight);
+    }
+
+    private void drawEndScreen(Graphics2D g2) {
+        g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight);
+    }
+
+    // https://docs.oracle.com/javase/8/docs/api/javax/swing/JButton.html
+    private void drawTitleScreen(Graphics2D g2) {
+        g2.setColor(Color.black);
+        g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight);
+        g2.setFont(this.gameFont);
+        g2.setColor(Color.WHITE);
+        FontMetrics metrics = g2.getFontMetrics(g2.getFont());
+        int nameWidth = metrics.stringWidth("Realm Raiders");
+        g2.drawString("Realm Raiders", this.gamePanel.screenWidth/2 - nameWidth/2, this.gamePanel.screenHeight/4);
+
+        // JButton x = new JButton("Realm Raiders");
+        // this.gamePanel.add(x);
     }
 }
