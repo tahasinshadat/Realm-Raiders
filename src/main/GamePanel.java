@@ -67,7 +67,7 @@ public class GamePanel extends JPanel implements Runnable {
     public ArrayList<Entity> enemiesToRemove = new ArrayList<>();
 
     // Game States
-    public boolean titleScreen = true;
+    public boolean titleScreen = !true;
     public boolean endScreen = false; // Only comes in if game is over
     public boolean paused = false; // Pauses Game
     public boolean menuScreen = false; // 

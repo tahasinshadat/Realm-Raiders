@@ -10,8 +10,9 @@ import components.KeyHandler;
 import components.MouseInteractions;
 import components.Projectile;
 import main.GamePanel;
+import objects.GameObject;
 
-public class Weapon {
+public class Weapon extends GameObject {
     
     GamePanel gamePanel;
     KeyHandler keyHandler;
@@ -33,7 +34,7 @@ public class Weapon {
     private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
     private int cooldown;
 
-    public Weapon(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse, Entity owner) {
+    public Weapon(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse, Entity owner, double weaponAttackSpeed, double weaponProjectileSpeed, double weaponDamage) {
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
         this.mouse = mouse;
@@ -44,6 +45,10 @@ public class Weapon {
         this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
         this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
         this.prevTileSize = this.gamePanel.tileSize;
+
+        this.weaponAttackSpeed = weaponAttackSpeed;
+        this.weaponProjectileSpeed = weaponProjectileSpeed;
+        this.weaponDamage = weaponDamage;
     }
 
     public double getAngleToMouse() {
