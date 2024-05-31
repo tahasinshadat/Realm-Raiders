@@ -77,9 +77,9 @@ public class Projectile extends Entity {
             this.deactivate();
         }
 
-        Rectangle uhh = new Rectangle((int)this.worldX, (int)this.worldY, this.hitbox.width, this.hitbox.height);
+        Rectangle worldHitbox = new Rectangle((int)this.worldX+this.hitbox.x, (int)this.worldY+this.hitbox.y, this.hitbox.width, this.hitbox.height);
         for (int i = 0; i < this.gamePanel.enemies.size(); i++) {
-            if (((Enemy) this.gamePanel.enemies.get(i)).getHitBox().intersects(uhh)) {
+            if (((Enemy) this.gamePanel.enemies.get(i)).getHitBox().intersects(worldHitbox)) {
                 ((Enemy)this.gamePanel.enemies.get(i)).takeDamage( (int) this.originalWeapon.weaponDamage);
                 this.deactivate();
             }

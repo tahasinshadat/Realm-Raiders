@@ -164,8 +164,10 @@ public class Weapon extends GameObject {
     }
 
     public void initializeAsRandomWeapon() {
+        this.weaponProjectileSpeed = this.randomNum(10, 20);
+
         // Determine Class based off of shooting speed
-        this.weaponAttackSpeed = randomNum(1, 15);
+        this.weaponAttackSpeed = this.randomNum(1, 15);
         this.setWeaponClass();
 
         // Determine Rarity based off of Damage & Class
@@ -175,7 +177,6 @@ public class Weapon extends GameObject {
     }
     
     private void setWeaponClass() {
-        System.out.println(weaponAttackSpeed);
         if (this.weaponAttackSpeed <= 2) this.weaponClass = "shotgun";
         else if (this.weaponAttackSpeed <= 4) this.weaponClass = "pistol";
         else if (this.weaponAttackSpeed <= 8) this.weaponClass = "machine gun";
