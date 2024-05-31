@@ -93,7 +93,7 @@ public class Projectile extends Entity {
         this.screenY = (this.worldY - this.gamePanel.player.worldY) + this.gamePanel.player.screenY + playerCenterOffset;
 
         Rectangle rect2 = new Rectangle(-this.width/2, -this.height/2, this.width, this.height); 
-        g2.setColor(Color.WHITE);
+        g2.setColor(Color.YELLOW);
         
         g2.translate(screenX, screenY); 
         g2.rotate(-Math.toRadians(this.angle));

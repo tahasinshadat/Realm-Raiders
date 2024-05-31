@@ -117,13 +117,14 @@ public class Enemy extends Entity {
                 // after not chasing for 5 more seconds, reset
                 this.gotNewAngle = false; // reset for next no chase time
                 this.frameCounter = 0;
+                this.chasing = true;
             }
             
             if (this.chasing) {
                 // Calculate movement based on player angle
                 this.angle = playerAngle;
-                double deltaX = this.speed * Math.cos(Math.toRadians(angle));
-                double deltaY = this.speed * -Math.sin(Math.toRadians(angle));
+                double deltaX = this.speed * Math.cos(Math.toRadians(this.angle));
+                double deltaY = this.speed * -Math.sin(Math.toRadians(this.angle));
         
                 this.worldX += deltaX;
                 this.worldY += deltaY;
@@ -133,8 +134,8 @@ public class Enemy extends Entity {
                     this.gotNewAngle = true;
                 }
                 // move in new angle
-                double deltaX = this.speed * Math.cos(Math.toRadians(angle));
-                double deltaY = this.speed * -Math.sin(Math.toRadians(angle));
+                double deltaX = this.speed * Math.cos(Math.toRadians(this.angle));
+                double deltaY = this.speed * -Math.sin(Math.toRadians(this.angle));
         
                 this.worldX += deltaX;
                 this.worldY += deltaY;
