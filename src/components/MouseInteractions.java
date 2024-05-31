@@ -4,10 +4,13 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+
 import javax.swing.SwingUtilities;
 import main.GamePanel;
 
-public class MouseInteractions implements MouseListener {
+public class MouseInteractions implements MouseListener, MouseWheelListener {
 
     private GamePanel gamePanel;
     public int mouseX;
@@ -15,11 +18,14 @@ public class MouseInteractions implements MouseListener {
     private boolean leftMouseClicked;
     private boolean rightMouseClicked;
     
+    public int wheelMoveAmount;
+    
     public MouseInteractions(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
         this.leftMouseClicked = false;
         this.rightMouseClicked = false;
         this.gamePanel.addMouseListener(this); // Add this as a MouseListener to the GamePanel
+        this.gamePanel.addMouseWheelListener(this);
     }
 
     public void getMousePosition() {
@@ -71,4 +77,9 @@ public class MouseInteractions implements MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {}
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        this.wheelMoveAmount = e.getWheelRotation();
+    }
 }

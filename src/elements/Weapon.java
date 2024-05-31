@@ -34,7 +34,7 @@ public class Weapon extends GameObject {
     private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
     private int cooldown;
 
-    public Weapon(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse, Entity owner, double weaponAttackSpeed, double weaponProjectileSpeed, double weaponDamage) {
+    public Weapon(GamePanel gamePanel, KeyHandler keyHandler, MouseInteractions mouse, Entity owner) {
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
         this.mouse = mouse;
@@ -46,6 +46,9 @@ public class Weapon extends GameObject {
         this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
         this.prevTileSize = this.gamePanel.tileSize;
 
+    }
+
+    public void setData(double weaponAttackSpeed, double weaponProjectileSpeed, double weaponDamage) {
         this.weaponAttackSpeed = weaponAttackSpeed;
         this.weaponProjectileSpeed = weaponProjectileSpeed;
         this.weaponDamage = weaponDamage;
@@ -126,6 +129,10 @@ public class Weapon extends GameObject {
         g2.rotate(Math.toRadians(angle)); // rotate back
         g2.translate(-screenX, -screenY); // translate back
 
+        // drawProjectiles(g2);
+    }
+
+    public void drawProjectiles(Graphics2D g2) {
         for (Projectile projectile : projectiles) {
             projectile.draw(g2);
         }

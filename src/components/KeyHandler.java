@@ -52,6 +52,7 @@ public class KeyHandler implements KeyListener {
     public void keyReleased(KeyEvent event) {
         int code = event.getKeyCode();
 
+        // MOVEMENT
         if (code == KeyEvent.VK_W) this.upPressed = false;
         if (code == KeyEvent.VK_S) this.downPressed = false;
         if (code == KeyEvent.VK_A) this.leftPressed = false;

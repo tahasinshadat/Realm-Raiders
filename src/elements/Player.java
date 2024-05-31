@@ -46,9 +46,12 @@ public class Player extends Entity {
         this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
         this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
 
-        this.equippedWeapon = new Weapon(this.gamePanel, this.keyHandler, this.mouse, this, 5, 10, 20);
+        this.equippedWeapon = new Weapon(this.gamePanel, this.keyHandler, this.mouse, this);
+        this.equippedWeapon.setData(5, 10, 20);
+        
         weaponInv.add(this.equippedWeapon);
-        weaponInv.add(new Weapon(gamePanel, keyHandler, mouse, this, 10, 10, 10));
+        weaponInv.add(new Weapon(gamePanel, keyHandler, mouse, this));
+        weaponInv.get(1).setData(100, 10, 10);
 
         hitbox = new Rectangle();
         hitbox.x = 8;
@@ -187,10 +190,24 @@ public class Player extends Entity {
             this.spriteCounter = 0;
         }
 
-        this.equippedWeapon.update();
+        for (Weapon weapon : weaponInv) weapon.update(); // update projectiles of all weapons
+
         if (this.frameCount % 300 == 0 && !this.dead) this.regenerateShield(); // every 5 seconds regenerate shield a little bit
         if (mouse.isLeftMouseClicked()) equippedWeapon.shoot();
+
+        updateEquippedWeapon(); // update equipped weapon on scroll
+
         this.frameCount++;
+    }
+
+    public void updateEquippedWeapon() {
+        int weaponIndex = weaponInv.indexOf(equippedWeapon);
+        weaponIndex = (weaponIndex + mouse.wheelMoveAmount) % weaponInv.size();
+        if (weaponIndex < 0) weaponIndex = weaponInv.size() + weaponIndex;
+
+        this.equippedWeapon = weaponInv.get(weaponIndex);
+
+        mouse.wheelMoveAmount = 0; // reset move amount after using
     }
 
     public void takeDamage(int damage) {
@@ -247,6 +264,7 @@ public class Player extends Entity {
         // System.out.println(this.worldX + " " + this.worldY);
         g2.drawImage(image, (int) this.screenX, (int) this.screenY, this.gamePanel.tileSize, this.gamePanel.tileSize, null);
         this.equippedWeapon.draw(g2);
+        for (Weapon weapon : weaponInv) weapon.drawProjectiles(g2); // draw projectiles of all weapons
     }
 
 }
