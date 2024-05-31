@@ -26,9 +26,14 @@ public class Weapon extends GameObject {
     public int width;
     public int height;
     private boolean flipped = false;
-    public double weaponAttackSpeed = 5; // per second
+
+    // stats
+    public int weaponAttackSpeed = 5; // per second
     public double weaponProjectileSpeed = 10;
     public double weaponDamage = 20;
+    public String weaponClass;
+    public String weaponRarity;
+    public String weaponName;
 
     private Entity owner;
     private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
@@ -49,7 +54,7 @@ public class Weapon extends GameObject {
     }
 
     public void setData(double weaponAttackSpeed, double weaponProjectileSpeed, double weaponDamage) {
-        this.weaponAttackSpeed = weaponAttackSpeed;
+        this.weaponAttackSpeed = (int) weaponAttackSpeed;
         this.weaponProjectileSpeed = weaponProjectileSpeed;
         this.weaponDamage = weaponDamage;
     }
@@ -148,5 +153,48 @@ public class Weapon extends GameObject {
             projectiles.add(new Projectile(gamePanel, angle, this, this.owner));
             this.cooldown = 0;
         }
+    }
+
+    public void initializeAsRandomWeapon() {
+        // Determine Class based off of shooting speed
+        this.weaponAttackSpeed = randomNum(1, 15);
+
+        if (this.weaponAttackSpeed <= 2) this.weaponClass = "shotgun";
+        else if (this.weaponAttackSpeed <= 4) this.weaponClass = "pistol";
+        else if (this.weaponAttackSpeed <= 6) this.weaponClass = "machine gun";
+        else if (this.weaponAttackSpeed <= 10) this.weaponClass = "assault rifle";
+        else if (this.weaponAttackSpeed <= 12) this.weaponClass = "sub-machine gun";
+        else if (this.weaponAttackSpeed <= 15) this.weaponClass = "minigun";
+
+        // Determine Rarity based off of Damage & Class
+        int[] dmgRange = this.getClassDamageRange();
+        this.weaponDamage = this.randomNum(dmgRange[0], dmgRange[1]);
+
+        if (this.weaponDamage <= getRarityThreshold(dmgRange, 1)) this.weaponRarity = "common";
+        else if (this.weaponDamage <= getRarityThreshold(dmgRange, 2)) this.weaponRarity = "uncommon";
+        else if (this.weaponDamage <= getRarityThreshold(dmgRange, 3)) this.weaponRarity = "rare";
+        else if (this.weaponDamage <= getRarityThreshold(dmgRange, 4)) this.weaponRarity = "epic";
+        else if (this.weaponDamage <= getRarityThreshold(dmgRange, 5)) this.weaponRarity = "mythical";
+    }
+
+    private int getRarityThreshold(int[] dmgRange, int rarity) {
+        return (dmgRange[0] + rarity * ((dmgRange[1] - dmgRange[0])/5));
+    }
+
+    private int[] getClassDamageRange() {
+        int[] range = {0, 0};
+        switch (this.weaponClass) {
+            case "shotgun" -> range = new int[]{5, 10};
+            case "pistol" -> range = new int[]{10, 20};
+            case "machine gun" -> range = new int[]{15, 25};
+            case "assault rifle" -> range = new int[]{12, 22};
+            case "sub-machine gun" -> range = new int[]{2, 13};
+            case "minigun" -> range = new int[]{1, 12};
+        }
+        return range;
+    }
+
+    private int randomNum(int min, int max) { // Inclusive
+        return (int) (Math.random() * ((max - min) + 1)) + min;
     }
 }

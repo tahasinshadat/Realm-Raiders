@@ -140,6 +140,7 @@ public class UI {
     }
 
     private void addBackButton() {
+        this.styleButtons();
         this.gamePanel.add(this.backButton);
     }
 
@@ -180,6 +181,7 @@ public class UI {
         g2.drawString("D - Move Right", this.gamePanel.screenWidth / 2 - 50, this.gamePanel.screenHeight / 4 + 120);
         g2.drawString("Mouse - Aim", this.gamePanel.screenWidth / 2 - 50, this.gamePanel.screenHeight / 4 + 150);
         g2.drawString("Click Back to return to the title screen", this.gamePanel.screenWidth / 2 - 150, this.gamePanel.screenHeight / 4 + 210);
+        this.addBackButton();
     }
 
     private void drawPausedScreen(Graphics2D g2) {
