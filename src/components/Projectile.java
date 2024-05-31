@@ -99,8 +99,14 @@ public class Projectile extends Entity {
         g2.rotate(-Math.toRadians(this.angle));
         g2.draw(rect2);
         g2.fill(rect2);
+        
+        // HITBOX
+        // g2.setColor(Color.RED);
+        // g2.fillRect(this.hitbox.x - playerCenterOffset, this.hitbox.y - playerCenterOffset, this.hitbox.width, this.hitbox.height);
+
         g2.rotate(Math.toRadians(this.angle)); // rotate back
         g2.translate(-screenX, -screenY); // translate back
+
     }
 
     public void updateValuesOnZoom() {
@@ -114,7 +120,17 @@ public class Projectile extends Entity {
         int newWorldWidth = this.gamePanel.tileSize * this.gamePanel.maxWorldCol;
         this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.originalWeapon.weaponProjectileSpeed);
 
+
         // HITBOX
+
+        // worldX and worldY is top left, does not account for playerCenterOffset
+        // this corrects hitbox location
+        int tileSize = this.gamePanel.tileSize;
+        int playerCenterOffset = tileSize/2;
+
+        this.hitbox.x = playerCenterOffset; 
+        this.hitbox.y = playerCenterOffset;
+
         this.width = this.gamePanel.tileSize/10;
         this.height = this.gamePanel.tileSize/10;
 
