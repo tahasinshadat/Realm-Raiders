@@ -28,7 +28,9 @@ public class Player extends Entity {
 
     public ArrayList<Weapon> weaponInv = new ArrayList<Weapon>();
     public Weapon equippedWeapon;
+    // public Weapon meleeWeapon;
     public int maxWeapons = 2;
+    public Weapon startWeapon;
 
     public final int maxShield = 300;
     public final int maxHealth = 300;
@@ -47,18 +49,22 @@ public class Player extends Entity {
         this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
         this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
 
-        this.equippedWeapon = new Weapon(this.gamePanel, this.keyHandler, this.mouse, this);
+        // this.meleeWeapon = new Weapon(this.gamePanel, this.keyHandler, this.mouse, this);
+        // this.meleeWeapon.setAsMeleeWeapon();
+
+        this.startWeapon = new Weapon(this.gamePanel, this.keyHandler, this.mouse, this);  // or can start off with melee weapon
+        this.equippedWeapon = this.startWeapon;
         this.equippedWeapon.setData(5, 10, 20);
         
-        weaponInv.add(this.equippedWeapon);
-        weaponInv.add(new Weapon(gamePanel, keyHandler, mouse, this));
-        weaponInv.get(1).setData(100, 10, 10);
+        this.weaponInv.add(this.equippedWeapon);
+        this.weaponInv.add(new Weapon(gamePanel, keyHandler, mouse, this));
+        this.weaponInv.get(1).setData(100, 10, 10);
 
-        hitbox = new Rectangle();
-        hitbox.x = 8;
-        hitbox.y = 16;
-        hitbox.width = 32;
-        hitbox.height = 32;
+        this.hitbox = new Rectangle();
+        this.hitbox.x = 8;
+        this.hitbox.y = 16;
+        this.hitbox.width = 32;
+        this.hitbox.height = 32;
 
         this.setDefaults();
         this.getPlayerImage();
@@ -73,6 +79,9 @@ public class Player extends Entity {
         this.direction = "right";
         this.drawDirection = this.direction;
         this.wasRight = true;
+        this.shield = this.maxShield;
+        this.health = this.maxHealth;
+        this.dead = false;
     }
 
     // Keeps the speed the same even when moving diagnallay
@@ -196,7 +205,9 @@ public class Player extends Entity {
         if (this.frameCount % 300 == 0 && !this.dead) this.regenerateShield(); // every 5 seconds regenerate shield a little bit
         if (mouse.isLeftMouseClicked()) equippedWeapon.shoot();
 
-        updateEquippedWeapon(); // update equipped weapon on scroll
+        this.updateEquippedWeapon(); // update equipped weapon on scroll
+
+        if (this.dead) this.gamePanel.gameState = GamePanel.END_STATE; // End of Game
 
         this.frameCount++;
     }

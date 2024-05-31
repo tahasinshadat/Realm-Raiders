@@ -1,5 +1,7 @@
 package main;
 
+import elements.Player;
+
 public class AssetManager {
     
     public GamePanel gamePanel;
@@ -23,8 +25,8 @@ public class AssetManager {
         this.gamePanel.enemies.clear();
         this.gamePanel.enemiesToRemove.clear();
 
-        // Reset Players Position
-        this.gamePanel.player.setDefaults();
+        // Reset Player Fully
+        this.gamePanel.player = new Player(this.gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse);
     }
 
 }

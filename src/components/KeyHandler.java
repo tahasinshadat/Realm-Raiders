@@ -2,7 +2,6 @@ package components;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-
 import main.GamePanel;
 
 public class KeyHandler implements KeyListener {
@@ -44,6 +43,12 @@ public class KeyHandler implements KeyListener {
                 // this.zoomInAmt--;
                 this.gamePanel.zoom(-1);
             }
+        }
+        if (code == KeyEvent.VK_P) this.gamePanel.paused = !this.gamePanel.paused;
+        if (this.gamePanel.paused) {
+            this.gamePanel.gameState = GamePanel.PAUSE_STATE;
+        } else {
+            this.gamePanel.gameState = GamePanel.PLAYING_STATE;
         }
     
     }

@@ -132,6 +132,11 @@ public class Weapon extends GameObject {
         // drawProjectiles(g2);
     }
 
+    public void setAsMeleeWeapon() {
+        this.width = this.gamePanel.tileSize * 2;
+        this.height = this.gamePanel.tileSize;
+    }
+
     public void drawProjectiles(Graphics2D g2) {
         for (Projectile projectile : projectiles) {
             projectile.draw(g2);

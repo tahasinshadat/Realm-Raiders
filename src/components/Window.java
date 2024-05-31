@@ -1,7 +1,6 @@
 package components;
 
 import javax.swing.JFrame;
-
 import main.GamePanel;
 
 public class Window {
