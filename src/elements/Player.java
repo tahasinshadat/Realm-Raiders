@@ -28,6 +28,7 @@ public class Player extends Entity {
 
     public ArrayList<Weapon> weaponInv = new ArrayList<Weapon>();
     public Weapon equippedWeapon;
+    public int maxWeapons = 2;
 
     public final int maxShield = 300;
     public final int maxHealth = 300;
@@ -203,11 +204,31 @@ public class Player extends Entity {
     public void updateEquippedWeapon() {
         int weaponIndex = weaponInv.indexOf(equippedWeapon);
         weaponIndex = (weaponIndex + mouse.wheelMoveAmount) % weaponInv.size();
+        
         if (weaponIndex < 0) weaponIndex = weaponInv.size() + weaponIndex;
 
         this.equippedWeapon = weaponInv.get(weaponIndex);
 
         mouse.wheelMoveAmount = 0; // reset move amount after using
+    }
+
+    /**
+     * 
+     * @param weapon Weapon to be added
+     * @return Weapon that was swapped out
+     * 
+     */
+    public Weapon addWeapon(Weapon weapon) {
+        if (weaponInv.size() + 1 <= maxWeapons) {
+            weaponInv.add(weapon);
+        } else {
+            weaponInv.add(weapon);
+            weaponInv.remove(this.equippedWeapon);
+            this.equippedWeapon = weapon;
+
+            return this.equippedWeapon;
+        }
+        return null;
     }
 
     public void takeDamage(int damage) {
