@@ -57,6 +57,7 @@ public class Weapon extends GameObject {
         this.weaponAttackSpeed = (int) weaponAttackSpeed;
         this.weaponProjectileSpeed = weaponProjectileSpeed;
         this.weaponDamage = weaponDamage;
+        this.setMetaData();
     }
 
     public double getAngleToMouse() {
@@ -131,6 +132,7 @@ public class Weapon extends GameObject {
         g2.rotate(-Math.toRadians(angle)); // rotated so y=0 aims at mouse
         g2.draw(rect2);
         g2.fill(rect2);
+        g2.drawString(this.weaponRarity + " " + this.weaponClass, tileSize, tileSize);;
         g2.rotate(Math.toRadians(angle)); // rotate back
         g2.translate(-screenX, -screenY); // translate back
 
@@ -152,29 +154,52 @@ public class Weapon extends GameObject {
         if (this.cooldown > this.gamePanel.FPS / this.weaponAttackSpeed) {
             projectiles.add(new Projectile(gamePanel, angle, this, this.owner));
             this.cooldown = 0;
+
+            if (this.weaponClass == "shotgun") {
+                for (int i = 0; i < 5; i++) {
+                    projectiles.add(new Projectile(gamePanel, angle + this.randomNum(-15, 15), this, this.owner));   
+                }
+            }
         }
     }
 
     public void initializeAsRandomWeapon() {
         // Determine Class based off of shooting speed
         this.weaponAttackSpeed = randomNum(1, 15);
-
-        if (this.weaponAttackSpeed <= 2) this.weaponClass = "shotgun";
-        else if (this.weaponAttackSpeed <= 4) this.weaponClass = "pistol";
-        else if (this.weaponAttackSpeed <= 6) this.weaponClass = "machine gun";
-        else if (this.weaponAttackSpeed <= 10) this.weaponClass = "assault rifle";
-        else if (this.weaponAttackSpeed <= 12) this.weaponClass = "sub-machine gun";
-        else if (this.weaponAttackSpeed <= 15) this.weaponClass = "minigun";
+        this.setWeaponClass();
 
         // Determine Rarity based off of Damage & Class
         int[] dmgRange = this.getClassDamageRange();
         this.weaponDamage = this.randomNum(dmgRange[0], dmgRange[1]);
+        this.setWeaponRarity(dmgRange);
+    }
+    
+    private void setWeaponClass() {
+        System.out.println(weaponAttackSpeed);
+        if (this.weaponAttackSpeed <= 2) this.weaponClass = "shotgun";
+        else if (this.weaponAttackSpeed <= 4) this.weaponClass = "pistol";
+        else if (this.weaponAttackSpeed <= 8) this.weaponClass = "machine gun";
+        else if (this.weaponAttackSpeed <= 10) this.weaponClass = "assault rifle";
+        else if (this.weaponAttackSpeed <= 12) this.weaponClass = "sub-machine gun";
+        else this.weaponClass = "minigun";
+    }
 
+    private void setWeaponRarity(int[] dmgRange) {
         if (this.weaponDamage <= getRarityThreshold(dmgRange, 1)) this.weaponRarity = "common";
         else if (this.weaponDamage <= getRarityThreshold(dmgRange, 2)) this.weaponRarity = "uncommon";
         else if (this.weaponDamage <= getRarityThreshold(dmgRange, 3)) this.weaponRarity = "rare";
         else if (this.weaponDamage <= getRarityThreshold(dmgRange, 4)) this.weaponRarity = "epic";
-        else if (this.weaponDamage <= getRarityThreshold(dmgRange, 5)) this.weaponRarity = "mythical";
+        else this.weaponRarity = "mythical";
+    }
+
+    private void setMetaData() {
+        // Only to be called by setData()
+        // Determine Class based off of shooting speed
+        this.setWeaponClass();
+        
+        // Determine Rarity based off of Damage & Class
+        int[] dmgRange = this.getClassDamageRange();
+        this.setWeaponRarity(dmgRange);
     }
 
     private int getRarityThreshold(int[] dmgRange, int rarity) {
@@ -186,10 +211,10 @@ public class Weapon extends GameObject {
         switch (this.weaponClass) {
             case "shotgun" -> range = new int[]{5, 10};
             case "pistol" -> range = new int[]{10, 20};
-            case "machine gun" -> range = new int[]{15, 25};
+            case "machine gun" -> range = new int[]{15, 20};
             case "assault rifle" -> range = new int[]{12, 22};
-            case "sub-machine gun" -> range = new int[]{2, 13};
-            case "minigun" -> range = new int[]{1, 12};
+            case "sub-machine gun" -> range = new int[]{8, 13};
+            case "minigun" -> range = new int[]{3, 12};
         }
         return range;
     }

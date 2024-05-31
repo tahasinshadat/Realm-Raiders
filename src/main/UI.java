@@ -180,7 +180,8 @@ public class UI {
         g2.drawString("S - Move Down", this.gamePanel.screenWidth / 2 - 50, this.gamePanel.screenHeight / 4 + 90);
         g2.drawString("D - Move Right", this.gamePanel.screenWidth / 2 - 50, this.gamePanel.screenHeight / 4 + 120);
         g2.drawString("Mouse - Aim", this.gamePanel.screenWidth / 2 - 50, this.gamePanel.screenHeight / 4 + 150);
-        g2.drawString("Click Back to return to the title screen", this.gamePanel.screenWidth / 2 - 150, this.gamePanel.screenHeight / 4 + 210);
+        g2.drawString("Scroll - Change Weapon", this.gamePanel.screenWidth / 2 - 50, this.gamePanel.screenHeight / 4 + 180);
+        g2.drawString("Click Back to return to the title screen", this.gamePanel.screenWidth / 2 - 150, this.gamePanel.screenHeight / 4 + 240);
         this.addBackButton();
     }
 

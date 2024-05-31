@@ -54,11 +54,12 @@ public class Player extends Entity {
 
         this.startWeapon = new Weapon(this.gamePanel, this.keyHandler, this.mouse, this);  // or can start off with melee weapon
         this.equippedWeapon = this.startWeapon;
-        this.equippedWeapon.setData(5, 10, 20);
+        this.equippedWeapon.setData(4, 10, 10);
         
         this.weaponInv.add(this.equippedWeapon);
         this.weaponInv.add(new Weapon(gamePanel, keyHandler, mouse, this));
-        this.weaponInv.get(1).setData(100, 10, 10);
+        // this.weaponInv.get(1).setData(100, 10, 10);
+        this.weaponInv.get(1).initializeAsRandomWeapon();
 
         this.hitbox = new Rectangle();
         this.hitbox.x = 8;
