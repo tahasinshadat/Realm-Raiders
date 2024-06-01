@@ -108,7 +108,7 @@ public class Projectile extends Entity {
         this.screenY = (this.worldY - this.gamePanel.player.worldY) + this.gamePanel.player.screenY + this.ownerCenterOffset;
 
         // Rectangle rect2 = new Rectangle(-this.width/2, -this.height/2, this.width, this.height); 
-        g2.setColor(Color.YELLOW);
+        // g2.setColor(Color.YELLOW);a
         
         g2.translate(screenX, screenY); 
         g2.rotate(-Math.toRadians(this.angle));
@@ -151,8 +151,8 @@ public class Projectile extends Entity {
         this.hitbox.y = this.ownerCenterOffset;
 
         // 48 is original tileSize
-        this.width = this.image.getWidth() / 25 + this.gamePanel.tileSize - 48;
-        this.height = this.image.getHeight() / 25 + this.gamePanel.tileSize - 48;
+        this.width = this.gamePanel.tileSize/4;
+        this.height = this.gamePanel.tileSize/4;
 
         this.hitbox.width = this.width;
         this.hitbox.height = this.height;

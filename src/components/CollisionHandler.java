@@ -23,109 +23,114 @@ public class CollisionHandler {
         
         int tileNum1, tileNum2;
 
-        switch(entity.direction) {
-
-            case "up" -> {
-                entityTopRow = (int) (entityTop - entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-            }
-
-            case "down" -> {
-                entityBottomRow = (int) (entityBottom + entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-            }
-
-            case "left" -> {
-                entityLeftCol = (int) (entityLeft - entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-            }
-
-            case "right" -> {
-                entityRightCol = (int) (entityRight + entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-            }
+        try {
             
-            case "up-left" -> {
-                entityTopRow = (int) (entityTop - entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
+            switch(entity.direction) {
+
+                case "up" -> {
+                    entityTopRow = (int) (entityTop - entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
                 }
-                entityLeftCol = (int) (entityLeft - entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
+
+                case "down" -> {
+                    entityBottomRow = (int) (entityBottom + entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
                 }
+
+                case "left" -> {
+                    entityLeftCol = (int) (entityLeft - entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                }
+
+                case "right" -> {
+                    entityRightCol = (int) (entityRight + entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                }
+                
+                case "up-left" -> {
+                    entityTopRow = (int) (entityTop - entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                    entityLeftCol = (int) (entityLeft - entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                }
+
+                case "up-right" -> {
+                    entityTopRow = (int) (entityTop - entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                    entityRightCol = (int) (entityRight + entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                }
+
+                case "down-left" -> {
+                    entityBottomRow = (int) (entityBottom + entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                    entityLeftCol = (int) (entityLeft - entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                }
+
+                case "down-right" -> {
+                    entityBottomRow = (int) (entityBottom + entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                    entityRightCol = (int) (entityRight + entity.speed) / this.gamePanel.tileSize;
+                    tileNum1 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
+                    tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
+                    if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
+                        entity.collisionEnabled = true;
+                    }
+                }
+
+                case "idle" -> entity.collisionEnabled = false;
+
+                default -> {
+                }
+
             }
-
-            case "up-right" -> {
-                entityTopRow = (int) (entityTop - entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-                entityRightCol = (int) (entityRight + entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-            }
-
-            case "down-left" -> {
-                entityBottomRow = (int) (entityBottom + entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-                entityLeftCol = (int) (entityLeft - entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityTopRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-            }
-
-            case "down-right" -> {
-                entityBottomRow = (int) (entityBottom + entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityLeftCol][entityBottomRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-                entityRightCol = (int) (entityRight + entity.speed) / this.gamePanel.tileSize;
-                tileNum1 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityTopRow];
-                tileNum2 = this.gamePanel.tileManager.mapTileNum[entityRightCol][entityBottomRow];
-                if ( this.gamePanel.tileManager.tile[tileNum1].collision || this.gamePanel.tileManager.tile[tileNum2].collision ) {
-                    entity.collisionEnabled = true;
-                }
-            }
-
-            case "idle" -> entity.collisionEnabled = false;
-
-            default -> {
-            }
-
+        } catch (java.lang.ArrayIndexOutOfBoundsException e) { // out of bounds
+            entity.collisionEnabled = true;
         }
     }
 }

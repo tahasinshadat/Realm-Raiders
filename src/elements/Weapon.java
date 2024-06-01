@@ -166,8 +166,8 @@ public class Weapon extends GameObject {
     }
 
     public void drawProjectiles(Graphics2D g2) {
-        for (Projectile projectile : projectiles) {
-            projectile.draw(g2);
+        for (int i = 0; i < projectiles.size(); i++) {
+            projectiles.get(i).draw(g2);
         }
     }
 
@@ -248,7 +248,7 @@ public class Weapon extends GameObject {
     }
 
     public void updateValuesOnZoom() {
-        this.width = this.image.getWidth() / 25 + this.gamePanel.tileSize - (48 + 48/2);
-        this.height = this.image.getHeight() / 25 + this.gamePanel.tileSize - (48 + 48/2);
+        this.height = this.gamePanel.tileSize/2;
+        this.width = this.height * (this.image.getWidth() / this.image.getHeight());
     }
 }
