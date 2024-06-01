@@ -5,6 +5,11 @@ import elements.Weapon;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 import main.GamePanel;
 
 public class Projectile extends Entity {
@@ -17,6 +22,7 @@ public class Projectile extends Entity {
     private int prevTileSize;
     private int width;
     private int height;
+    public BufferedImage image;
 
     private Weapon originalWeapon;
     private Entity owner;
@@ -41,6 +47,8 @@ public class Projectile extends Entity {
         this.height = this.gamePanel.tileSize/10;
 
         this.hitbox = new Rectangle();
+
+        this.setImage();
         updateValuesOnZoom(); // set hitbox values
 
         setDirection();
@@ -86,18 +94,31 @@ public class Projectile extends Entity {
         }
     }
 
+    public void setImage() {
+        try {
+            this.image = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/bullet.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void draw(Graphics2D g2) {
         // screen pos = difference in pos in world + player origin offset + player center offset
         this.screenX = (this.worldX - this.gamePanel.player.worldX) + this.gamePanel.player.screenX + this.ownerCenterOffset;
         this.screenY = (this.worldY - this.gamePanel.player.worldY) + this.gamePanel.player.screenY + this.ownerCenterOffset;
 
-        Rectangle rect2 = new Rectangle(-this.width/2, -this.height/2, this.width, this.height); 
+        // Rectangle rect2 = new Rectangle(-this.width/2, -this.height/2, this.width, this.height); 
         g2.setColor(Color.YELLOW);
         
         g2.translate(screenX, screenY); 
         g2.rotate(-Math.toRadians(this.angle));
-        g2.draw(rect2);
-        g2.fill(rect2);
+        // g2.draw(rect2);
+        // g2.fill(rect2);
+
+        g2.drawImage(this.image, 
+                    -this.width/2, -this.height/2, 
+                     this.width, this.height, 
+                     null);
         
         // HITBOX
         // g2.setColor(Color.RED);
@@ -129,8 +150,9 @@ public class Projectile extends Entity {
         this.hitbox.x = this.ownerCenterOffset; 
         this.hitbox.y = this.ownerCenterOffset;
 
-        this.width = this.gamePanel.tileSize/10;
-        this.height = this.gamePanel.tileSize/10;
+        // 48 is original tileSize
+        this.width = this.image.getWidth() / 25 + this.gamePanel.tileSize - 48;
+        this.height = this.image.getHeight() / 25 + this.gamePanel.tileSize - 48;
 
         this.hitbox.width = this.width;
         this.hitbox.height = this.height;

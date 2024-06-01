@@ -3,7 +3,11 @@ package elements;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import components.Entity;
 import components.KeyHandler;
@@ -21,6 +25,7 @@ public class Weapon extends GameObject {
     public double screenX;
     public double screenY;
     private int prevTileSize;
+    public BufferedImage image;
 
     public double angle;
     public int width;
@@ -58,6 +63,7 @@ public class Weapon extends GameObject {
         this.weaponProjectileSpeed = weaponProjectileSpeed;
         this.weaponDamage = weaponDamage;
         this.setMetaData();
+        this.setImage();
     }
 
     public double getAngleToMouse() {
@@ -105,15 +111,22 @@ public class Weapon extends GameObject {
     //     this.prevTileSize = this.gamePanel.tileSize;
     // }
 
+    public void setImage() {
+        try {
+            this.image = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/" + this.weaponClass + ".png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void draw(Graphics2D g2) {
         int tileSize = this.gamePanel.tileSize;
+
+        this.updateValuesOnZoom();
 
         // x and y of player on screen
         this.screenX = this.gamePanel.player.screenX + tileSize/2;
         this.screenY = this.gamePanel.player.screenY + tileSize/2;
-
-        this.width = tileSize*2;
-        this.height = tileSize/2;
         
         this.angle = getAngleToMouse();
         double deltaX = mouse.getMouseX() - this.screenX;
@@ -127,14 +140,22 @@ public class Weapon extends GameObject {
         }
 
         // rectangle with center that is colinear to y=0 and left side is at x=0 so that it orbits player when rotating
-        Rectangle rect2 = new Rectangle(tileSize/2, -this.height/2, this.width, this.height); 
-        g2.translate(screenX, screenY); // translates origin and therefore weapon (rect atm) origin to center of player
+        // Rectangle rect2 = new Rectangle(tileSize/2, -this.height/2, this.width, this.height); 
+        // g2.draw(rect2);
+        // g2.fill(rect2);
+        
+        g2.translate(screenX, screenY); // translates origin and therefore weapon origin to center of player
+        // g2.drawString(this.weaponRarity + " " + this.weaponClass, tileSize, tileSize);
+        
         g2.rotate(-Math.toRadians(angle)); // rotated so y=0 aims at mouse
-        g2.draw(rect2);
-        g2.fill(rect2);
-        g2.drawString(this.weaponRarity + " " + this.weaponClass, tileSize, tileSize);;
+        g2.drawImage(this.image, 
+                     tileSize/2, ((this.flipped) ? -1 : 1) * (int) -this.height/2, 
+                     this.width, ((this.flipped) ? -1 : 1) * this.height, 
+                     null);
+        
         g2.rotate(Math.toRadians(angle)); // rotate back
         g2.translate(-screenX, -screenY); // translate back
+
 
         // drawProjectiles(g2);
     }
@@ -174,6 +195,8 @@ public class Weapon extends GameObject {
         int[] dmgRange = this.getClassDamageRange();
         this.weaponDamage = this.randomNum(dmgRange[0], dmgRange[1]);
         this.setWeaponRarity(dmgRange);
+
+        this.setImage();
     }
     
     private void setWeaponClass() {
@@ -222,5 +245,10 @@ public class Weapon extends GameObject {
 
     private int randomNum(int min, int max) { // Inclusive
         return (int) (Math.random() * ((max - min) + 1)) + min;
+    }
+
+    public void updateValuesOnZoom() {
+        this.width = this.image.getWidth() / 25 + this.gamePanel.tileSize - (48 + 48/2);
+        this.height = this.image.getHeight() / 25 + this.gamePanel.tileSize - (48 + 48/2);
     }
 }
