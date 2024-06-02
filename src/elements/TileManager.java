@@ -83,6 +83,14 @@ public class TileManager {
                 }
             }
 
+            // Unlocked Gate Tile
+            this.tile[7] = new Tile();
+            this.tile[7].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/voidTile.png"));
+
+            // Locked Gate Tile
+            this.tile[8] = new Tile();
+            this.tile[8].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/voidTile.png"));
+
             // Void / Empty Space Tiles
             this.tile[9] = new Tile();
             this.tile[9].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/voidTile.png"));
