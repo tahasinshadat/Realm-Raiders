@@ -53,6 +53,7 @@ public class TileManager {
                     this.tile[5] = new Tile();
                     this.tile[5].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType1/tile.png"));
                     this.tile[5].collision = true;
+                    
                 }
                 case 2 -> {
                     // Floors
@@ -89,7 +90,8 @@ public class TileManager {
 
             // Locked Gate Tile
             this.tile[8] = new Tile();
-            this.tile[8].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/voidTile.png"));
+            this.tile[8].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType1/tile.png"));
+            this.tile[8].collision = true;
 
             // Void / Empty Space Tiles
             this.tile[9] = new Tile();

@@ -2,14 +2,11 @@ package components;
 
 import elements.Enemy;
 import elements.Weapon;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
-
 import main.GamePanel;
 
 public class Projectile extends Entity {
@@ -49,9 +46,9 @@ public class Projectile extends Entity {
         this.hitbox = new Rectangle();
 
         this.setImage();
-        updateValuesOnZoom(); // set hitbox values
+        this.updateValuesOnZoom(); // set hitbox values
 
-        setDirection();
+        this.setDirection();
     }
 
     public void setDirection() {

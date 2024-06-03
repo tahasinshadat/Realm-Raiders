@@ -7,6 +7,7 @@ import main.GamePanel;
 public class KeyHandler implements KeyListener {
     
     public boolean upPressed, downPressed, leftPressed, rightPressed;
+    public boolean interactionButtonPressed;
     GamePanel gamePanel;
 
     // Limit amount player can zoom in and out to a certain range
@@ -30,17 +31,18 @@ public class KeyHandler implements KeyListener {
         if (code == KeyEvent.VK_S) this.downPressed = true;
         if (code == KeyEvent.VK_A) this.leftPressed = true;
         if (code == KeyEvent.VK_D) this.rightPressed = true;
+        if (code == KeyEvent.VK_E) this.interactionButtonPressed = true;
         if (code == KeyEvent.VK_UP) {
             if (this.zoomInAmt <= maxZoomAmt) {
-                // this.zoomInAmt++;
-                // this.zoomOutAmt--;
+                this.zoomInAmt++;
+                this.zoomOutAmt--;
                 this.gamePanel.zoom(1);
             }
         }
         if (code == KeyEvent.VK_DOWN) {
             if (this.zoomOutAmt <= maxZoomAmt) {
-                // this.zoomOutAmt++;
-                // this.zoomInAmt--;
+                this.zoomOutAmt++;
+                this.zoomInAmt--;
                 this.gamePanel.zoom(-1);
             }
         }
@@ -62,6 +64,7 @@ public class KeyHandler implements KeyListener {
         if (code == KeyEvent.VK_S) this.downPressed = false;
         if (code == KeyEvent.VK_A) this.leftPressed = false;
         if (code == KeyEvent.VK_D) this.rightPressed = false;
+        if (code == KeyEvent.VK_E) this.interactionButtonPressed = false;
 
     }
 

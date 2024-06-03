@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import main.GamePanel;
+import objects.GameObject;
 
 public class Player extends Entity {
     
@@ -61,11 +62,18 @@ public class Player extends Entity {
         // this.weaponInv.get(1).setData(100, 10, 10);
         this.weaponInv.get(1).initializeAsRandomWeapon();
 
+        // add weapons to gamePanel objects
+        // this.gamePanel.obj.addAll(weaponInv);
+
+        for (Weapon wep : weaponInv) {
+            wep.onGround = false;
+        }
+
         this.hitbox = new Rectangle();
-        this.hitbox.x = 8;
-        this.hitbox.y = 16;
-        this.hitbox.width = 32;
-        this.hitbox.height = 32;
+        this.hitbox.x = this.gamePanel.tileSize / 6;
+        this.hitbox.y = this.gamePanel.tileSize / 3;
+        this.hitbox.width = this.gamePanel.tileSize / (3 / 2);
+        this.hitbox.height = this.gamePanel.tileSize / (3 / 2);
 
         this.setDefaults();
         this.getPlayerImage();
@@ -157,6 +165,15 @@ public class Player extends Entity {
             this.direction = "idle";
         }
 
+        boolean interacted = false; // prevent pickup on hold
+        if (!interacted && keyHandler.interactionButtonPressed) {
+            // System.out.println("Attempting pickup");
+            this.pickUpObject();
+            interacted = true;
+        } else if (keyHandler.interactionButtonPressed == false) {
+            interacted = false; 
+        }
+
         // Check For tile collisions
         this.collisionEnabled = false;
         this.gamePanel.collisionHandler.checkTile(this);
@@ -234,13 +251,44 @@ public class Player extends Entity {
         if (weaponInv.size() + 1 <= maxWeapons) {
             weaponInv.add(weapon);
         } else {
+            
             weaponInv.add(weapon);
+            Weapon dropped = this.equippedWeapon;
+
             weaponInv.remove(this.equippedWeapon);
             this.equippedWeapon = weapon;
 
-            return this.equippedWeapon;
+            return dropped;
         }
         return null;
+    }
+
+    public void pickUpObject() {
+        for (GameObject object : this.gamePanel.obj) {
+            // System.out.println("Can pick up: " + object.canPickup(this.worldX, this.worldY));
+            // System.out.println("Player: " + this.worldX + ", " + this.worldY);
+            // System.out.println("Object: " + object.worldX + ", " + object.worldY);
+            if (object.canPickup(this.worldX, this.worldY)) {
+                object.pickup();
+                this.gamePanel.obj.remove(object);
+                // System.out.println("Picked up!");
+
+                // WEAPON
+                if (object instanceof Weapon weapon) {
+                    // System.out.println("Attempting to add weapon!");
+                    Weapon dropped = this.addWeapon(weapon);
+                    weapon.onGround = false;
+
+                    if (dropped != null) {
+                        // System.out.println("Dropping weapon! " + dropped);
+                        dropped.onGround = true;
+                        this.gamePanel.obj.add(dropped);
+                        dropped.drop((int) this.worldX, (int) this.worldY);
+                    }
+                }
+
+            }
+        }
     }
 
     public void takeDamage(int damage) {
@@ -276,7 +324,7 @@ public class Player extends Entity {
         BufferedImage image = null;
 
         switch (this.drawDirection) {
-            case "idle":
+            case "idle" -> {
                 if (spriteNum == 1) {
                     if (this.wasRight) image = this.idleR1;
                     else image = this.idleL1;
@@ -284,20 +332,24 @@ public class Player extends Entity {
                     if (this.wasRight) image = this.idleR2;
                     else image = this.idleL2;
                 }
-                break;
-            case "right":
+            }
+            case "right" -> {
                 if (spriteNum == 1) image = this.right1;
                 else image = this.right2;
-                break;
-            case "left":
+            }
+            case "left" -> {
                 if (spriteNum == 1) image = this.left1;
                 else image = this.left2;
-                break;
+            }
         }
         // System.out.println(this.worldX + " " + this.worldY);
         g2.drawImage(image, (int) this.screenX, (int) this.screenY, this.gamePanel.tileSize, this.gamePanel.tileSize, null);
         this.equippedWeapon.draw(g2);
         for (Weapon weapon : weaponInv) weapon.drawProjectiles(g2); // draw projectiles of all weapons
+    }
+
+    public void updateValuesOnZoom() {
+        
     }
 
 }

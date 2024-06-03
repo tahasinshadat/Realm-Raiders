@@ -25,6 +25,10 @@ public class MapCreator {
     private int endRoomX;
     private int endRoomY;
 
+    public ArrayList<Room> rooms = new ArrayList<>();
+
+    
+
     public MapCreator(GamePanel gamePanel, boolean wallsEnabled, int presetNum) {
         this.gamePanel = gamePanel;
         this.wallsEnabled = wallsEnabled;
@@ -51,6 +55,10 @@ public class MapCreator {
             this.floorVarieties = 1;
             this.wallVarieties = 1;
         }
+    }
+
+    private int getOpenedGate() {
+        return 7;
     }
 
     private int getWallType() { // Return the walls in order, so if floorVarieties = 2, and wallVarieties = 2, then walls should be 2, 3, 2, 3, 2, 3, etc
@@ -108,6 +116,8 @@ public class MapCreator {
 
         // this.placeRoom(endRoomX, endRoomY, createRoom(this.gamePanel.startingRoomSize)); // Place End Room somewhere on the edge of the map
 
+        this.rooms = new ArrayList<>();
+
         ArrayList<int[]> path =  new ArrayList<>();
         int currentPathX = this.endRoomX;
         int currentPathY = this.endRoomY;
@@ -153,6 +163,8 @@ public class MapCreator {
         // this.printPath(path);
         this.constructMap(path); // consturct path on matrix
 
+        // System.out.println(rooms);
+
     }
 
 
@@ -195,10 +207,22 @@ public class MapCreator {
                 if (this.endRoomX == x && this.endRoomY == y) typeOfRoom = this.gamePanel.endRoomSize;      
 
                 switch (corridorDirections.size()) {
-                    case 1 -> this.placeRoom(x, y, this.room1(typeOfRoom, corridorDirections.get(0)));
-                    case 2 -> this.placeRoom(x, y, this.room2(typeOfRoom, corridorDirections.get(0), corridorDirections.get(1)));
-                    case 3 -> this.placeRoom(x, y, this.room3(typeOfRoom, corridorDirections.get(0), corridorDirections.get(1), corridorDirections.get(2)));
-                    case 4 -> this.placeRoom(x, y, this.room4(typeOfRoom));
+                    case 1 -> {
+                        this.placeRoom(x, y, this.room1(typeOfRoom, corridorDirections.get(0)));
+                        rooms.add(new Room(this.gamePanel, typeOfRoom, x, y));
+                    }
+                    case 2 -> {
+                        this.placeRoom(x, y, this.room2(typeOfRoom, corridorDirections.get(0), corridorDirections.get(1)));
+                        rooms.add(new Room(this.gamePanel, typeOfRoom, x, y));
+                    }
+                    case 3 -> {
+                        this.placeRoom(x, y, this.room3(typeOfRoom, corridorDirections.get(0), corridorDirections.get(1), corridorDirections.get(2)));
+                        rooms.add(new Room(this.gamePanel, typeOfRoom, x, y));
+                    }
+                    case 4 -> {
+                        this.placeRoom(x, y, this.room4(typeOfRoom));
+                        rooms.add(new Room(this.gamePanel, typeOfRoom, x, y));
+                    }
                     default -> {
                     }
                 }
@@ -302,6 +326,8 @@ public class MapCreator {
         return room;
     }
 
+
+
     // Creator Methods (Creates Rooms with hallways in different orientations and orders, creating a full section)
     private int[][] startEndRoomUp(int size) {
         int[][] room = new int[this.gamePanel.sectionSize][this.gamePanel.sectionSize];
@@ -389,6 +415,7 @@ public class MapCreator {
                 worldMap[sectionsTopLeftX + i][sectionsTopLeftY + j] = room[i][j];
             }
         }
+        
     }
 
 
@@ -413,68 +440,77 @@ public class MapCreator {
 
     private void addCorridor(int col, int row, String direction, int[][] arr, int length) {
         switch (direction) {
-            case "left":
+            case "left" -> {
                 for (int j = 0; j < length; j++) {
                     for (int i = 0; i < 6; i++) {
-
                         if (i == 0 || i == 6 - 1) {
                             arr[i + col][row - j] = this.getWallType(); // Set border walls
                         } else {
                             arr[i + col][row - j] = this.getFloorType(); // Set inner floors
                         }
                     }
+                    if (j == 0) {
+                        for (int k = 1; k < 5; k++) arr[col + k][row] = this.getOpenedGate(); // Set gate at the entrance
+                    }
                     this.wallCount++;
                 }
-                break;
-            case "right":
-                for (int i = 0; i < 6; i++) {
-                    for (int j = 0; j < length; j++) {
-
+            }
+            case "right" -> {
+                for (int j = 0; j < length; j++) {
+                    for (int i = 0; i < 6; i++) {
                         if (i == 0 || i == 6 - 1) {
                             arr[i + col][j + row] = this.getWallType(); // Set border walls
                         } else {
                             arr[i + col][j + row] = this.getFloorType(); // Set inner floors
                         }
                     }
+                    if (j == 0) {
+                        for (int k = 1; k < 5; k++) arr[col + k][row] = this.getOpenedGate(); // Set gate at the entrance
+                    }
                     this.wallCount++;
                 }
-                break;
-            case "down":
+            }
+            case "down" -> {
                 for (int i = 0; i < length; i++) {
                     for (int j = 0; j < 6; j++) {
-
                         if (j == 0 || j == 6 - 1) {
                             arr[i + col][j + row] = this.getWallType(); // Set border walls
                         } else {
                             arr[i + col][j + row] = this.getFloorType(); // Set inner floors
                         }
                     }
+                    if (i == 0) {
+                        for (int k = 1; k < 5; k++) arr[col][row + k] = this.getOpenedGate(); // Set gate at the entrance
+                    }
                     this.wallCount++;
                 }
-                break;
-            case "up":
+            }
+            case "up" -> {
                 for (int i = 0; i < length; i++) {
                     for (int j = 0; j < 6; j++) {
-
                         if (j == 0 || j == 6 - 1) {
                             arr[col - i][j + row] = this.getWallType(); // Set border walls
                         } else {
                             arr[col - i][j + row] = this.getFloorType(); // Set inner floors
                         }
                     }
+                    if (i == 0) {
+                        for (int k = 1; k < 5; k++) arr[col][row + k] = this.getOpenedGate(); // Set gate at the entrance
+                    }
                     this.wallCount++;
                 }
-                break;
-            default: break;
+            }
+            default -> {
+            }
         }
     }
+
+
 
     private int randomNum(int min, int max) { // Inclusive
         return (int) (Math.random() * ((max - min) + 1)) + min;
     }
     
-
-
     // Helpers
     private void rotateLeft(int[][] matrix) {
         int n = matrix.length;

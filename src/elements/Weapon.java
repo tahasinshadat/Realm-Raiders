@@ -18,18 +18,15 @@ import objects.GameObject;
 
 public class Weapon extends GameObject {
     
-    GamePanel gamePanel;
+    // GamePanel gamePanel;
     KeyHandler keyHandler;
     MouseInteractions mouse;
     
-    public double screenX;
-    public double screenY;
-    private int prevTileSize;
-    public BufferedImage image;
-
+    // public double screenX;
+    // public double screenY;
     public double angle;
-    public int width;
-    public int height;
+    // public int width;
+    // public int height;
     private boolean flipped = false;
 
     // stats
@@ -40,7 +37,7 @@ public class Weapon extends GameObject {
     public String weaponRarity;
     public String weaponName;
 
-    private Entity owner;
+    public Entity owner;
     private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
     private int cooldown;
 
@@ -54,7 +51,6 @@ public class Weapon extends GameObject {
         // x and y of player on screen
         this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
         this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
-        this.prevTileSize = this.gamePanel.tileSize;
 
     }
 
@@ -119,45 +115,49 @@ public class Weapon extends GameObject {
         }
     }
 
+    @Override
     public void draw(Graphics2D g2) {
-        int tileSize = this.gamePanel.tileSize;
+        // System.out.println("On ground?: " + this.onGround);
 
-        this.updateValuesOnZoom();
-
-        // x and y of player on screen
-        this.screenX = this.gamePanel.player.screenX + tileSize/2;
-        this.screenY = this.gamePanel.player.screenY + tileSize/2;
-        
-        this.angle = getAngleToMouse();
-        double deltaX = mouse.getMouseX() - this.screenX;
-
-        if (deltaX > 0) { // Keep image upright
-            flipped = false;
+        if (!this.onGround) {
             g2.setColor(Color.WHITE);
+            int tileSize = this.gamePanel.tileSize;
+
+            this.updateValuesOnZoom();
+
+            // x and y of player on screen
+            this.screenX = this.gamePanel.player.screenX + tileSize/2;
+            this.screenY = this.gamePanel.player.screenY + tileSize/2;
+            
+            this.angle = getAngleToMouse();
+            double deltaX = mouse.getMouseX() - this.screenX;
+
+            flipped = deltaX <= 0; // Keep image upright
+            // g2.setColor(Color.WHITE);
+            // g2.setColor(Color.RED);
+
+            // rectangle with center that is colinear to y=0 and left side is at x=0 so that it orbits player when rotating
+            // Rectangle rect2 = new Rectangle(tileSize/2, -this.height/2, this.width, this.height); 
+            // g2.draw(rect2);
+            // g2.fill(rect2);
+            
+            g2.translate(screenX, screenY); // translates origin and therefore weapon origin to center of player
+            // g2.drawString(this.weaponRarity + " " + this.weaponClass, tileSize, tileSize);
+            
+            g2.rotate(-Math.toRadians(angle)); // rotated so y=0 aims at mouse
+            g2.drawImage(this.image, 
+                        tileSize/2, ((this.flipped) ? -1 : 1) * (int) -this.height/2, 
+                        this.width, ((this.flipped) ? -1 : 1) * this.height, 
+                        null);
+            
+            g2.rotate(Math.toRadians(angle)); // rotate back
+            g2.translate(-screenX, -screenY); // translate back
+
+
+            // drawProjectiles(g2);
         } else {
-            flipped = true;
-            g2.setColor(Color.RED);
+            super.draw(g2);
         }
-
-        // rectangle with center that is colinear to y=0 and left side is at x=0 so that it orbits player when rotating
-        // Rectangle rect2 = new Rectangle(tileSize/2, -this.height/2, this.width, this.height); 
-        // g2.draw(rect2);
-        // g2.fill(rect2);
-        
-        g2.translate(screenX, screenY); // translates origin and therefore weapon origin to center of player
-        // g2.drawString(this.weaponRarity + " " + this.weaponClass, tileSize, tileSize);
-        
-        g2.rotate(-Math.toRadians(angle)); // rotated so y=0 aims at mouse
-        g2.drawImage(this.image, 
-                     tileSize/2, ((this.flipped) ? -1 : 1) * (int) -this.height/2, 
-                     this.width, ((this.flipped) ? -1 : 1) * this.height, 
-                     null);
-        
-        g2.rotate(Math.toRadians(angle)); // rotate back
-        g2.translate(-screenX, -screenY); // translate back
-
-
-        // drawProjectiles(g2);
     }
 
     public void setAsMeleeWeapon() {

@@ -5,9 +5,11 @@ import components.Entity;
 import components.KeyHandler;
 import components.MapCreator;
 import components.MouseInteractions;
+import components.Room;
 import elements.Enemy;
 import elements.Player;
 import elements.TileManager;
+import elements.Weapon;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -36,11 +38,11 @@ public class GamePanel extends JPanel implements Runnable {
     public final int endRoomSize = 34;
     public final int corridorLength = 22;
     public final int corridorHeight = 6;
-    public int currentPreset = 1;
+    public int currentPreset = 3;
 
     // !!! determines world size !!!
     public int sectionSize = 50; 
-    public int sections = 7;
+    public int sections = 5;
     public int worldSize = this.sectionSize * this.sections;
 
     public final int maxWorldCol = this.worldSize;
@@ -60,9 +62,9 @@ public class GamePanel extends JPanel implements Runnable {
     public AssetManager assetManager = new AssetManager(this);
     
     // Entities
-    public Player player = new Player(this, this.keyHandler, this.mouse);
     public ArrayList<GameObject> obj = new ArrayList<>();
     public ArrayList<GameObject> objToRemove = new ArrayList<>();
+    public Player player = new Player(this, this.keyHandler, this.mouse);
     public ArrayList<Entity> enemies = new ArrayList<>();
     public ArrayList<Entity> enemiesToRemove = new ArrayList<>();
 
@@ -79,6 +81,13 @@ public class GamePanel extends JPanel implements Runnable {
     public int levelEnhancer = 3;
     public int score = 0;
     public int currentLevel = 0;
+    public double gameDifficulty = 1.0;
+    public final int[] waveRange = {2, 4};
+    public final int[] enemyAmtRange = {3, 6};
+    public final int[] spawnTimeRange = {2, 5};
+
+    // add test weapon for testing
+    public Weapon testWeapon = new Weapon(this, this.keyHandler, this.mouse, this.player);
 
     // Styling
     public Color backgroundColor = new Color(0, 0, 128/2);
@@ -97,7 +106,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.tileManager.mapTileNum = mapCreator.getWorldMap();
 
         // Add some enemies to the map for testing
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
+        // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
         // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 2, "BOSS", true));
         // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Orc", false));
         // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 2, "Archer", false));
@@ -108,12 +117,12 @@ public class GamePanel extends JPanel implements Runnable {
         // this.endGameThread(); // DO NOT UNCOMMENT
         this.resetProperties();
         this.cleanup();
-        this.setupGame();
         this.generateNewLevel();
+        this.setupGame();
         this.gameState = GamePanel.PLAYING_STATE;
         // this.startGameThread(); // DO NOT UNCOMMENT
         this.requestFocus();
-        enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
+        // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
     }
 
     public void cleanup() {
@@ -122,8 +131,8 @@ public class GamePanel extends JPanel implements Runnable {
         this.assetManager.reset();
         this.gameUI.removeButtons();
         
-        // Add initial enemies or any other initial setup
-        enemies.add(new Enemy(this, (int) player.worldX, (int) player.worldY - 100, 1, "Goblin", false));
+        // // Add initial enemies or any other initial setup
+        // enemies.add(new Enemy(this, (int) player.worldX, (int) player.worldY - 100, 1, "Goblin", false));
     }
     
     public void resetProperties() {
@@ -133,12 +142,22 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void setupGame() {
+        // add test weapon for testing
+        this.testWeapon.initializeAsRandomWeapon();
+        this.testWeapon.worldX = (int) this.player.worldX;
+        this.testWeapon.worldY = (int) this.player.worldY;
+        this.testWeapon.owner = this.player;
+        this.obj.add(testWeapon);
+        // System.out.println("Added test weapon!");
+        // System.out.println(this.obj);
+
         this.assetManager.setObjects();
         this.assetManager.setEnemies();
     }
 
     public void generateNewLevel() { // Passed Previous Level So Load New One
         this.currentLevel++;
+        this.gameDifficulty += 0.1;
 
         if (this.currentLevel % this.levelEnhancer == 0) {
             this.sections += 2;
@@ -203,6 +222,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     }
 
+    // public Room test = new Room(this, 22, 2, 1);
+
     public void update() {
         if (this.gameState == GamePanel.PLAYING_STATE) {
             this.player.update();
@@ -213,6 +234,12 @@ public class GamePanel extends JPanel implements Runnable {
                 }
             }
             enemies.removeAll(enemiesToRemove);
+
+            for (Room room : this.mapCreator.rooms) {
+                room.update();
+            }
+
+            // test.update();
         }
     }
 
@@ -230,6 +257,11 @@ public class GamePanel extends JPanel implements Runnable {
             gameUI.draw(g2); // Draw GUI
         } else {
             this.tileManager.draw(g2); // Draw Tiles
+
+            for (GameObject object : obj) { // draw game objects
+                object.draw(g2);
+            }
+
             this.player.draw(g2); // Draw the Player
 
             for (Entity enemy : enemies) { // Draw Enemies

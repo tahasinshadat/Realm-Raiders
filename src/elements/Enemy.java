@@ -23,7 +23,6 @@ public class Enemy extends Entity {
     public int damage;
     public int speed, attackSpeed;
     public int size;
-    public boolean isBoss;
     public int trueSpeed;
     public int frameCounter = 0;
     public boolean chasing = true;
@@ -34,13 +33,81 @@ public class Enemy extends Entity {
     public int barHeight = this.size / 10;
     public boolean isDead = false;
 
-    public Enemy(GamePanel gamePanel, int startX, int startY, int enemyType, String enemyName, boolean isBoss) {
+    // Enemy Info
+    public static int enemyTypes = 3;
+    public static String[][] enemyNames = {
+        { // Final Boss Names
+            "Doombringer",
+            "Shadowfiend",
+            "Chaos Lord",
+            "Nightmare King",
+            "Deathbringer",
+            "Hellfire Demon",
+            "Void Reaper",
+            "Abyssal Overlord",
+            "Eternal Warden",
+            "Apocalypse"
+        },
+        { // Melee Enemies
+            "Goblin",
+            "Orc",
+            "Troll",
+            "Bandit",
+            "Barbarian",
+            "Warrior",
+            "Knight",
+            "Berserker",
+            "Swordsman",
+            "Brute"
+        },
+        { // Ranged Enemies
+            "Archer",
+            "Crossbowman",
+            "Hunter",
+            "Marksman",
+            "Sniper",
+            "Bowman",
+            "Ranger",
+            "Sharpshooter",
+            "Slinger",
+            "Javelineer"
+        },
+        { // Stationary Enemies
+            "Watchtower",
+            "Turret",
+            "Catapult",
+            "Ballista",
+            "Siege Tower",
+            "Guard Post",
+            "Cannon",
+            "Arrow Trap",
+            "Magic Tower",
+            "Artillery"
+        }
+    };
+
+    public Enemy(GamePanel gamePanel, int startX, int startY, int enemyType) {
+        this.gamePanel = gamePanel;
+        this.worldX = startX;
+        this.worldY = startY;
+        this.type = enemyType;
+        this.name = enemyNames[this.type][this.randomNum(0, enemyNames[this.type].length-1)];
+        this.setDefaults();
+        this.prevTileSize = this.gamePanel.tileSize;
+
+        this.width = this.gamePanel.tileSize;
+        this.height = this.gamePanel.tileSize;
+
+        this.hitbox = new Rectangle();
+        this.updateValuesOnZoom();
+    }
+
+    public Enemy(GamePanel gamePanel, int startX, int startY, int enemyType, String enemyName) {
         this.gamePanel = gamePanel;
         this.worldX = startX;
         this.worldY = startY;
         this.type = enemyType;
         this.name = enemyName;
-        this.isBoss = isBoss;
         this.setDefaults();
         this.prevTileSize = this.gamePanel.tileSize;
 
@@ -52,34 +119,46 @@ public class Enemy extends Entity {
     }
 
     public void setDefaults() {
-        if (this.isBoss) {
-            this.size = this.gamePanel.tileSize*2;
-            this.health = 300;
-            this.maxHealth = 300;
-            this.damage = 10;
-            this.defense = 30;
-            this.speed = 8;
-            this.trueSpeed = this.speed;
-            this.attackSpeed = 5;
-        } else {
-            this.size = this.gamePanel.tileSize;
-            if (this.type == 1) { // melee unit
+
+        switch (this.type) {
+            case 0 -> { // boss
+                this.size = this.gamePanel.tileSize*2;
+                this.health = 300;
+                this.maxHealth = 300;
+                this.damage = 10;
+                this.defense = 30;
+                this.speed = 8;
+                this.trueSpeed = this.speed;
+                this.attackSpeed = 5;
+            }
+            case 1 -> { // melee unit
                 this.health = 100;
                 this.maxHealth = 100;
                 this.damage = 7;
                 this.defense = 20;
-                this.speed = 7;
+                this.speed = 6;
                 this.trueSpeed = this.speed;
                 this.attackSpeed = 10;
-            } else if (this.type == 2) { // ranged unit
+            }
+            case 2 -> { // ranged unit
                 this.health = 50;
                 this.maxHealth = 50;
                 this.damage = 4;
                 this.defense = 10;
-                this.speed = 5;
+                this.speed = 4;
                 this.trueSpeed = this.speed;
                 this.attackSpeed = 8;
             }
+            case 3 -> { // no movement AOE unit
+                this.health = 50;
+                this.maxHealth = 50;
+                this.damage = 4;
+                this.defense = 10;
+                this.speed = 0;
+                this.trueSpeed = this.speed;
+                this.attackSpeed = 8;
+            }
+            default -> {}
         }
         this.barWidth = this.size;
         this.barHeight = this.size / 10;
@@ -105,7 +184,7 @@ public class Enemy extends Entity {
         }
     
         // If there is no collision, move
-        if (!collisionEnabled) {
+        if (!this.collisionEnabled) {
             this.chasing = true; // true until overriden after 5 secs
 
             if (this.frameCounter > this.gamePanel.FPS*5) {
@@ -184,7 +263,7 @@ public class Enemy extends Entity {
         this.screenY = (this.worldY - this.gamePanel.player.worldY) + this.gamePanel.player.screenY + playerCenterOffset;
 
         // Draw the enemy
-        g2.setColor(isBoss ? Color.GREEN : Color.BLUE);
+        g2.setColor(this.type == 0 ? Color.GREEN : Color.BLUE);
         g2.fillRect((int) screenX - this.size / 2, (int) screenY - this.size / 2, this.size, this.size);
 
         // Draw the enemy name
@@ -215,7 +294,7 @@ public class Enemy extends Entity {
         this.speed = newWorldWidth / (this.gamePanel.worldWidth / this.trueSpeed);
 
         // Update hitbox
-        this.size = (this.isBoss) ? this.gamePanel.tileSize * 2 : this.gamePanel.tileSize; 
+        this.size = (this.type == 0) ? this.gamePanel.tileSize * 2 : this.gamePanel.tileSize; 
 
         this.width = this.size;
         this.height = this.size;
@@ -271,6 +350,10 @@ public class Enemy extends Entity {
 
     public double getRandomAngle() {
         return (Math.random() * 360);
+    }
+
+    private int randomNum(int min, int max) { // Inclusive
+        return (int) (Math.random() * ((max - min) + 1)) + min;
     }
 
 }
