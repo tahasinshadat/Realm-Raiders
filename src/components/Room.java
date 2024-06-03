@@ -10,6 +10,7 @@ public class Room {
     public boolean isCleared;
     public boolean isLootRoom = false;
     public boolean isBossRoom = false;
+    public boolean isStartRoom = false;
     public int size;
     public int sectionX, sectionY;
     public int sectionsTopLeftX, sectionsTopLeftY;
@@ -39,6 +40,7 @@ public class Room {
         this.size = size;
         if (this.size == this.gamePanel.lootRoomSize) this.isLootRoom = true;
         else if (this.size == this.gamePanel.endRoomSize) this.isBossRoom = true;
+        else if (this.size == this.gamePanel.startingRoomSize) this.isStartRoom = true;
 
         this.isCleared = false;
 
@@ -56,12 +58,16 @@ public class Room {
 
     public void update() {
         // System.out.println(this.isPlayerInRoom( (int) (this.gamePanel.player.worldX / this.gamePanel.tileSize), (int) (this.gamePanel.player.worldY / this.gamePanel.tileSize) ));
-        if (!this.isBossRoom && !this.roomInitialized && !this.isCleared && !this.isLootRoom && this.isPlayerInRoom( (int) (this.gamePanel.player.worldX / this.gamePanel.tileSize), (int) (this.gamePanel.player.worldY / this.gamePanel.tileSize) )) {
+        if (!this.isBossRoom && !this.roomInitialized && !this.isCleared && !this.isLootRoom && !this.isStartRoom &&
+            this.isPlayerInRoom((int) this.gamePanel.player.worldX, (int) this.gamePanel.player.worldY)) {
+            
             this.initiateRoom();
             this.roomInitialized = true;
         }
 
-        if (this.isBossRoom && !this.roomInitialized && !this.isCleared && this.isPlayerInRoom( (int) (this.gamePanel.player.worldX / this.gamePanel.tileSize), (int) (this.gamePanel.player.worldY / this.gamePanel.tileSize) )) {
+        if (this.isBossRoom && !this.roomInitialized && !this.isCleared && 
+            this.isPlayerInRoom( (int) this.gamePanel.player.worldX, (int) this.gamePanel.player.worldY)) {
+
             this.initiateBossRoom();
             this.roomInitialized = true;
         }
@@ -165,8 +171,11 @@ public class Room {
     }
 
     public boolean isPlayerInRoom(int playerWorldX, int playerWorldY) {
-        return playerWorldX > this.roomLeft + 1 && playerWorldX < this.roomRight - 1 &&
-               playerWorldY > this.roomTop + 1 && playerWorldY < this.roomBottom - 1;
+        return playerWorldX / this.gamePanel.tileSize > this.roomLeft + 1 && 
+               playerWorldX / this.gamePanel.tileSize < this.roomRight - 1 &&
+
+               playerWorldY / this.gamePanel.tileSize > this.roomTop + 1 && 
+               playerWorldY / this.gamePanel.tileSize < this.roomBottom - 1;
     }
 
     private int randomNum(int min, int max) { // Inclusive
