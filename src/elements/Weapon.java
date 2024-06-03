@@ -226,6 +226,11 @@ public class Weapon extends GameObject {
         this.setWeaponRarity(dmgRange);
     }
 
+    @Override
+    public String toString() {
+        return this.weaponRarity + " " + this.weaponClass;
+    }
+
     private int getRarityThreshold(int[] dmgRange, int rarity) {
         return (dmgRange[0] + rarity * ((dmgRange[1] - dmgRange[0])/5));
     }

@@ -64,7 +64,6 @@ public class Player extends Entity {
 
         // add weapons to gamePanel objects
         // this.gamePanel.obj.addAll(weaponInv);
-
         for (Weapon wep : weaponInv) {
             wep.onGround = false;
         }
@@ -118,7 +117,10 @@ public class Player extends Entity {
         }
     }
 
+    private boolean interacted = false; // prevent pickup on hold
+
     public void update() {
+        this.updateValuesOnZoom();
         if (keyHandler.upPressed && keyHandler.leftPressed) {
             this.direction = "up-left";
             this.drawDirection = "left";
@@ -165,7 +167,6 @@ public class Player extends Entity {
             this.direction = "idle";
         }
 
-        boolean interacted = false; // prevent pickup on hold
         if (!interacted && keyHandler.interactionButtonPressed) {
             // System.out.println("Attempting pickup");
             this.pickUpObject();
@@ -270,19 +271,15 @@ public class Player extends Entity {
             // System.out.println("Object: " + object.worldX + ", " + object.worldY);
             if (object.canPickup(this.worldX, this.worldY)) {
                 object.pickup();
-                this.gamePanel.obj.remove(object);
                 // System.out.println("Picked up!");
 
                 // WEAPON
                 if (object instanceof Weapon weapon) {
                     // System.out.println("Attempting to add weapon!");
                     Weapon dropped = this.addWeapon(weapon);
-                    weapon.onGround = false;
 
                     if (dropped != null) {
                         // System.out.println("Dropping weapon! " + dropped);
-                        dropped.onGround = true;
-                        this.gamePanel.obj.add(dropped);
                         dropped.drop((int) this.worldX, (int) this.worldY);
                     }
                 }
@@ -349,7 +346,10 @@ public class Player extends Entity {
     }
 
     public void updateValuesOnZoom() {
-        
+        this.hitbox.x = this.gamePanel.tileSize / 6;
+        this.hitbox.y = this.gamePanel.tileSize / 3;
+        this.hitbox.width = this.gamePanel.tileSize / (3 / 2);
+        this.hitbox.height = this.gamePanel.tileSize / (3 / 2);
     }
 
 }

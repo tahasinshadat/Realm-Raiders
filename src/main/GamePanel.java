@@ -87,7 +87,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int[] spawnTimeRange = {2, 5};
 
     // add test weapon for testing
-    public Weapon testWeapon = new Weapon(this, this.keyHandler, this.mouse, this.player);
+    public Weapon testWeapon;
 
     // Styling
     public Color backgroundColor = new Color(0, 0, 128/2);
@@ -143,6 +143,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupGame() {
         // add test weapon for testing
+        this.testWeapon = new Weapon(this, this.keyHandler, this.mouse, this.player);
         this.testWeapon.initializeAsRandomWeapon();
         this.testWeapon.worldX = (int) this.player.worldX;
         this.testWeapon.worldY = (int) this.player.worldY;
@@ -259,6 +260,7 @@ public class GamePanel extends JPanel implements Runnable {
             this.tileManager.draw(g2); // Draw Tiles
 
             for (GameObject object : obj) { // draw game objects
+                // System.out.println("Drawing " + object + " On ground? " + object.onGround);
                 object.draw(g2);
             }
 

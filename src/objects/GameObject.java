@@ -20,6 +20,7 @@ public class GameObject {
 
     public GameObject pickup() {
         this.onGround = false;
+        this.gamePanel.obj.remove(this);
         return this;
     }
 
@@ -27,6 +28,7 @@ public class GameObject {
         this.onGround = true;
         this.worldX = x;
         this.worldY = y;
+        this.gamePanel.obj.add(this);
         return this;
     }
 
