@@ -1,5 +1,10 @@
 package main;
 
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+import elements.Enemy;
 import elements.Player;
 
 public class AssetManager {
@@ -15,7 +20,11 @@ public class AssetManager {
     }
 
     public void setEnemies() {
-
+        try {
+            Enemy.bulletImage = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/enemy_bullet.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void reset() {

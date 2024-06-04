@@ -1,7 +1,14 @@
 package components;
 
 import elements.Enemy;
+import elements.Weapon;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
+
 import main.GamePanel;
 import objects.GameObject;
 
@@ -98,6 +105,12 @@ public class Room {
     }
 
     private void spawnNextWave() { // spawns enemies in waves
+        try {
+            BufferedImage bulletImage = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/enemy_bullet.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (this.currentWave < this.totalWaves) {
 
             for (int i = 0; i < this.enemiesPerWave; i++) {
@@ -106,7 +119,7 @@ public class Room {
                         this.gamePanel, 
                         this.randomNum(this.roomLeft + 1, this.roomRight - 1) * this.gamePanel.tileSize, 
                         this.randomNum(this.roomTop + 1, this.roomBottom - 1) * this.gamePanel.tileSize, 
-                        this.randomNum(1, Enemy.enemyTypes - 1)
+                        this.randomNum(1, Enemy.enemyTypes)
                     )     
                 );
             }

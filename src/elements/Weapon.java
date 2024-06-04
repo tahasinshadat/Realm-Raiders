@@ -89,6 +89,7 @@ public class Weapon extends GameObject {
     public void update() {
         // updateSpeed();
         ArrayList<Projectile> toRemove = new ArrayList<Projectile>();
+        this.angle = getAngleToMouse();
         
         for (Projectile projectile : projectiles) {
             projectile.update();
@@ -129,7 +130,6 @@ public class Weapon extends GameObject {
             this.screenX = this.gamePanel.player.screenX + tileSize/2;
             this.screenY = this.gamePanel.player.screenY + tileSize/2;
             
-            this.angle = getAngleToMouse();
             double deltaX = mouse.getMouseX() - this.screenX;
 
             flipped = deltaX <= 0; // Keep image upright
@@ -181,6 +181,28 @@ public class Weapon extends GameObject {
                     projectiles.add(new Projectile(gamePanel, angle + this.randomNum(-15, 15), this, this.owner));   
                 }
             }
+        }
+    }
+
+    public void shoot(BufferedImage image) {
+        if (this.cooldown > this.gamePanel.FPS / this.weaponAttackSpeed) {
+            projectiles.add(new Projectile(gamePanel, angle, this, this.owner, image));
+            this.cooldown = 0;
+
+            if (this.weaponClass == "shotgun") {
+                for (int i = 0; i < 5; i++) {
+                    projectiles.add(new Projectile(gamePanel, angle + this.randomNum(-15, 15), this, this.owner, image));   
+                }
+            }
+
+            if (this.owner instanceof Enemy enemy) {
+                if (enemy.type == 3) {
+                    for (int i = 15; i < 360; i += 15) {
+                        projectiles.add(new Projectile(gamePanel, angle + i, this, this.owner, image));
+                    }
+                }
+            }
+
         }
     }
 

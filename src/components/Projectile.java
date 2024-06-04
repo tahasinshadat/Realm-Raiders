@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.Buffer;
+
 import javax.imageio.ImageIO;
 import main.GamePanel;
 
@@ -51,6 +53,32 @@ public class Projectile extends Entity {
         this.setDirection();
     }
 
+    public Projectile(GamePanel gamePanel, double angle, Weapon originalWeapon, Entity owner, BufferedImage image) {
+        this.gamePanel = gamePanel;
+        this.angle = angle; // in degrees, 0 degrees is right, counter clockwise is positive
+        
+        this.originalWeapon = originalWeapon;
+        this.owner = owner;
+        this.prevTileSize = this.gamePanel.tileSize;
+        
+        this.speed = this.originalWeapon.weaponProjectileSpeed;
+
+        this.ownerCenterOffset = this.gamePanel.tileSize/2;
+        this.worldX = this.owner.worldX + ((this.originalWeapon.width + this.ownerCenterOffset) * Math.cos(Math.toRadians(angle)));
+        this.worldY = this.owner.worldY + ((this.originalWeapon.width + this.ownerCenterOffset) * -Math.sin(Math.toRadians(angle)));
+
+
+        this.width = this.gamePanel.tileSize/10;
+        this.height = this.gamePanel.tileSize/10;
+
+        this.hitbox = new Rectangle();
+
+        this.setImage(image);
+        this.updateValuesOnZoom(); // set hitbox values
+
+        this.setDirection();
+    }
+
     public void setDirection() {
         double threshold = 45.0/2;
         String[] directions = {"right", "up-right", "up", "up-left", "left", "down-left", "down", "down-right"};
@@ -83,9 +111,21 @@ public class Projectile extends Entity {
         }
 
         Rectangle worldHitbox = new Rectangle((int)this.worldX+this.hitbox.x, (int)this.worldY+this.hitbox.y, this.hitbox.width, this.hitbox.height);
-        for (int i = 0; i < this.gamePanel.enemies.size(); i++) {
-            if (((Enemy) this.gamePanel.enemies.get(i)).getHitBox().intersects(worldHitbox)) {
-                ((Enemy)this.gamePanel.enemies.get(i)).takeDamage( (int) this.originalWeapon.weaponDamage);
+        if (this.gamePanel.player == this.owner) { // player owner
+            for (int i = 0; i < this.gamePanel.enemies.size(); i++) {
+                if (((Enemy) this.gamePanel.enemies.get(i)).getHitBox().intersects(worldHitbox)) {
+                    ((Enemy)this.gamePanel.enemies.get(i)).takeDamage( (int) this.originalWeapon.weaponDamage);
+                    this.deactivate();
+                }
+            }
+        } else { // enemy owner
+            Rectangle playerHitbox = this.gamePanel.player.hitbox;
+            Rectangle playerWorldHitbox = new Rectangle((int)this.gamePanel.player.worldX+playerHitbox.x, 
+                                                        (int)this.gamePanel.player.worldY+playerHitbox.y, 
+                                                        playerHitbox.width, 
+                                                        playerHitbox.height);
+            if (worldHitbox.intersects(playerWorldHitbox)) {
+                this.gamePanel.player.takeDamage((int)this.originalWeapon.weaponDamage);
                 this.deactivate();
             }
         }
@@ -93,10 +133,17 @@ public class Projectile extends Entity {
 
     public void setImage() {
         try {
-            this.image = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/bullet.png"));
+            if (this.gamePanel.player == this.owner) 
+                this.image = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/bullet.png"));
+            else 
+                this.image = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/enemy_bullet.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setImage(BufferedImage image) {
+        this.image = image;
     }
 
     public void draw(Graphics2D g2) {
