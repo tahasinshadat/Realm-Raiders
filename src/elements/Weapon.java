@@ -1,6 +1,8 @@
 package elements;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -36,6 +38,7 @@ public class Weapon extends GameObject {
     public String weaponClass;
     public String weaponRarity;
     public String weaponName;
+    public Color textColor;
 
     public Entity owner;
     private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
@@ -153,7 +156,16 @@ public class Weapon extends GameObject {
             g2.rotate(Math.toRadians(angle)); // rotate back
             g2.translate(-screenX, -screenY); // translate back
 
-
+            // Display weapon name
+            g2.setColor(this.textColor);
+            g2.setFont(new Font("Arial", Font.BOLD, 20));
+            FontMetrics metrics = g2.getFontMetrics(g2.getFont());
+            
+            int strWidth = metrics.stringWidth(this.toString());
+            g2.drawString(this.toString(), this.gamePanel.screenWidth-(strWidth + 10), this.gamePanel.screenHeight-10);
+            
+            g2.setFont(new Font("Arial", Font.BOLD, 12)); // reset g2
+            g2.setColor(Color.WHITE);
             // drawProjectiles(g2);
         } else {
             super.draw(g2);
@@ -219,6 +231,7 @@ public class Weapon extends GameObject {
         this.setWeaponRarity(dmgRange);
 
         this.setImage();
+        this.setTextColor();
     }
     
     private void setWeaponClass() {
@@ -246,6 +259,30 @@ public class Weapon extends GameObject {
         // Determine Rarity based off of Damage & Class
         int[] dmgRange = this.getClassDamageRange();
         this.setWeaponRarity(dmgRange);
+
+        this.setTextColor();
+    }
+
+    private void setTextColor() {
+        switch (this.weaponRarity) {
+            case "common":
+                this.textColor = Color.WHITE;
+                break;
+            case "uncommon":
+                this.textColor = Color.GREEN;
+                break;
+            case "rare": 
+                this.textColor = Color.BLUE;
+                break;
+            case "epic":
+                this.textColor = Color.YELLOW;
+                break;
+            case "mythical":
+                this.textColor = Color.MAGENTA;
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

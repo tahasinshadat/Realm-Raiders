@@ -163,7 +163,7 @@ public class Enemy extends Entity {
                 this.trueSpeed = this.speed;
                 this.attackSpeed = 1;
                 this.weapon = new Weapon(gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse, this);
-                this.weapon.setData(3, 3, 10);
+                this.weapon.setData(3, 3, this.damage*5);
             }
             case 3 -> { // no movement AOE unit
                 this.health = 50;
@@ -174,7 +174,7 @@ public class Enemy extends Entity {
                 this.trueSpeed = this.speed;
                 this.attackSpeed = 0.33;
                 this.weapon = new Weapon(gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse, this);
-                this.weapon.setData(1, 3, 10);
+                this.weapon.setData(1, 3, this.damage*5);
             }
             default -> {}
         }
