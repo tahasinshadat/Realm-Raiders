@@ -28,7 +28,13 @@ public class UI {
 
     // Loading 
     private int loadScreenTimer = 0;
-    private boolean loadScreenActive = false;
+    private String[] gameFacts = {
+        "hello world",
+        "hello world",
+        "hello world",
+        "hello world",
+        "hello world",
+    };
 
     public UI(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
@@ -154,6 +160,7 @@ public class UI {
             case GamePanel.END_STATE -> this.drawEndScreen(g2);
             case GamePanel.PAUSE_STATE -> this.drawPausedScreen(g2);
             case GamePanel.PLAYING_STATE -> this.drawInGameUI(g2);
+            case GamePanel.LOAD_STATE -> this.drawLoadScreen(g2);
             default -> throw new IllegalStateException("Unexpected value: " + this.gamePanel.gameState); // Not possible
         }
     }
@@ -234,18 +241,38 @@ public class UI {
 
     // display the load screen with a buffer wheel for 3 seconds
     public void drawLoadScreen(Graphics2D g2) {
-        if (this.loadScreenActive) {
-            g2.setColor(this.gamePanel.backgroundColor);
-            g2.fillRect(0, 0, gamePanel.screenWidth, gamePanel.screenHeight);
+        g2.setColor(this.gamePanel.backgroundColor);
+        g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight);
 
-            // draw buffer wheel
+        // draw buffer wheel
+        int centerX = gamePanel.screenWidth / 2;
+        int centerY = gamePanel.screenHeight / 2;
+        int outerRadius = 60;
+        int innerRadius = 40;
+        int arcAngle = (loadScreenTimer * 360) / (gamePanel.FPS * 3);
 
-            if (this.loadScreenTimer >= this.gamePanel.FPS * 3) { // 3 seconds has passed
-                this.loadScreenActive = false;
-                this.loadScreenTimer = 0;
-            }
-            this.loadScreenTimer++;
+        g2.setColor(Color.WHITE);
+        g2.fillArc(centerX - outerRadius, centerY - outerRadius, outerRadius * 2, outerRadius * 2, 0, arcAngle);
+        g2.setColor(this.gamePanel.backgroundColor);
+        g2.fillArc(centerX - innerRadius, centerY - innerRadius, innerRadius * 2, innerRadius * 2, 0, arcAngle);
+
+        // Draw loading text
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Arial", Font.BOLD, 24));
+        g2.drawString("Loading...", centerX - 50, centerY + 80);
+
+        // Draw random game fact
+        g2.setFont(new Font("Arial", Font.PLAIN, 16));
+        String fact = this.gameFacts[this.randomNum(0, this.gameFacts.length - 1)];
+        g2.drawString(fact, this.getXForCenteredText(g2, fact), this.gamePanel.screenHeight - 40);
+
+        if (this.loadScreenTimer > this.gamePanel.FPS * 5) { // 5 seconds has passed
+            this.loadScreenTimer = 0;
+            this.gamePanel.generateNewLevel();
+            this.gamePanel.gameState = GamePanel.PLAYING_STATE;
         }
+        this.loadScreenTimer++;
+        
     }
 
     private int getXForCenteredText(Graphics2D g2, String text) {
@@ -254,4 +281,7 @@ public class UI {
         return x;
     }
 
+    private int randomNum(int min, int max) { // Inclusive
+        return (int) (Math.random() * ((max - min) + 1)) + min;
+    }
 }

@@ -9,7 +9,7 @@ import components.Room;
 import elements.Enemy;
 import elements.Player;
 import elements.TileManager;
-import elements.Weapon;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -17,6 +17,7 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 import objects.GameObject;
+import objects.Weapon;
 
 public class GamePanel extends JPanel implements Runnable {
     
@@ -38,11 +39,11 @@ public class GamePanel extends JPanel implements Runnable {
     public final int endRoomSize = 34;
     public final int corridorLength = 22;
     public final int corridorHeight = 6;
-    public int currentPreset = 3;
+    public int currentPreset = 1 + (int)(Math.random() * 3);
 
     // !!! determines world size !!!
     public int sectionSize = 50; 
-    public int sections = 5;
+    public int sections = 3;
     public int worldSize = this.sectionSize * this.sections;
 
     public final int maxWorldCol = this.worldSize;
@@ -74,6 +75,7 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int PAUSE_STATE = 2;
     public static final int END_STATE = 3;
     public static final int MENU_SCREEN_STATE = 4;
+    public static final int LOAD_STATE = 5;
     public int gameState = GamePanel.TITLE_STATE;
     public boolean paused = false;
 
@@ -136,6 +138,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
     
     public void resetProperties() {
+        this.player = new Player(this, keyHandler, mouse);
         this.currentLevel = 0;
         this.score = 0;
         this.levelEnhancer = 3;
@@ -147,7 +150,6 @@ public class GamePanel extends JPanel implements Runnable {
         this.testWeapon.initializeAsRandomWeapon();
         this.testWeapon.worldX = (int) this.player.worldX;
         this.testWeapon.worldY = (int) this.player.worldY;
-        this.testWeapon.owner = this.player;
         this.obj.add(testWeapon);
         // System.out.println("Added test weapon!");
         // System.out.println(this.obj);
@@ -162,7 +164,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         if (this.currentLevel % this.levelEnhancer == 0) {
             this.sections += 2;
-            this.currentPreset = (int) (1 + Math.random() * 3); // Choose Random Preset
+            this.currentPreset = (1 + (int) (Math.random() * 3)); // Choose Random Preset
             this.mapCreator.preset(this.currentPreset);
         }
 
@@ -252,6 +254,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (
             this.gameState == GamePanel.TITLE_STATE || 
             this.gameState == GamePanel.PAUSE_STATE || 
+            this.gameState == GamePanel.LOAD_STATE ||
             this.gameState == GamePanel.MENU_SCREEN_STATE || 
             this.gameState == GamePanel.END_STATE
         ) {

@@ -1,7 +1,7 @@
 package components;
 
 import elements.Enemy;
-import elements.Weapon;
+
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -10,6 +10,7 @@ import java.nio.Buffer;
 
 import javax.imageio.ImageIO;
 import main.GamePanel;
+import objects.Weapon;
 
 public class Projectile extends Entity {
     double angle;

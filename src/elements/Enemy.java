@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import main.GamePanel;
+import objects.Weapon;
 
 public class Enemy extends Entity {
     GamePanel gamePanel;
@@ -44,7 +45,6 @@ public class Enemy extends Entity {
     public boolean isDead = false;
 
     private Weapon weapon;
-    private ArrayList<Projectile> projectiles = new ArrayList<>();
     public static BufferedImage bulletImage; // to be set by AssetManager
 
     // Enemy Info
@@ -162,8 +162,6 @@ public class Enemy extends Entity {
                 this.speed = 4;
                 this.trueSpeed = this.speed;
                 this.attackSpeed = 1;
-                this.weapon = new Weapon(gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse, this);
-                this.weapon.setData(3, 3, this.damage*5);
             }
             case 3 -> { // no movement AOE unit
                 this.health = 50;
@@ -173,11 +171,13 @@ public class Enemy extends Entity {
                 this.speed = 0;
                 this.trueSpeed = this.speed;
                 this.attackSpeed = 0.33;
-                this.weapon = new Weapon(gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse, this);
-                this.weapon.setData(1, 3, this.damage*5);
             }
             default -> {}
         }
+
+        this.weapon = new Weapon(gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse, this);
+        this.weapon.setData(3, 3, this.damage*5);
+
         this.barWidth = this.size;
         this.barHeight = this.size / 10;
     }
@@ -195,7 +195,7 @@ public class Enemy extends Entity {
         this.gamePanel.collisionHandler.checkTile(this);
 
         // Check for collision with player
-        if (this.type == 1) { // Only for melee units
+        if (this.type == 1 || this.type == 0) { // Only for melee units
             Rectangle enemyHitbox = new Rectangle((int) this.worldX, (int) this.worldY, this.hitbox.width, this.hitbox.height);
             Rectangle playerHitbox = new Rectangle((int) this.gamePanel.player.worldX, (int) this.gamePanel.player.worldY, this.gamePanel.player.hitbox.width, this.gamePanel.player.hitbox.height);
             if (enemyHitbox.intersects(playerHitbox) && this.canAttack()) {
@@ -203,7 +203,8 @@ public class Enemy extends Entity {
                 cooldown = 0;
             }
 
-        } else if (this.type == 2 || this.type == 3) { // ranged units
+        } 
+        if (this.type == 0 || this.type == 2 || this.type == 3) { // ranged units
             // update projectiles
             this.weapon.update();
             this.weapon.angle = this.getPlayerAngle();
@@ -221,7 +222,7 @@ public class Enemy extends Entity {
         if (!this.collisionEnabled) {
             this.chasing = true; // true until overriden after 5 secs
 
-            if (this.frameCounter > this.gamePanel.FPS* ((this.type == 1) ? 5 : 0)) { 
+            if (this.frameCounter > this.gamePanel.FPS* ((this.type == 1 || this.type == 0) ? 5 : 0)) { 
                 // after 5 seconds of chasing, stop (only for melee units)
                 this.chasing = false;
             }
@@ -321,7 +322,7 @@ public class Enemy extends Entity {
         g2.fillRect((int) screenX - this.size / 2, (int) (screenY - this.size / 2 - gap), healthBarWidth, this.barHeight);
 
         // draw projectiles
-        if (this.type == 2 || this.type == 3) {
+        if (this.type == 0 || this.type == 2 || this.type == 3) {
             this.weapon.drawProjectiles(g2);
         }
     }

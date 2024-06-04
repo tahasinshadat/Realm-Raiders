@@ -1,7 +1,6 @@
 package components;
 
 import elements.Enemy;
-import elements.Weapon;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -10,7 +9,10 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import main.GamePanel;
+import objects.Chest;
 import objects.GameObject;
+import objects.Portal;
+import objects.Weapon;
 
 public class Room {
     GamePanel gamePanel;
@@ -24,20 +26,20 @@ public class Room {
     public int enemiesInRoom;
     public boolean roomInitialized = false;
     public boolean roomCleared = false;
-    
+
     // Room boundaries
     public int roomTop, roomBottom, roomLeft, roomRight;
 
     // Entities
-    public ArrayList<GameObject> roomObjects = new ArrayList<>();
     public ArrayList<Entity> roomEnemies = new ArrayList<>();
+    private Portal portal;
+    private Chest chest;
 
     // Waves
     private boolean waveActive = false;
     private int totalWaves;
     private int enemiesPerWave;
     private int currentWave;
-    private int enemiesSpawned;
     private int frameCounter;
     private int framesBetweenSpawns;
 
@@ -61,6 +63,10 @@ public class Room {
         this.roomRight = this.roomLeft + size - 1;
         this.roomTop = this.sectionsTopLeftY + ( (this.gamePanel.sectionSize - size) / 2);
         this.roomBottom = this.roomTop + size - 1;
+
+        if (this.isLootRoom) {
+            this.spawnChest();
+        }
     }
 
     public void update() {
@@ -79,6 +85,8 @@ public class Room {
             this.roomInitialized = true;
         }
 
+        if (this.portal != null) this.portal.update();
+        if (this.chest != null) this.chest.update();
 
         if (this.waveActive) {
             if (this.frameCounter % this.framesBetweenSpawns == 0) {
@@ -99,18 +107,11 @@ public class Room {
         this.enemiesPerWave = enemiesPerWave;
         this.framesBetweenSpawns = framesBetweenSpawns;
         this.currentWave = 0;
-        this.enemiesSpawned = 0;
         this.frameCounter = 0;
         this.waveActive = true;
     }
 
     private void spawnNextWave() { // spawns enemies in waves
-        try {
-            BufferedImage bulletImage = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/enemy_bullet.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         if (this.currentWave < this.totalWaves) {
 
             for (int i = 0; i < this.enemiesPerWave; i++) {
@@ -142,6 +143,16 @@ public class Room {
 
     public void initiateBossRoom() {
         this.closeGates();
+        roomEnemies.add(
+            new Enemy( // spawn boss in center of room
+                this.gamePanel, (this.roomLeft + this.roomRight) / 2 * this.gamePanel.tileSize, (this.roomTop + this.roomBottom) / 2 * this.gamePanel.tileSize, 0
+            )     
+        );
+        this.generateEnemies( // spawn grunts
+            this.randomNum(this.gamePanel.waveRange[0], this.gamePanel.waveRange[1] / 2), 
+            this.randomNum(this.gamePanel.enemyAmtRange[0] / 2, this.gamePanel.enemyAmtRange[1] / 2), 
+            this.randomNum(this.gamePanel.spawnTimeRange[0] * this.gamePanel.FPS, this.gamePanel.spawnTimeRange[1] * this.gamePanel.FPS)
+        );
     }
 
     public String getRoomKey() {
@@ -152,11 +163,32 @@ public class Room {
         if (!this.roomCleared) {
             this.openGates();
             this.gamePanel.score++;
+            if (this.isBossRoom) {
+                this.revealPortal();
+                this.spawnChest(this.gamePanel.player.worldX, this.gamePanel.player.worldY);
+            } else {
+                this.spawnChest();
+            }
         }
         this.roomCleared = true;
     }
 
-    public void openGates() {
+    private void revealPortal() {
+        this.portal = new Portal(this.gamePanel, (int)(((double)this.roomLeft + this.roomRight) / 2 * this.gamePanel.tileSize), (int)(((double)this.roomTop + this.roomBottom) / 2 * this.gamePanel.tileSize));
+        this.gamePanel.obj.add(this.portal); // Add the portal to the game objects list
+    }
+
+    private void spawnChest() {
+        this.chest = new Chest(this.gamePanel, (this.roomLeft + this.roomRight) / 2 * this.gamePanel.tileSize, (this.roomTop + this.roomBottom) / 2 * this.gamePanel.tileSize);
+        this.gamePanel.obj.add(this.chest);
+    }
+
+    private void spawnChest(double worldX, double worldY) {
+        this.chest = new Chest(this.gamePanel, (int) worldX, (int)worldY);
+        this.gamePanel.obj.add(this.chest);
+    }
+
+    private void openGates() {
         for (int x = this.sectionsTopLeftX; x <= this.sectionsTopLeftX + this.gamePanel.sectionSize; x++) {
             for (int y = this.sectionsTopLeftY; y <= this.sectionsTopLeftY+this.gamePanel.sectionSize; y++) {
 
@@ -168,7 +200,7 @@ public class Room {
         }
     }
 
-    public void closeGates() {
+    private void closeGates() {
         for (int x = this.sectionsTopLeftX; x <= this.sectionsTopLeftX+this.gamePanel.sectionSize; x++) {
             for (int y = this.sectionsTopLeftY; y <= this.sectionsTopLeftY+this.gamePanel.sectionSize; y++) {
                 // System.out.print("Checking tile at: " + x + ", " + y + ": ");

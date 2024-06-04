@@ -1,4 +1,4 @@
-package elements;
+package objects;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -15,8 +15,8 @@ import components.Entity;
 import components.KeyHandler;
 import components.MouseInteractions;
 import components.Projectile;
+import elements.Enemy;
 import main.GamePanel;
-import objects.GameObject;
 
 public class Weapon extends GameObject {
     
@@ -208,7 +208,7 @@ public class Weapon extends GameObject {
             }
 
             if (this.owner instanceof Enemy enemy) {
-                if (enemy.type == 3) {
+                if (enemy.type == 3 || enemy.type == 0) {
                     for (int i = 15; i < 360; i += 15) {
                         projectiles.add(new Projectile(gamePanel, angle + i, this, this.owner, image));
                     }
@@ -311,8 +311,7 @@ public class Weapon extends GameObject {
         return (int) (Math.random() * ((max - min) + 1)) + min;
     }
 
-    public void updateValuesOnZoom() {
-        this.height = this.gamePanel.tileSize/2;
-        this.width = this.height * (this.image.getWidth() / this.image.getHeight());
+    public void clearProjectiles() {
+        projectiles.clear();
     }
 }

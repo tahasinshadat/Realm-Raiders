@@ -11,7 +11,9 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import main.GamePanel;
+import objects.Chest;
 import objects.GameObject;
+import objects.Weapon;
 
 public class Player extends Entity {
     
@@ -58,9 +60,9 @@ public class Player extends Entity {
         this.equippedWeapon.setData(4, 10, 10);
         
         this.weaponInv.add(this.equippedWeapon);
-        this.weaponInv.add(new Weapon(gamePanel, keyHandler, mouse, this));
-        // this.weaponInv.get(1).setData(100, 10, 10);
-        this.weaponInv.get(1).initializeAsRandomWeapon();
+        // this.weaponInv.add(new Weapon(gamePanel, keyHandler, mouse, this));
+        // // this.weaponInv.get(1).setData(100, 10, 10);
+        // this.weaponInv.get(1).initializeAsRandomWeapon();
 
         // add weapons to gamePanel objects
         // this.gamePanel.obj.addAll(weaponInv);
@@ -242,6 +244,12 @@ public class Player extends Entity {
         mouse.wheelMoveAmount = 0; // reset move amount after using
     }
 
+    public void clearProjectiles() {
+        for (Weapon weapon : weaponInv) {
+            weapon.clearProjectiles();
+        }
+    }
+
     /**
      * 
      * @param weapon Weapon to be added
@@ -251,6 +259,7 @@ public class Player extends Entity {
     public Weapon addWeapon(Weapon weapon) {
         if (weaponInv.size() + 1 <= maxWeapons) {
             weaponInv.add(weapon);
+            this.equippedWeapon = weapon;
         } else {
             
             weaponInv.add(weapon);
@@ -265,11 +274,14 @@ public class Player extends Entity {
     }
 
     public void pickUpObject() {
-        for (GameObject object : this.gamePanel.obj) {
+        for (int i = 0; i < this.gamePanel.obj.size(); i++) {
             // System.out.println("Can pick up: " + object.canPickup(this.worldX, this.worldY));
             // System.out.println("Player: " + this.worldX + ", " + this.worldY);
             // System.out.println("Object: " + object.worldX + ", " + object.worldY);
-            if (object.canPickup(this.worldX, this.worldY)) {
+            if (this.gamePanel.obj.get(i).canPickup(this.worldX, this.worldY)) {
+                GameObject object = this.gamePanel.obj.get(i);
+
+                if (object instanceof Chest) continue;
                 object.pickup();
                 // System.out.println("Picked up!");
 
@@ -305,7 +317,7 @@ public class Player extends Entity {
     }
 
     private void regenerateShield() {
-        int shieldRegenRate = 20; // Adjust the regeneration rate as needed
+        int shieldRegenRate = 300; // Adjust the regeneration rate as needed
         if (this.shield < this.maxShield) {
             this.shield += shieldRegenRate;
             if (this.shield > this.maxShield) {
@@ -343,13 +355,16 @@ public class Player extends Entity {
         g2.drawImage(image, (int) this.screenX, (int) this.screenY, this.gamePanel.tileSize, this.gamePanel.tileSize, null);
         this.equippedWeapon.draw(g2);
         for (Weapon weapon : weaponInv) weapon.drawProjectiles(g2); // draw projectiles of all weapons
+
+        // hitbox?
+        // g2.fillRect((int)screenX + hitbox.x, (int)screenY + hitbox.y, hitbox.width, hitbox.height);
     }
 
     public void updateValuesOnZoom() {
         this.hitbox.x = this.gamePanel.tileSize / 6;
         this.hitbox.y = this.gamePanel.tileSize / 3;
-        this.hitbox.width = this.gamePanel.tileSize / (3 / 2);
-        this.hitbox.height = this.gamePanel.tileSize / (3 / 2);
+        this.hitbox.width = (int)(this.gamePanel.tileSize / (3.0 / 2));
+        this.hitbox.height = (int)(this.gamePanel.tileSize / (3.0 / 2));
     }
 
 }

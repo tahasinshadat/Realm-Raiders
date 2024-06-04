@@ -41,6 +41,10 @@ public class GameObject {
     }
 
     public void draw(Graphics2D g2) {
+        // System.out.println("Drawing " + image + " (" + width + ", " + height + ")\n" + 
+        //                    " at " + worldX + ", " + worldY + 
+        //                    "\nPlayer at " + this.gamePanel.player.worldX + ", " + this.gamePanel.player.worldY);
+
         this.updateValuesOnZoom();
         // screen pos = difference in pos in world + player origin offset + player center offset
         this.screenX = (this.worldX - this.gamePanel.player.worldX) + this.gamePanel.player.screenX + this.gamePanel.tileSize/2;
