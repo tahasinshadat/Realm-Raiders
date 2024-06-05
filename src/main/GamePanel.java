@@ -49,10 +49,10 @@ public class GamePanel extends JPanel implements Runnable {
     public int sections = 3;
     public int worldSize = this.sectionSize * this.sections;
 
-    public final int maxWorldCol = this.worldSize;
-    public final int maxWorldRow = this.worldSize;
-    public final int worldWidth = this.tileSize * this.maxWorldCol;
-    public final int worldHeight = this.tileSize * this.maxWorldRow;
+    public int maxWorldCol = this.worldSize;
+    public int maxWorldRow = this.worldSize;
+    public int worldWidth = this.originalScaledTileSize * this.maxWorldCol;
+    public int worldHeight = this.originalScaledTileSize * this.maxWorldRow;
     public final int FPS = 60; // lowered FPS
 
     // Game Components
@@ -173,17 +173,30 @@ public class GamePanel extends JPanel implements Runnable {
             this.currentPreset = (1 + (int) (Math.random() * 3)); // Choose Random Preset
             this.tileManager.initPreset(currentPreset);;
             this.mapCreator.preset(this.currentPreset);
+
+            
+            this.updateWorldSize();
         }
 
         this.assetManager.reset();
 
         this.keyHandler = new KeyHandler(this);
+        this.tileManager = new TileManager(this);
         this.mapCreator.setWorldSize(this.sections, this.sectionSize);
         this.worldSize = this.mapCreator.getWorldSize();
         this.mapCreator.setEnvironment();
         this.tileManager.mapTileNum = mapCreator.getWorldMap();
         this.minimap = new Minimap(this, 20);
         this.player.resetPosition();
+    }
+
+    private void updateWorldSize() {
+        this.worldSize = this.sectionSize * this.sections;
+
+        this.maxWorldCol = this.worldSize;
+        this.maxWorldRow = this.worldSize;
+        this.worldWidth = this.originalScaledTileSize * this.maxWorldCol;
+        this.worldHeight = this.originalScaledTileSize * this.maxWorldRow;
     }
 
     public void startGameThread() {
