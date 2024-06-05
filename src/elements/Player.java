@@ -35,8 +35,8 @@ public class Player extends Entity {
     public int maxWeapons = 2;
     public Weapon startWeapon;
 
-    public final int maxShield = 300;
-    public final int maxHealth = 300;
+    public int maxShield = 300;
+    public int maxHealth = 300;
 
     public int shield = this.maxShield;
     public int health = this.maxHealth;
@@ -325,6 +325,23 @@ public class Player extends Entity {
                 this.shield = this.maxShield; // Ensure shield does not exceed maxShield
             }
         }
+    }
+
+    public void regenerateHealth(int amt) {
+        if (this.health < this.maxHealth) {
+            this.health += amt;
+            if (this.health > this.maxHealth) {
+                this.health = this.maxHealth; // Ensure health does not exceed maxShield
+            }
+        }
+    }
+
+    public void increaseHealth(int amt) {
+        this.maxHealth += amt;
+    }
+
+    public void increaseShield(int amt) {
+        this.maxShield += amt;
     }
 
     public void draw(Graphics2D g2) {

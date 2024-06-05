@@ -165,7 +165,7 @@ public class Room {
             this.gamePanel.score++;
             if (this.isBossRoom) {
                 this.revealPortal();
-            } else {
+            } else if (!this.isLootRoom){
                 this.spawnChest();
             }
             // Mark the room as cleared on the minimap
