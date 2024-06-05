@@ -52,7 +52,6 @@ public class KeyHandler implements KeyListener {
                 this.gamePanel.gameState = GamePanel.PAUSE_STATE;
             } else {
                 this.gamePanel.gameState = GamePanel.PLAYING_STATE;
-                this.gamePanel.gameUI.drawnTint = false;
             }
         }
     

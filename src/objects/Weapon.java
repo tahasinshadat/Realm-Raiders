@@ -65,6 +65,10 @@ public class Weapon extends GameObject {
         this.setImage();
     }
 
+    public double[] getData() {
+        return new double[]{this.weaponAttackSpeed, this.weaponProjectileSpeed, this.weaponDamage};
+    }
+
     public double getAngleToMouse() {
         double deltaX = mouse.getMouseX() - this.screenX;
         double deltaY = this.screenY - mouse.getMouseY();
@@ -189,6 +193,12 @@ public class Weapon extends GameObject {
 
     public void shoot() {
         if (this.cooldown > this.gamePanel.FPS / this.weaponAttackSpeed) {
+            
+            if (this.owner == this.gamePanel.player) { // decrease mana for player
+                this.gamePanel.player.mana--;
+                if (this.gamePanel.player.mana <= 0) return;
+            }
+
             projectiles.add(new Projectile(gamePanel, angle, this, this.owner));
             this.cooldown = 0;
 
@@ -200,8 +210,14 @@ public class Weapon extends GameObject {
         }
     }
 
-    public void shoot(BufferedImage image) {
+    public void shoot(BufferedImage image) { 
         if (this.cooldown > this.gamePanel.FPS / this.weaponAttackSpeed) {
+
+            if (this.owner == this.gamePanel.player) { // decrease mana for player
+                this.gamePanel.player.mana--;
+                if (this.gamePanel.player.mana <= 0) return;
+            }
+
             projectiles.add(new Projectile(gamePanel, angle, this, this.owner, image));
             this.cooldown = 0;
 

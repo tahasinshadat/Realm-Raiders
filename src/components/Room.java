@@ -64,7 +64,7 @@ public class Room {
         this.roomTop = this.sectionsTopLeftY + ( (this.gamePanel.sectionSize - size) / 2);
         this.roomBottom = this.roomTop + size - 1;
 
-        if (this.isLootRoom) {
+        if (this.isLootRoom || this.isStartRoom) {
             this.spawnChest();
         }
     }
@@ -96,7 +96,7 @@ public class Room {
         if (this.portal != null) this.portal.update();
         if (this.chest != null) this.chest.update();
         if (this.isCleared) this.roomCleared();
-        if (this.chest != null && this.chest.chestOpened) this.isCleared = true;
+        if (this.chest != null && this.chest.chestOpened && !this.isStartRoom) this.isCleared = true;
         
     }
 
@@ -165,11 +165,12 @@ public class Room {
             this.gamePanel.score++;
             if (this.isBossRoom) {
                 this.revealPortal();
-            } else if (!this.isLootRoom){
+            } else if (!this.isLootRoom && !this.isStartRoom){
                 this.spawnChest();
             }
             // Mark the room as cleared on the minimap
             this.gamePanel.minimap.clearRoom(this.sectionX, this.sectionY);
+            this.gamePanel.player.regenerateMana(75);
         }
         this.roomCleared = true;
     }

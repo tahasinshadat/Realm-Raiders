@@ -62,8 +62,8 @@ public class GamePanel extends JPanel implements Runnable {
     public MouseInteractions mouse = new MouseInteractions(this);
     public Thread gameThread;
     public MapCreator mapCreator = new MapCreator(this, true, this.currentPreset);
-    public UI gameUI = new UI(this);
     public AssetManager assetManager = new AssetManager(this);
+    public UI gameUI = new UI(this);
     public Minimap minimap;
     public DataHandler dataHandler = new DataHandler(this);
     
@@ -151,11 +151,11 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupGame() {
         // add test weapon for testing
-        this.testWeapon = new Weapon(this, this.keyHandler, this.mouse, this.player);
-        this.testWeapon.initializeAsRandomWeapon();
-        this.testWeapon.worldX = (int) this.player.worldX;
-        this.testWeapon.worldY = (int) this.player.worldY;
-        this.obj.add(testWeapon);
+        // this.testWeapon = new Weapon(this, this.keyHandler, this.mouse, this.player);
+        // this.testWeapon.initializeAsRandomWeapon();
+        // this.testWeapon.worldX = (int) this.player.worldX;
+        // this.testWeapon.worldY = (int) this.player.worldY;
+        // this.obj.add(testWeapon);
         // System.out.println("Added test weapon!");
         // System.out.println(this.obj);
     }
@@ -303,26 +303,32 @@ public class GamePanel extends JPanel implements Runnable {
         ) {
             gameUI.draw(g2); // Draw GUI
         } else {
-            this.tileManager.draw(g2); // Draw Tiles
 
-            for (int i = 0; i < this.obj.size(); i++) { // draw game objects
-                // System.out.println("Drawing " + object + " On ground? " + object.onGround);
-                obj.get(i).draw(g2);
-            }
-
-            this.player.draw(g2); // Draw the Player
-
-            for (Entity enemy : enemies) { // Draw Enemies
-                ((Enemy) enemy).draw(g2);
-            }
-
-            this.minimap.draw(g2); // Draw the minimap
+            this.drawGameFrame(g2); // Draw GUI + Game
 
             this.gameUI.draw(g2); // Draw in game UI
             
         }
 
         g2.dispose();
+    }
+
+
+    public void drawGameFrame(Graphics2D g2) {
+        this.tileManager.draw(g2); // Draw Tiles
+
+        for (int i = 0; i < this.obj.size(); i++) { // draw game objects
+            // System.out.println("Drawing " + object + " On ground? " + object.onGround);
+            obj.get(i).draw(g2);
+        }
+
+        this.player.draw(g2); // Draw the Player
+
+        for (Entity enemy : enemies) { // Draw Enemies
+            ((Enemy) enemy).draw(g2);
+        }
+
+        this.minimap.draw(g2); // Draw the minimap
     }
 
     public void zoom(int zoomAmt) {

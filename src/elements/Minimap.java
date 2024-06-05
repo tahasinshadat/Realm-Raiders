@@ -146,6 +146,6 @@ public class Minimap {
     }
 
     public void updateCurrentRoom(Room room) {
-        this.currentRoom = room;
+        if (!room.isBossRoom) this.currentRoom = room;
     }
 }

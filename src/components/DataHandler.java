@@ -86,4 +86,19 @@ public class DataHandler {
         } 
     }
 
+    public void savePlayerData() {
+        
+    }
+
+    public void saveWeaponData() {
+
+    }
+
+    public void loadPlayerData() {
+
+    }
+
+    public void loadWeaponData() {
+        
+    }
 }

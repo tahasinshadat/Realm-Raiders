@@ -5,6 +5,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
@@ -24,25 +26,45 @@ public class UI {
     // In Game UI
     private int healthBarHeight = 25;
     private int shieldBarHeight = this.healthBarHeight / 2;
+    private int manaBarHeight = this.healthBarHeight / 3;
     private int spacing = 3;
     private int cornerX = 10;
     private int cornerY = 10;
 
     // Styling
-    public boolean drawnTint = false;
+    public BufferedImage gameTitle;
 
     // Loading 
     private int loadScreenTimer = 0;
     private String[] gameFacts = {
         "This Game Was Inspired by Soul Knight!",
-        "Check Out Realm Raiders On Github! It Was Made For Our APCSA Project",
-        "The Weapon Type Determines Fire Rate, The Weapon Rarity Determines Damage",
-        "Always Heal Up Before Moving Onto A Boss Room",
-        "When Coding A Game, You Have To Code Aspects That You Never Even Thought Of, Like These Tips & Facts!",
-    };
+        "Check Out Realm Raiders On Github! It Was Made For Our APCSA Project.",
+        "The Weapon Type Determines Fire Rate, The Weapon Rarity Determines Damage.",
+        "Always Heal Up Before Moving Onto A Boss Room!",
+        "Zoom Out Before Entering a Boss Room.",
+        "There are 25 different weapons in this game!",
+        "You can continue exploring the map after killing the boss",
+        "Use different weapons to find the one that suits your playstyle best!",
+        "Remember to pick up loot after clearing a room!",
+        "Enemies have weaknesses – try different weapons to exploit them!",
+        "Check the minimap frequently to avoid missing rooms!",
+        "Bosses have attack patterns – learn them to avoid damage!",
+        "Save your powerful weapons for tough enemies or bosses.",
+        "Different characters have unique abilities – experiment with them!",
+        "Use cover to avoid enemy fire and reduce damage taken.",
+        "Explore every room – you never know what you might find!",
+        "Healing items are scarce – use them wisely.",
+        "Keep an eye on your mana – running out can be deadly!",
+        "Defeated enemies can drop helpful items – collect them!",
+        "Try different strategies for different enemy types.",
+        "Pay attention to your surroundings – it could save your life!",
+        "Focus tower enemies first! They get dangerous with time."
+};
+
 
     public UI(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
+        this.gameTitle = this.gamePanel.assetManager.loadImage("../assets/icons/title.png");
         this.gameFont = new Font("Virgil", Font.PLAIN, 40);
         this.setupButtons();
     }
@@ -220,9 +242,11 @@ public class UI {
         g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight);
         g2.setFont(gameFont);
         g2.setColor(Color.WHITE);
-        FontMetrics metrics = g2.getFontMetrics(g2.getFont());
-        int nameWidth = metrics.stringWidth("Realm Raiders");
-        g2.drawString("Realm Raiders", this.gamePanel.screenWidth / 2 - nameWidth / 2, this.gamePanel.screenHeight / 4);
+        // FontMetrics metrics = g2.getFontMetrics(g2.getFont());
+        // int nameWidth = metrics.stringWidth("Realm Raiders");
+        
+        g2.drawImage(this.gameTitle, this.gamePanel.screenWidth / 2 - 300 + 15, this.gamePanel.screenHeight / 8 - 150, 600, 300, null);
+        // g2.drawString("Realm Raiders", this.gamePanel.screenWidth / 2 - nameWidth / 2, this.gamePanel.screenHeight / 4);
         this.addTitleButtons();
     }
 
@@ -243,22 +267,32 @@ public class UI {
     }
 
     private void drawPausedScreen(Graphics2D g2) {
-        if (!this.drawnTint) {
-            this.drawnTint = true;
-            Color tint = new Color(0, 0, 0, 150); // semi transparent tint
-            g2.setColor(tint);
-            g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight); // Fill the entire screen
-        }
+        
+        this.gamePanel.drawGameFrame(g2);
+        this.drawInGameUI(g2);
+        Color tint = new Color(0, 0, 0, 255/2); // semi transparent tint
+        g2.setColor(tint);
+        g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight); // Fill the entire screen
 
         // Draw the paused screen content
-        g2.setColor(this.gamePanel.backgroundColor);
+        Color pauseTint = new Color(0, 0, 0, 255/2);
+        g2.setColor(pauseTint);
         g2.fillRect(this.gamePanel.screenWidth / 4, this.gamePanel.screenHeight / 4, this.gamePanel.screenWidth / 2, this.gamePanel.screenHeight / 2);
         g2.setColor(Color.WHITE);
         g2.setFont(this.gameFont);
+
+        // Draw Text
         String text = "Game Paused";
-        int x = getXForCenteredText(g2, text);
-        int y = this.gamePanel.screenHeight / 2;
-        g2.drawString(text, x, y);
+        g2.drawString(text, this.getXForCenteredText(g2, text), this.gamePanel.screenHeight / 2);
+
+        this.gameFont = new Font("Virgil", Font.PLAIN, 20);
+        g2.setFont(this.gameFont);
+        String escText = "Press ESC to Resume";
+        g2.drawString(escText, this.getXForCenteredText(g2, escText), this.gamePanel.screenHeight / 2 + 35);
+        this.gameFont = new Font("Virgil", Font.PLAIN, 40);
+
+        // Draw Icon
+        g2.drawImage(this.gameTitle, this.gamePanel.screenWidth / 2 - 150 + 6, this.gamePanel.screenHeight / 5 - 6, 300, 150, null);
 
         this.addSaveAndQuitButton();
     }
@@ -283,6 +317,7 @@ public class UI {
     private void drawInGameUI(Graphics2D g2) {
         this.drawShieldBar(g2, this.gamePanel.player.shield);
         this.drawHealthBar(g2, this.gamePanel.player.health);
+        this.drawManaBar(g2, this.gamePanel.player.mana);
     }
 
     private void drawShieldBar(Graphics2D g2, int shieldAmt) {
@@ -297,6 +332,13 @@ public class UI {
         g2.fillRect(this.cornerX - this.spacing, this.cornerY + this.shieldBarHeight + this.spacing * 2, this.gamePanel.player.maxHealth + this.spacing * 2, this.healthBarHeight + this.spacing * 2);
         g2.setColor(Color.RED);
         g2.fillRect(this.cornerX, this.cornerY + this.shieldBarHeight + this.spacing * 3, health, this.healthBarHeight);
+    }
+    
+    private void drawManaBar(Graphics2D g2, int mana) {
+        g2.setColor(Color.BLACK);
+        g2.fillRect(this.cornerX - this.spacing, this.cornerY + this.shieldBarHeight + this.healthBarHeight + this.spacing * 5, this.gamePanel.player.maxMana + this.spacing * 2, this.manaBarHeight + this.spacing * 2);
+        g2.setColor(Color.BLUE);
+        g2.fillRect(this.cornerX, this.cornerY + this.shieldBarHeight + this.healthBarHeight + this.spacing * 6, mana, this.manaBarHeight);
     }
 
     private String fact;
@@ -350,4 +392,5 @@ public class UI {
     private int randomNum(int min, int max) { // Inclusive
         return (int) (Math.random() * ((max - min) + 1)) + min;
     }
+
 }

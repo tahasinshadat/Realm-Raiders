@@ -37,9 +37,11 @@ public class Player extends Entity {
 
     public int maxShield = 300;
     public int maxHealth = 300;
+    public int maxMana = 200;
 
     public int shield = this.maxShield;
     public int health = this.maxHealth;
+    public int mana = this.maxMana;
 
     public int frameCount;
     public boolean dead = false;
@@ -327,6 +329,13 @@ public class Player extends Entity {
         }
     }
 
+    public void regenerateMana(int manaAmt) {
+        if (this.mana < this.maxMana) {
+            this.mana += manaAmt;
+            if (this.mana > this.maxMana) this.mana = maxMana;
+        }
+    }
+
     public void regenerateHealth(int amt) {
         if (this.health < this.maxHealth) {
             this.health += amt;
@@ -334,6 +343,10 @@ public class Player extends Entity {
                 this.health = this.maxHealth; // Ensure health does not exceed maxShield
             }
         }
+    }
+
+    public void increaseMana(int amt) {
+        this.maxMana += amt;
     }
 
     public void increaseHealth(int amt) {
