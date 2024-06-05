@@ -24,9 +24,9 @@ public class Potion extends GameObject {
 
         switch (this.type) {
             case "Empty" -> this.image = this.gamePanel.assetManager.loadImage("../assets/potions/empty.png");
-            case "Heal" -> this.image = this.gamePanel.assetManager.loadImage("../assets/potions/empty.png");
-            case "Increase Max Health" -> this.image = this.gamePanel.assetManager.loadImage("../assets/potions/empty.png");
-            case "Increase Max Shield" -> this.image = this.gamePanel.assetManager.loadImage("../assets/potions/empty.png");
+            case "Heal" -> this.image = this.gamePanel.assetManager.loadImage("../assets/potions/heal.png");
+            case "Increase Max Health" -> this.image = this.gamePanel.assetManager.loadImage("../assets/potions/healthIncrease.png");
+            case "Increase Max Shield" -> this.image = this.gamePanel.assetManager.loadImage("../assets/potions/shieldIncrease.png");
             default -> this.image = this.gamePanel.assetManager.loadImage("../assets/potions/empty.png");
         }
 
