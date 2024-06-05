@@ -173,14 +173,11 @@ public class GamePanel extends JPanel implements Runnable {
             this.currentPreset = (1 + (int) (Math.random() * 3)); // Choose Random Preset
             this.tileManager.initPreset(currentPreset);;
             this.mapCreator.preset(this.currentPreset);
-
-            
             this.updateWorldSize();
         }
 
         this.assetManager.reset();
 
-        this.keyHandler = new KeyHandler(this);
         this.tileManager = new TileManager(this);
         this.mapCreator.setWorldSize(this.sections, this.sectionSize);
         this.worldSize = this.mapCreator.getWorldSize();

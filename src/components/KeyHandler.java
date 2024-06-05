@@ -27,31 +27,33 @@ public class KeyHandler implements KeyListener {
     public void keyPressed(KeyEvent event) {
         int code = event.getKeyCode();
 
-        if (code == KeyEvent.VK_W) this.upPressed = true;
-        if (code == KeyEvent.VK_S) this.downPressed = true;
-        if (code == KeyEvent.VK_A) this.leftPressed = true;
-        if (code == KeyEvent.VK_D) this.rightPressed = true;
-        if (code == KeyEvent.VK_E) this.interactionButtonPressed = true;
-        if (code == KeyEvent.VK_UP) {
-            if (this.zoomInAmt <= maxZoomAmt) {
-                this.zoomInAmt++;
-                this.zoomOutAmt--;
-                this.gamePanel.zoom(1);
+        if (!(this.gamePanel.gameState == GamePanel.LOAD_STATE)) {
+            if (code == KeyEvent.VK_W) this.upPressed = true;
+            if (code == KeyEvent.VK_S) this.downPressed = true;
+            if (code == KeyEvent.VK_A) this.leftPressed = true;
+            if (code == KeyEvent.VK_D) this.rightPressed = true;
+            if (code == KeyEvent.VK_E) this.interactionButtonPressed = true;
+            if (code == KeyEvent.VK_UP) {
+                if (this.zoomInAmt <= maxZoomAmt) {
+                    this.zoomInAmt++;
+                    this.zoomOutAmt--;
+                    this.gamePanel.zoom(1);
+                }
             }
-        }
-        if (code == KeyEvent.VK_DOWN) {
-            if (this.zoomOutAmt <= maxZoomAmt) {
-                this.zoomOutAmt++;
-                this.zoomInAmt--;
-                this.gamePanel.zoom(-1);
+            if (code == KeyEvent.VK_DOWN) {
+                if (this.zoomOutAmt <= maxZoomAmt) {
+                    this.zoomOutAmt++;
+                    this.zoomInAmt--;
+                    this.gamePanel.zoom(-1);
+                }
             }
-        }
-        if (code == KeyEvent.VK_ESCAPE) this.gamePanel.paused = !this.gamePanel.paused;
-        if (this.gamePanel.paused) {
-            this.gamePanel.gameState = GamePanel.PAUSE_STATE;
-        } else {
-            this.gamePanel.gameState = GamePanel.PLAYING_STATE;
-            this.gamePanel.gameUI.drawnTint = false;
+            if (code == KeyEvent.VK_ESCAPE) this.gamePanel.paused = !this.gamePanel.paused;
+            if (this.gamePanel.paused) {
+                this.gamePanel.gameState = GamePanel.PAUSE_STATE;
+            } else {
+                this.gamePanel.gameState = GamePanel.PLAYING_STATE;
+                this.gamePanel.gameUI.drawnTint = false;
+            }
         }
     
     }
