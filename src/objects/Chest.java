@@ -28,9 +28,17 @@ public class Chest extends GameObject {
     }
 
     public void update() {
-        if (this.gamePanel.keyHandler.interactionButtonPressed && this.canPickup(this.gamePanel.player.worldX, this.gamePanel.player.worldY) && !this.chestOpened) {
+        // keyhandler.interactionButtonPressed always false for some reason
+        // System.out.println(this.gamePanel.keyHandler.interactionButtonPressed);
+        // if (this.gamePanel.keyHandler.interactionButtonPressed && this.canInteract(this.gamePanel.player.worldX, this.gamePanel.player.worldY) && !this.chestOpened) {
+        //     this.openChest();
+        // }
+    }
+
+    @Override
+    public void interact() {
+        if (!this.chestOpened)
             this.openChest();
-        }
     }
 
     // @Override
@@ -57,7 +65,7 @@ public class Chest extends GameObject {
     }
 
     public void revealContents() {
-        this.gamePanel.obj.add(this.chestItem);
+        this.gamePanel.addObjectAfterFrame(this.chestItem);
     }
 
     public void updateValuesOnZoom() {

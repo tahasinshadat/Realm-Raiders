@@ -17,18 +17,6 @@ public class AssetManager {
         this.gamePanel = gamePanel;
     }
 
-    public void setObjects() {
-        
-    }
-
-    public void setEnemies() {
-        try {
-            Enemy.bulletImage = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/enemy_bullet.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void reset() {
         // Clear All Entities
         this.gamePanel.obj.clear();
@@ -41,6 +29,13 @@ public class AssetManager {
         this.gamePanel.player.worldY = this.gamePanel.worldHeight / 2;
         this.gamePanel.player.health = this.gamePanel.player.maxHealth;
         this.gamePanel.player.shield = this.gamePanel.player.maxShield;
+
+        // reset enemy bulletImage
+        try {
+            Enemy.bulletImage = ImageIO.read(getClass().getResourceAsStream("../assets/weapons/enemy_bullet.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Method to load an image

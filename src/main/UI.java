@@ -36,7 +36,7 @@ public class UI {
     private String[] gameFacts = {
         "This Game Was Inspired by Soul Knight!",
         "Check Out Realm Raiders On Github! It Was Made For Our APCSA Project",
-        "The Weapon Type Determines Speed, The Weapon Rarity Determines Damage",
+        "The Weapon Type Determines Fire Rate, The Weapon Rarity Determines Damage",
         "Always Heal Up Before Moving Onto A Boss Room",
         "When Coding A Game, You Have To Code Aspects That You Never Even Thought Of, Like These Tips & Facts!",
     };
@@ -299,6 +299,7 @@ public class UI {
         g2.fillRect(this.cornerX, this.cornerY + this.shieldBarHeight + this.spacing * 3, health, this.healthBarHeight);
     }
 
+    private String fact;
     // display the load screen with a buffer wheel for 3 seconds
     public void drawLoadScreen(Graphics2D g2) {
         g2.setColor(this.gamePanel.backgroundColor);
@@ -324,11 +325,14 @@ public class UI {
         // Draw random game fact
         g2.setFont(new Font("Arial", Font.PLAIN, 20));
         g2.drawString("Tips & Facts", this.getXForCenteredText(g2, "Tips & Facts"), this.gamePanel.screenHeight - 80);
-        String fact = this.gameFacts[this.randomNum(0, this.gameFacts.length - 1)];
+
+        if (fact == null) fact = this.gameFacts[this.randomNum(0, this.gameFacts.length - 1)];
+
         g2.drawString(fact, this.getXForCenteredText(g2, fact), this.gamePanel.screenHeight - 40);
 
         if (this.loadScreenTimer > this.gamePanel.FPS * 5) { // 5 seconds has passed
             this.loadScreenTimer = 0;
+            fact = null;
             this.gamePanel.keyHandler = null;
             this.gamePanel.generateNewLevel();
             this.gamePanel.gameState = GamePanel.PLAYING_STATE;

@@ -171,7 +171,7 @@ public class Player extends Entity {
 
         if (!interacted && keyHandler.interactionButtonPressed) {
             // System.out.println("Attempting pickup");
-            this.pickUpObject();
+            this.interactWithObject();
             interacted = true;
         } else if (keyHandler.interactionButtonPressed == false) {
             interacted = false; 
@@ -273,20 +273,17 @@ public class Player extends Entity {
         return null;
     }
 
-    public void pickUpObject() {
+    public void interactWithObject() {
         for (int i = 0; i < this.gamePanel.obj.size(); i++) {
-            // System.out.println("Can pick up: " + object.canPickup(this.worldX, this.worldY));
+            // System.out.println("Can interact: " + object.canInteract(this.worldX, this.worldY));
             // System.out.println("Player: " + this.worldX + ", " + this.worldY);
             // System.out.println("Object: " + object.worldX + ", " + object.worldY);
-            if (this.gamePanel.obj.get(i).canPickup(this.worldX, this.worldY)) {
+            if (this.gamePanel.obj.get(i).canInteract(this.worldX, this.worldY)) {
                 GameObject object = this.gamePanel.obj.get(i);
-
-                if (object instanceof Chest) continue;
-                object.pickup();
-                // System.out.println("Picked up!");
 
                 // WEAPON
                 if (object instanceof Weapon weapon) {
+                    weapon.pickup();
                     // System.out.println("Attempting to add weapon!");
                     Weapon dropped = this.addWeapon(weapon);
 
@@ -294,8 +291,12 @@ public class Player extends Entity {
                         // System.out.println("Dropping weapon! " + dropped);
                         dropped.drop((int) this.worldX, (int) this.worldY);
                     }
+
+                    return;
                 }
 
+                object.interact();
+                // System.out.println("Picked up!");
             }
         }
     }
@@ -367,4 +368,10 @@ public class Player extends Entity {
         this.hitbox.height = (int)(this.gamePanel.tileSize / (3.0 / 2));
     }
 
+    public void resetPosition() {
+        int worldWidth = this.gamePanel.maxWorldCol*this.gamePanel.tileSize;
+        int worldHeight = this.gamePanel.maxWorldRow*this.gamePanel.tileSize;
+        this.worldX = worldWidth / 2;
+        this.worldY = worldHeight / 2;
+    }
 }

@@ -131,6 +131,7 @@ public class Room {
 
     public void initiateRoom() { // closes the gates and spawns the enemies
         this.closeGates();
+        this.gamePanel.player.clearProjectiles();
         this.generateEnemies(
             this.randomNum(this.gamePanel.waveRange[0], this.gamePanel.waveRange[1]), 
             this.randomNum(this.gamePanel.enemyAmtRange[0], this.gamePanel.enemyAmtRange[1]), 
@@ -140,6 +141,7 @@ public class Room {
 
     public void initiateBossRoom() {
         this.closeGates();
+        this.gamePanel.player.clearProjectiles();
         roomEnemies.add(
             new Enemy( // spawn boss in center of room
                 this.gamePanel, (this.roomLeft + this.roomRight) / 2 * this.gamePanel.tileSize, (this.roomTop + this.roomBottom) / 2 * this.gamePanel.tileSize, 0
@@ -162,7 +164,6 @@ public class Room {
             this.gamePanel.score++;
             if (this.isBossRoom) {
                 this.revealPortal();
-                this.spawnChest(this.gamePanel.player.worldX, this.gamePanel.player.worldY);
             } else {
                 this.spawnChest();
             }
@@ -173,12 +174,17 @@ public class Room {
     }
 
     private void revealPortal() {
-        this.portal = new Portal(this.gamePanel, (int)(((double)this.roomLeft + this.roomRight) / 2 * this.gamePanel.tileSize), (int)(((double)this.roomTop + this.roomBottom) / 2 * this.gamePanel.tileSize));
+        this.portal = new Portal(this.gamePanel, (int)(((double)this.roomLeft + this.roomRight) / 2 * this.gamePanel.originalScaledTileSize), 
+                                                 (int)(((double)this.roomTop + this.roomBottom) / 2 * this.gamePanel.originalScaledTileSize));
         this.gamePanel.obj.add(this.portal); // Add the portal to the game objects list
+        
+        this.spawnChest((((double)this.roomLeft + this.roomRight) / 2 * this.gamePanel.originalScaledTileSize), 
+                        (((double)this.roomTop + this.roomBottom) / 2 * this.gamePanel.originalScaledTileSize + 150));
     }
 
     private void spawnChest() {
-        this.chest = new Chest(this.gamePanel, (this.roomLeft + this.roomRight) / 2 * this.gamePanel.tileSize, (this.roomTop + this.roomBottom) / 2 * this.gamePanel.tileSize);
+        this.chest = new Chest(this.gamePanel, (this.roomLeft + this.roomRight) / 2 * this.gamePanel.originalScaledTileSize, 
+                                               (this.roomTop + this.roomBottom) / 2 * this.gamePanel.originalScaledTileSize);
         this.gamePanel.obj.add(this.chest);
     }
 

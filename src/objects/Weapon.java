@@ -168,7 +168,11 @@ public class Weapon extends GameObject {
             g2.setColor(Color.WHITE);
             // drawProjectiles(g2);
         } else {
+            // Display weapon name
+            g2.setColor(this.textColor);
             super.draw(g2);
+            super.drawName(g2);
+            g2.setColor(Color.WHITE);
         }
     }
 

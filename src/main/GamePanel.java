@@ -26,6 +26,7 @@ public class GamePanel extends JPanel implements Runnable {
     // Tile settings
     final int originalTileSize = 16; // 16 x 16
     final int scale = 3;
+    public final int originalScaledTileSize = originalTileSize * scale;
     public int tileSize = originalTileSize * scale; // 48 x 48
 
     // 22 : 13 Aspect Ratio
@@ -158,9 +159,6 @@ public class GamePanel extends JPanel implements Runnable {
         this.obj.add(testWeapon);
         // System.out.println("Added test weapon!");
         // System.out.println(this.obj);
-
-        this.assetManager.setObjects();
-        this.assetManager.setEnemies();
     }
 
     public void generateNewLevel() { // Passed Previous Level So Load New One
@@ -185,6 +183,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.mapCreator.setEnvironment();
         this.tileManager.mapTileNum = mapCreator.getWorldMap();
         this.minimap = new Minimap(this, 20);
+        this.player.resetPosition();
     }
 
     public void startGameThread() {
@@ -265,8 +264,20 @@ public class GamePanel extends JPanel implements Runnable {
                 room.update();
             }
 
+            this.addGameObjectsInQueue();
+
             // test.update();
         }
+    }
+
+    private ArrayList<GameObject> gameObjectsToAdd = new ArrayList<>();
+    public boolean addObjectAfterFrame(GameObject object) {
+        return gameObjectsToAdd.add(object);
+    }
+
+    private void addGameObjectsInQueue() {
+        this.obj.addAll(gameObjectsToAdd);
+        gameObjectsToAdd.clear();
     }
 
     @Override
@@ -285,9 +296,9 @@ public class GamePanel extends JPanel implements Runnable {
         } else {
             this.tileManager.draw(g2); // Draw Tiles
 
-            for (GameObject object : obj) { // draw game objects
+            for (int i = 0; i < this.obj.size(); i++) { // draw game objects
                 // System.out.println("Drawing " + object + " On ground? " + object.onGround);
-                object.draw(g2);
+                obj.get(i).draw(g2);
             }
 
             this.player.draw(g2); // Draw the Player

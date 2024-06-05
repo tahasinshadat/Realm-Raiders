@@ -45,7 +45,7 @@ public class Enemy extends Entity {
     public boolean isDead = false;
 
     private Weapon weapon;
-    public static BufferedImage bulletImage; // to be set by AssetManager
+    public static BufferedImage bulletImage;
 
     // Enemy Info
     public static int enemyTypes = 3;
