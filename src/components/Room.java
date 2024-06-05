@@ -96,6 +96,7 @@ public class Room {
         if (this.portal != null) this.portal.update();
         if (this.chest != null) this.chest.update();
         if (this.isCleared) this.roomCleared();
+        if (this.chest != null && this.chest.chestOpened) this.isCleared = true;
         
     }
 

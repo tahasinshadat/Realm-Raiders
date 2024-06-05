@@ -85,7 +85,7 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean paused = false;
 
     // Game Progress Checking:
-    public int levelEnhancer = 3;
+    public final int levelEnhancer = 3;
     public int score = 0;
     public int currentLevel = 0;
     public double gameDifficulty = 1.0;
@@ -147,7 +147,6 @@ public class GamePanel extends JPanel implements Runnable {
         this.player = new Player(this, keyHandler, mouse);
         this.currentLevel = 0;
         this.score = 0;
-        this.levelEnhancer = 3;
     }
 
     public void setupGame() {
@@ -164,6 +163,7 @@ public class GamePanel extends JPanel implements Runnable {
     public void generateNewLevel() { // Passed Previous Level So Load New One
         
         this.cleanup();
+        this.tileManager = new TileManager(this);
 
         this.currentLevel++;
         this.gameDifficulty += 0.1;
@@ -178,7 +178,6 @@ public class GamePanel extends JPanel implements Runnable {
 
         this.assetManager.reset();
 
-        this.tileManager = new TileManager(this);
         this.mapCreator.setWorldSize(this.sections, this.sectionSize);
         this.worldSize = this.mapCreator.getWorldSize();
         this.mapCreator.setEnvironment();

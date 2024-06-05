@@ -2,6 +2,8 @@ package elements;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.HashSet;
+import java.util.Set;
 
 import components.Room;
 import main.GamePanel;
@@ -12,12 +14,14 @@ public class Minimap {
     private int padding;
     private int[][] sectionMap;
     private Room currentRoom; // Player Section tracking
+    private Set<String> discoveredRooms; // Track discovered rooms
 
     public Minimap(GamePanel gamePanel, int minimapTileSize) {
         this.gamePanel = gamePanel;
         this.minimapTileSize = minimapTileSize;
-        this.padding = this.minimapTileSize / 4;  // Define this.padding between rooms
+        this.padding = this.minimapTileSize / 4; 
         this.sectionMap = new int[this.gamePanel.sections][this.gamePanel.sections];
+        this.discoveredRooms = new HashSet<>(); // discovered rooms set
         this.initializeSectionMap();
     }
 
@@ -25,9 +29,25 @@ public class Minimap {
         for (Room room : this.gamePanel.mapCreator.rooms) {
             if (room.isBossRoom) this.sectionMap[room.sectionX][room.sectionY] = 4;
             else if (room.isLootRoom) this.sectionMap[room.sectionX][room.sectionY] = 3;
-            else if (room.isStartRoom) { this.sectionMap[room.sectionX][room.sectionY] = 2; this.updateCurrentRoom(room); } // also set the players currentRoom to the starting room
+            else if (room.isStartRoom) { 
+                this.sectionMap[room.sectionX][room.sectionY] = 2; 
+                this.updateCurrentRoom(room); 
+                this.discoveredRooms.add(room.getRoomKey()); // Discover the start room
+            }
             else this.sectionMap[room.sectionX][room.sectionY] = 1;
         }
+        this.discoverConnectedHallways(this.currentRoom); // Discover connected hallways for startRoom
+    }
+
+    private void discoverConnectedHallways(Room room) {
+        int x = room.sectionX;
+        int y = room.sectionY;
+        
+        // Discover adjacent rooms (hallways)
+        if (x > 0 && sectionMap[x - 1][y] != 0) discoveredRooms.add((x - 1) + "," + y);
+        if (x < sectionMap.length - 1 && sectionMap[x + 1][y] != 0) discoveredRooms.add((x + 1) + "," + y);
+        if (y > 0 && sectionMap[x][y - 1] != 0) discoveredRooms.add(x + "," + (y - 1));
+        if (y < sectionMap[0].length - 1 && sectionMap[x][y + 1] != 0) discoveredRooms.add(x + "," + (y + 1));
     }
 
     public void draw(Graphics2D g2) {
@@ -46,7 +66,7 @@ public class Minimap {
         for (int x = 0; x < sectionMap.length; x++) {
             for (int y = 0; y < sectionMap[0].length; y++) {
                 int roomType = sectionMap[x][y];
-                if (roomType == 0) continue;
+                if (roomType == 0 || !discoveredRooms.contains(x + "," + y)) continue;
 
                 int screenX = offsetX + x * (this.minimapTileSize + this.padding);
                 int screenY = offsetY + y * (this.minimapTileSize + this.padding);
@@ -71,24 +91,24 @@ public class Minimap {
         g2.setColor(Color.DARK_GRAY);
         for (int x = 0; x < sectionMap.length; x++) {
             for (int y = 0; y < sectionMap[0].length; y++) {
-                if (sectionMap[x][y] != 0) {
+                if (sectionMap[x][y] != 0 && discoveredRooms.contains(x + "," + y)) {
                     int screenX = offsetX + x * (this.minimapTileSize + this.padding);
                     int screenY = offsetY + y * (this.minimapTileSize + this.padding);
 
                     // Check for adjacent rooms and draw hallways
-                    if (x > 0 && sectionMap[x - 1][y] != 0) {
+                    if (x > 0 && sectionMap[x - 1][y] != 0 && discoveredRooms.contains((x - 1) + "," + y)) {
                         // Draw hallway to the left
                         g2.fillRect(screenX - this.padding, screenY + this.minimapTileSize / 2 - this.padding / 2, this.padding, this.padding);
                     }
-                    if (x < sectionMap.length - 1 && sectionMap[x + 1][y] != 0) {
+                    if (x < sectionMap.length - 1 && sectionMap[x + 1][y] != 0 && discoveredRooms.contains((x + 1) + "," + y)) {
                         // Draw hallway to the right
                         g2.fillRect(screenX + this.minimapTileSize, screenY + this.minimapTileSize / 2 - this.padding / 2, this.padding, this.padding);
                     }
-                    if (y > 0 && sectionMap[x][y - 1] != 0) {
+                    if (y > 0 && sectionMap[x][y - 1] != 0 && discoveredRooms.contains(x + "," + (y - 1))) {
                         // Draw hallway upwards
                         g2.fillRect(screenX + this.minimapTileSize / 2 - this.padding / 2, screenY - this.padding, this.padding, this.padding);
                     }
-                    if (y < sectionMap[0].length - 1 && sectionMap[x][y + 1] != 0) {
+                    if (y < sectionMap[0].length - 1 && sectionMap[x][y + 1] != 0 && discoveredRooms.contains(x + "," + (y + 1))) {
                         // Draw hallway downwards
                         g2.fillRect(screenX + this.minimapTileSize / 2 - this.padding / 2, screenY + this.minimapTileSize, this.padding, this.padding);
                     }
@@ -99,6 +119,8 @@ public class Minimap {
 
     public void clearRoom(int sectionX, int sectionY) {
         this.sectionMap[sectionX][sectionY] = 8;  // Mark room as cleared
+        this.discoveredRooms.add(sectionX + "," + sectionY); // Add room to discovered rooms
+        this.discoverConnectedHallways(new Room(this.gamePanel, 0, sectionX, sectionY)); // Discover connected hallways
     }
 
     public void updateCurrentRoom(Room room) {
