@@ -46,11 +46,12 @@ public class KeyHandler implements KeyListener {
                 this.gamePanel.zoom(-1);
             }
         }
-        if (code == KeyEvent.VK_P) this.gamePanel.paused = !this.gamePanel.paused;
+        if (code == KeyEvent.VK_ESCAPE) this.gamePanel.paused = !this.gamePanel.paused;
         if (this.gamePanel.paused) {
             this.gamePanel.gameState = GamePanel.PAUSE_STATE;
         } else {
             this.gamePanel.gameState = GamePanel.PLAYING_STATE;
+            this.gamePanel.gameUI.drawnTint = false;
         }
     
     }

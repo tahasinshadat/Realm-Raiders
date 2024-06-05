@@ -71,22 +71,15 @@ public class Room {
 
     public void update() {
         // System.out.println(this.isPlayerInRoom( (int) (this.gamePanel.player.worldX / this.gamePanel.tileSize), (int) (this.gamePanel.player.worldY / this.gamePanel.tileSize) ));
-        if (!this.isBossRoom && !this.roomInitialized && !this.isCleared && !this.isLootRoom && !this.isStartRoom &&
-            this.isPlayerInRoom((int) this.gamePanel.player.worldX, (int) this.gamePanel.player.worldY)) {
-            
+        if (!this.isBossRoom && !this.roomInitialized && !this.isCleared && !this.isLootRoom && !this.isStartRoom && this.isPlayerInRoom((int) this.gamePanel.player.worldX, (int) this.gamePanel.player.worldY)) {
             this.initiateRoom();
             this.roomInitialized = true;
         }
 
-        if (this.isBossRoom && !this.roomInitialized && !this.isCleared && 
-            this.isPlayerInRoom( (int) this.gamePanel.player.worldX, (int) this.gamePanel.player.worldY)) {
-
+        if (this.isBossRoom && !this.roomInitialized && !this.isCleared && this.isPlayerInRoom( (int) this.gamePanel.player.worldX, (int) this.gamePanel.player.worldY)) {
             this.initiateBossRoom();
             this.roomInitialized = true;
         }
-
-        if (this.portal != null) this.portal.update();
-        if (this.chest != null) this.chest.update();
 
         if (this.waveActive) {
             if (this.frameCounter % this.framesBetweenSpawns == 0) {
@@ -99,7 +92,11 @@ public class Room {
             this.isCleared = true;
         }
 
+        if (this.isPlayerInRoom( (int) this.gamePanel.player.worldX, (int) this.gamePanel.player.worldY)) this.gamePanel.minimap.updateCurrentRoom(this); // update current room for minimap
+        if (this.portal != null) this.portal.update();
+        if (this.chest != null) this.chest.update();
         if (this.isCleared) this.roomCleared();
+        
     }
 
     public void generateEnemies(int totalWaves, int enemiesPerWave, int framesBetweenSpawns) { // sets flag to true, and specifies enemy amount and time between spawns
@@ -169,6 +166,8 @@ public class Room {
             } else {
                 this.spawnChest();
             }
+            // Mark the room as cleared on the minimap
+            this.gamePanel.minimap.clearRoom(this.sectionX, this.sectionY);
         }
         this.roomCleared = true;
     }

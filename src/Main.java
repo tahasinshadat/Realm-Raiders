@@ -12,13 +12,3 @@ public class Main {
         
     }
 }
-
-/*
-
--m "Major Progress 4"
--m "Weapon Pickup with GameObject, zooming needs work"
--m "Room Clearing Implementation & Player navigation tracking"
--m "Score Counting"
--m "Random Enemy Generation"
-
-*/

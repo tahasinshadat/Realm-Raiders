@@ -317,7 +317,7 @@ public class Player extends Entity {
     }
 
     private void regenerateShield() {
-        int shieldRegenRate = 300; // Adjust the regeneration rate as needed
+        int shieldRegenRate = 25; // Adjust the regeneration rate as needed
         if (this.shield < this.maxShield) {
             this.shield += shieldRegenRate;
             if (this.shield > this.maxShield) {

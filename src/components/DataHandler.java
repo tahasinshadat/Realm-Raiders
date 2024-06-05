@@ -1,101 +1,88 @@
 package components;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import main.GamePanel;
 
 public class DataHandler {
 
     public GamePanel gamePanel;
-    public int mapTileNum[][];
+    private String saveFilePath = "../realm_raiders_save_data/saveFile.txt";
+    private int[][] mapTileNum;
 
-    InputStream is;
-    BufferedReader br;
-
-    private String file;
-
-    public DataHandler(GamePanel gamePanel, int[][] mapTileNum) {
+    public DataHandler(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
-        this.mapTileNum = mapTileNum;
     }
 
-    public void setFile(String file) {
-        this.file = file;
-        this.is = getClass().getResourceAsStream(this.file);
-        this.br = new BufferedReader(new InputStreamReader(this.is));
-    }
-
-    public int[][] readFileData() {
+    public void saveProgress() {
         try {
-            int col = 0;
-            int row = 0;
+            // Create the data directory if it doesn't exist
+            File directory = new File("realm_raiders_save_data");
+            directory.mkdirs();
 
-            while (col < this.gamePanel.maxWorldCol && row < this.gamePanel.maxWorldRow) {
-                String line = this.br.readLine(); // Read a single line from the txt file as a String
+            // Create a new save file in the data directory
+            String saveFilePath = "realm_raiders_save_data/saveFile.txt";
+            BufferedWriter writer = new BufferedWriter(new FileWriter(saveFilePath));
 
-                while (col < this.gamePanel.maxWorldCol) {
+            writer.write("CurrentPreset: " + this.gamePanel.currentPreset); writer.newLine();
 
-                    String numbers[] = line.split(" "); // Split the string into an array via the spaces
+            writer.write("WorldSize: " + this.gamePanel.worldSize); writer.newLine();
 
-                    int num = Integer.parseInt(numbers[col]); // Convert the number to an int
+            writer.write("LevelEnhancer: " + this.gamePanel.levelEnhancer); writer.newLine();
 
-                    this.mapTileNum[col][row] = num;
-                    col++;
+            writer.write("Score: " + this.gamePanel.score); writer.newLine();
+
+            writer.write("CurrentLevel: " + this.gamePanel.currentLevel); writer.newLine();
+
+            writer.write("GameDifficulty: " + this.gamePanel.gameDifficulty); writer.newLine();
+
+            writer.write("PlayerPositionX: " + this.gamePanel.player.worldX); writer.newLine();
+            writer.write("PlayerPositionY: " + this.gamePanel.player.worldY); writer.newLine();
+
+            // Write world map
+            for (int row = 0; row < this.gamePanel.maxWorldRow; row++) {
+                for (int col = 0; col < this.gamePanel.maxWorldCol; col++) {
+                    writer.write(this.gamePanel.tileManager.mapTileNum[col][row] + " ");
                 }
-                if (col == this.gamePanel.maxWorldCol) {
-                    col = 0;
-                    row++;
-                }
+                writer.newLine();
             }
 
-            this.br.close(); // Close the current BufferedReader
+            writer.close();
 
-            return this.mapTileNum;
+            System.out.println("Game progress saved successfully.");
 
-        } catch (Exception e) {
-            e.setStackTrace(null);
-        }
-        return this.mapTileNum;
-    }
-
-    public int getFileCols() {
-        try {
-            this.is = getClass().getResourceAsStream(this.file);
-            this.br = new BufferedReader(new InputStreamReader(this.is));
-    
-            // Read the first line to determine the number of columns
-            String firstLine = this.br.readLine();
-            String[] numbers = firstLine.split(" ");
-            int cols = numbers.length;
-
-            return cols;
-        
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return 0;
     }
-    
-    public int getFileRows() {
-        try {
-            this.is = getClass().getResourceAsStream(this.file);
-            this.br = new BufferedReader(new InputStreamReader(this.is));
-    
-            // Count the number of lines to determine the number of rows
-            int rows = 0;
-            while (this.br.readLine() != null) {
-                rows++;
+
+    public void loadProgress() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(saveFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("Score: ")) {
+                    this.gamePanel.score = Integer.parseInt(line.substring(7));
+                } else if (line.startsWith("Level: ")) {
+                    this.gamePanel.currentLevel = Integer.parseInt(line.substring(7));
+                } else if (line.startsWith("PlayerPositionX: ")) {
+                    this.gamePanel.player.worldX = Integer.parseInt(line.substring(17));
+                } else if (line.startsWith("PlayerPositionY: ")) {
+                    this.gamePanel.player.worldY = Integer.parseInt(line.substring(17));
+                } else {
+                    
+                }
             }
-    
-            return rows;
+            System.out.println("Game progress loaded successfully.");
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return 0;
+
     }
-    
 
 }

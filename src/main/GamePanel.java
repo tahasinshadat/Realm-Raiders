@@ -1,12 +1,14 @@
 package main;
 
 import components.CollisionHandler;
+import components.DataHandler;
 import components.Entity;
 import components.KeyHandler;
 import components.MapCreator;
 import components.MouseInteractions;
 import components.Room;
 import elements.Enemy;
+import elements.Minimap;
 import elements.Player;
 import elements.TileManager;
 
@@ -61,6 +63,8 @@ public class GamePanel extends JPanel implements Runnable {
     public MapCreator mapCreator = new MapCreator(this, true, this.currentPreset);
     public UI gameUI = new UI(this);
     public AssetManager assetManager = new AssetManager(this);
+    public Minimap minimap;
+    public DataHandler dataHandler = new DataHandler(this);
     
     // Entities
     public ArrayList<GameObject> obj = new ArrayList<>();
@@ -106,6 +110,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.worldSize = this.mapCreator.getWorldSize();
         this.mapCreator.setEnvironment();
         this.tileManager.mapTileNum = mapCreator.getWorldMap();
+        this.minimap = new Minimap(this, 20);
 
         // Add some enemies to the map for testing
         // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
@@ -159,6 +164,9 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void generateNewLevel() { // Passed Previous Level So Load New One
+        
+        this.cleanup();
+
         this.currentLevel++;
         this.gameDifficulty += 0.1;
 
@@ -171,10 +179,12 @@ public class GamePanel extends JPanel implements Runnable {
 
         this.assetManager.reset();
 
+        this.keyHandler = new KeyHandler(this);
         this.mapCreator.setWorldSize(this.sections, this.sectionSize);
         this.worldSize = this.mapCreator.getWorldSize();
         this.mapCreator.setEnvironment();
         this.tileManager.mapTileNum = mapCreator.getWorldMap();
+        this.minimap = new Minimap(this, 20);
     }
 
     public void startGameThread() {
@@ -187,6 +197,18 @@ public class GamePanel extends JPanel implements Runnable {
             this.gameThread.interrupt();
             this.gameThread = null;
         }
+    }
+
+    public void saveProgress() {
+        this.dataHandler.saveProgress();
+    }
+
+    public void loadProgress() {
+        this.dataHandler.loadProgress();
+    }
+
+    public void loadGame() {
+        
     }
 
     @Override
@@ -274,7 +296,10 @@ public class GamePanel extends JPanel implements Runnable {
                 ((Enemy) enemy).draw(g2);
             }
 
+            this.minimap.draw(g2); // Draw the minimap
+
             this.gameUI.draw(g2); // Draw in game UI
+            
         }
 
         g2.dispose();

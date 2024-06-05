@@ -27,8 +27,6 @@ public class MapCreator {
 
     public ArrayList<Room> rooms = new ArrayList<>();
 
-    
-
     public MapCreator(GamePanel gamePanel, boolean wallsEnabled, int presetNum) {
         this.gamePanel = gamePanel;
         this.wallsEnabled = wallsEnabled;

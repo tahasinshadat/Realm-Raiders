@@ -18,6 +18,8 @@ public class UI {
     private JButton controlsButton;
     private JButton backButton;
     private JButton backToTitleScreenButton;
+    private JButton saveAndQuitButton;
+    private JButton quitButton;
 
     // In Game UI
     private int healthBarHeight = 25;
@@ -26,14 +28,17 @@ public class UI {
     private int cornerX = 10;
     private int cornerY = 10;
 
+    // Styling
+    public boolean drawnTint = false;
+
     // Loading 
     private int loadScreenTimer = 0;
     private String[] gameFacts = {
-        "hello world",
-        "hello world",
-        "hello world",
-        "hello world",
-        "hello world",
+        "This Game Was Inspired by Soul Knight!",
+        "Check Out Realm Raiders On Github! It Was Made For Our APCSA Project",
+        "The Weapon Type Determines Speed, The Weapon Rarity Determines Damage",
+        "Always Heal Up Before Moving Onto A Boss Room",
+        "When Coding A Game, You Have To Code Aspects That You Never Even Thought Of, Like These Tips & Facts!",
     };
 
     public UI(GamePanel gamePanel) {
@@ -48,32 +53,39 @@ public class UI {
         this.controlsButton = new JButton("Controls + How to Play");
         this.backButton = new JButton("Back");
         this.backToTitleScreenButton = new JButton("Back To Title Screen");
+        this.quitButton = new JButton("Quit Game");
+        this.saveAndQuitButton = new JButton("Save Progress and Quit");
 
         // Set position of buttons
         this.newGameButton.setBounds(this.gamePanel.screenWidth / 2 - 100, this.gamePanel.screenHeight / 2 - 60, 200, 40);
         this.loadGameButton.setBounds(this.gamePanel.screenWidth / 2 - 100, this.gamePanel.screenHeight / 2 - 10, 200, 40);
         this.controlsButton.setBounds(this.gamePanel.screenWidth / 2 - 100, this.gamePanel.screenHeight / 2 + 40, 200, 40);
+        this.quitButton.setBounds(this.gamePanel.screenWidth / 2 - 100, this.gamePanel.screenHeight / 2 + 90, 200, 40);
         this.backButton.setBounds(this.gamePanel.screenWidth / 2 - 100, this.gamePanel.screenHeight / 2 + 100, 200, 40);
         this.backToTitleScreenButton.setBounds(this.gamePanel.screenWidth / 2 - 100, gamePanel.screenHeight / 2 + 100 + 50, 200, 40);
+        this.saveAndQuitButton.setBounds(this.gamePanel.screenWidth / 2 - 100, this.gamePanel.screenHeight / 2 + 60, 200, 40);
 
-        newGameButton.addActionListener((ActionEvent e) -> {
+        this.newGameButton.addActionListener((ActionEvent e) -> {
             this.gamePanel.gameState = GamePanel.PLAYING_STATE;
             this.gamePanel.newGame();
             this.removeButtons();
         });
 
-        loadGameButton.addActionListener((ActionEvent e) -> {
-            // add load game logic
+        this.loadGameButton.addActionListener((ActionEvent e) -> {
+            this.gamePanel.loadProgress();
+            this.gamePanel.loadGame();
+            this.gamePanel.gameState = GamePanel.PLAYING_STATE;
+            this.removeButtons();
         });
 
-        controlsButton.addActionListener((ActionEvent e) -> {
+        this.controlsButton.addActionListener((ActionEvent e) -> {
             this.gamePanel.gameState = GamePanel.MENU_SCREEN_STATE;
             this.gamePanel.requestFocus();
             this.removeButtons();
             this.addBackButton();
         });
 
-        backButton.addActionListener((ActionEvent e) -> {
+        this.backButton.addActionListener((ActionEvent e) -> {
             this.gamePanel.gameState = GamePanel.TITLE_STATE;
             this.gamePanel.requestFocus();
             this.removeButtons();
@@ -85,6 +97,18 @@ public class UI {
             this.removeButtons();
             this.addTitleButtons();
             this.gamePanel.requestFocus();
+        });
+
+        this.saveAndQuitButton.addActionListener((ActionEvent e) -> {
+            this.gamePanel.saveProgress();
+            this.gamePanel.gameState = GamePanel.TITLE_STATE;
+            this.gamePanel.requestFocus();
+            this.removeButtons();
+            this.addTitleButtons();
+        });
+
+        this.quitButton.addActionListener((ActionEvent e) -> {
+            System.exit(0); // Close the game
         });
 
         this.gamePanel.setLayout(null);
@@ -111,6 +135,14 @@ public class UI {
         this.backToTitleScreenButton.setForeground(Color.WHITE);
         this.backToTitleScreenButton.setBackground(Color.BLACK); 
         this.backToTitleScreenButton.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+
+        this.saveAndQuitButton.setForeground(Color.WHITE);
+        this.saveAndQuitButton.setBackground(Color.BLACK); 
+        this.saveAndQuitButton.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+
+        this.quitButton.setForeground(Color.WHITE);
+        this.quitButton.setBackground(Color.BLACK); 
+        this.quitButton.setBorder(BorderFactory.createLineBorder(Color.WHITE));
     }
 
     private void addTitleButtons() {
@@ -118,8 +150,13 @@ public class UI {
         // Set "New Game" button to proper Title Screen Button Position 
         this.newGameButton.setBounds(this.gamePanel.screenWidth / 2 - 100, this.gamePanel.screenHeight / 2 - 60, 200, 40);
         this.gamePanel.add(this.newGameButton); // adds JButton to a Container class which is displayed by the Panel via Swing
+        
         this.gamePanel.add(this.loadGameButton);
         this.gamePanel.add(this.controlsButton);
+        
+        this.quitButton.setBounds(this.gamePanel.screenWidth / 2 - 100, gamePanel.screenHeight / 2 + 90, 200, 40);
+        this.gamePanel.add(this.quitButton);
+        
         // Causes button flickering
         // this.gamePanel.revalidate();
         // this.gamePanel.repaint();
@@ -130,7 +167,12 @@ public class UI {
         // Set "New Game" button to proper End Screen Button Position 
         this.newGameButton.setBounds(this.gamePanel.screenWidth / 2 - 100, this.gamePanel.screenHeight / 2 + 100, 200, 40);
         this.gamePanel.add(this.newGameButton);
+
         this.gamePanel.add(this.backToTitleScreenButton);
+
+        this.quitButton.setBounds(this.gamePanel.screenWidth / 2 - 100, gamePanel.screenHeight / 2 + 100 + 50 + 50, 200, 40);
+        this.gamePanel.add(this.quitButton);
+
         // Causes button flickering
         // this.gamePanel.revalidate();
         // this.gamePanel.repaint();
@@ -143,11 +185,19 @@ public class UI {
         if (this.gamePanel.isAncestorOf(this.controlsButton)) this.gamePanel.remove(this.controlsButton);
         if (this.gamePanel.isAncestorOf(this.backButton)) this.gamePanel.remove(this.backButton);
         if (this.gamePanel.isAncestorOf(this.backToTitleScreenButton)) this.gamePanel.remove(this.backToTitleScreenButton);
+        if (this.gamePanel.isAncestorOf(this.saveAndQuitButton)) this.gamePanel.remove(this.saveAndQuitButton);
+        if (this.gamePanel.isAncestorOf(this.quitButton)) this.gamePanel.remove(this.quitButton);
+
     }
 
     private void addBackButton() {
         this.styleButtons();
         this.gamePanel.add(this.backButton);
+    }
+
+    private void addSaveAndQuitButton() {
+        this.styleButtons();
+        this.gamePanel.add(this.saveAndQuitButton);
     }
 
     public void draw(Graphics2D g2) {
@@ -193,14 +243,24 @@ public class UI {
     }
 
     private void drawPausedScreen(Graphics2D g2) {
+        if (!this.drawnTint) {
+            this.drawnTint = true;
+            Color tint = new Color(0, 0, 0, 150); // semi transparent tint
+            g2.setColor(tint);
+            g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight); // Fill the entire screen
+        }
+
+        // Draw the paused screen content
         g2.setColor(this.gamePanel.backgroundColor);
-        g2.fillRect(this.gamePanel.screenWidth/4, this.gamePanel.screenHeight/4, this.gamePanel.screenWidth/2, this.gamePanel.screenHeight/2);
+        g2.fillRect(this.gamePanel.screenWidth / 4, this.gamePanel.screenHeight / 4, this.gamePanel.screenWidth / 2, this.gamePanel.screenHeight / 2);
         g2.setColor(Color.WHITE);
         g2.setFont(this.gameFont);
         String text = "Game Paused";
         int x = getXForCenteredText(g2, text);
         int y = this.gamePanel.screenHeight / 2;
         g2.drawString(text, x, y);
+
+        this.addSaveAndQuitButton();
     }
 
     private void drawEndScreen(Graphics2D g2) {
@@ -259,15 +319,17 @@ public class UI {
         // Draw loading text
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Arial", Font.BOLD, 24));
-        g2.drawString("Loading...", centerX - 50, centerY + 80);
+        g2.drawString("Loading...", centerX - 50, centerY + 120);
 
         // Draw random game fact
-        g2.setFont(new Font("Arial", Font.PLAIN, 16));
+        g2.setFont(new Font("Arial", Font.PLAIN, 20));
+        g2.drawString("Tips & Facts", this.getXForCenteredText(g2, "Tips & Facts"), this.gamePanel.screenHeight - 80);
         String fact = this.gameFacts[this.randomNum(0, this.gameFacts.length - 1)];
         g2.drawString(fact, this.getXForCenteredText(g2, fact), this.gamePanel.screenHeight - 40);
 
         if (this.loadScreenTimer > this.gamePanel.FPS * 5) { // 5 seconds has passed
             this.loadScreenTimer = 0;
+            this.gamePanel.keyHandler = null;
             this.gamePanel.generateNewLevel();
             this.gamePanel.gameState = GamePanel.PLAYING_STATE;
         }
