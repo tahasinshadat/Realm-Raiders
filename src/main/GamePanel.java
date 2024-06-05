@@ -165,6 +165,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (this.currentLevel % this.levelEnhancer == 0) {
             this.sections += 2;
             this.currentPreset = (1 + (int) (Math.random() * 3)); // Choose Random Preset
+            this.tileManager.initPreset(currentPreset);;
             this.mapCreator.preset(this.currentPreset);
         }
 
