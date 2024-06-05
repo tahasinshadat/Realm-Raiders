@@ -2,8 +2,12 @@ package elements;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import components.Room;
 import main.GamePanel;
@@ -15,6 +19,8 @@ public class Minimap {
     private int[][] sectionMap;
     private Room currentRoom; // Player Section tracking
     private Set<String> discoveredRooms; // Track discovered rooms
+    private BufferedImage skullIcon;
+    private BufferedImage chestIcon;
 
     public Minimap(GamePanel gamePanel, int minimapTileSize) {
         this.gamePanel = gamePanel;
@@ -23,6 +29,7 @@ public class Minimap {
         this.sectionMap = new int[this.gamePanel.sections][this.gamePanel.sections];
         this.discoveredRooms = new HashSet<>(); // discovered rooms set
         this.initializeSectionMap();
+        this.loadIcons();
     }
 
     private void initializeSectionMap() {
@@ -37,6 +44,15 @@ public class Minimap {
             else this.sectionMap[room.sectionX][room.sectionY] = 1;
         }
         this.discoverConnectedHallways(this.currentRoom); // Discover connected hallways for startRoom
+    }
+
+    private void loadIcons() {
+        try {
+            this.skullIcon = ImageIO.read(getClass().getResourceAsStream("../assets/icons/skull.png"));
+            this.chestIcon = ImageIO.read(getClass().getResourceAsStream("../assets/icons/chest.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void discoverConnectedHallways(Room room) {
@@ -59,7 +75,7 @@ public class Minimap {
         // System.out.println("Drawing minimap at offsetX: " + offsetX + ", offsetY: " + offsetY);
 
         // semi-transpareny!!!!!!
-        g2.setColor(new Color(0, 0, 0, 150));  // Semi-transparent black
+        g2.setColor(new Color(0, 0, 0, 150));
         g2.fillRect(offsetX - 10, offsetY - 10, minimapWidth + 20, minimapHeight + 20);
 
         // Draw rooms
@@ -71,13 +87,19 @@ public class Minimap {
                 int screenX = offsetX + x * (this.minimapTileSize + this.padding);
                 int screenY = offsetY + y * (this.minimapTileSize + this.padding);
 
-                if (roomType == 8) g2.setColor(Color.LIGHT_GRAY);  // Cleared room
-                else if (roomType == 1) g2.setColor(Color.GRAY);  // Normal room
-                else if (roomType == 2) g2.setColor(Color.GREEN);  // Start room
-                else if (roomType == 3) g2.setColor(Color.YELLOW);  // Loot room
-                else if (roomType == 4) g2.setColor(Color.RED);  // Boss room
+                if (roomType == 8) g2.setColor(new Color(180, 180, 180));  // Cleared room
+                else if (roomType == 1) g2.setColor(new Color(140, 140, 140));  // Normal room
+                else if (roomType == 2) g2.setColor(new Color(34, 160, 34, 200));  // Start room
+                else if (roomType == 3) g2.setColor(new Color(218, 165, 32, 200));  // Loot room 
+                else if (roomType == 4) g2.setColor(new Color(178, 34, 34, 200));  // Boss room 
                 
                 g2.fillRect(screenX, screenY, this.minimapTileSize, this.minimapTileSize);
+                
+                int skullIconSize = (int) (this.minimapTileSize / 1.25);
+                int chestIconSize = (int) (this.minimapTileSize / 1.25);
+                
+                if (roomType == 3) g2.drawImage(this.chestIcon, screenX + (this.minimapTileSize - chestIconSize) / 2, screenY + 2, chestIconSize, chestIconSize, null);
+                if (roomType == 4) g2.drawImage(this.skullIcon, screenX + (this.minimapTileSize - skullIconSize) / 2, screenY, skullIconSize, skullIconSize, null);
 
                 // white outline for the current room
                 if (this.currentRoom != null && x == this.currentRoom.sectionX && y == this.currentRoom.sectionY) {
