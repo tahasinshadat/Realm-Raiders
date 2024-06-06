@@ -20,6 +20,21 @@ public class DataHandler {
         this.gamePanel = gamePanel;
     }
 
+
+
+    // SAVING FUNCTIONS
+    public void savePlayerData(BufferedWriter writer) { // save player data (location, health, shield, mana, current weapon)
+        
+    }
+
+    public void saveWeaponData(BufferedWriter writer) { // save weapon data (speed, damage, rarity)
+
+    }
+
+    public void saveWorldData(BufferedWriter writer) { // save room positions and states + current objects on map + miniMap state + score, current level, current preset, gameDifficulty, etc
+
+    }
+    
     public void saveProgress() {
         try {
             // Create the data directory if it doesn't exist
@@ -33,8 +48,6 @@ public class DataHandler {
             writer.write("CurrentPreset: " + this.gamePanel.currentPreset); writer.newLine();
 
             writer.write("WorldSize: " + this.gamePanel.worldSize); writer.newLine();
-
-            writer.write("LevelEnhancer: " + this.gamePanel.levelEnhancer); writer.newLine();
 
             writer.write("Score: " + this.gamePanel.score); writer.newLine();
 
@@ -62,6 +75,21 @@ public class DataHandler {
         }
     }
 
+    
+
+    // LOADING FUNCTIONS
+    public void loadPlayerData(BufferedReader reader) {
+
+    }
+
+    public void loadWeaponData(BufferedReader reader) {
+        
+    }
+
+    public void loadWorldData(BufferedReader reader) {
+        
+    }
+
     public void loadProgress() {
         try (BufferedReader reader = new BufferedReader(new FileReader(saveFilePath))) {
             String line;
@@ -86,19 +114,4 @@ public class DataHandler {
         } 
     }
 
-    public void savePlayerData() {
-        
-    }
-
-    public void saveWeaponData() {
-
-    }
-
-    public void loadPlayerData() {
-
-    }
-
-    public void loadWeaponData() {
-        
-    }
 }

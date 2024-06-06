@@ -88,7 +88,7 @@ public class Minimap {
                 int screenY = offsetY + y * (this.minimapTileSize + this.padding);
 
                 if (roomType == 8) g2.setColor(new Color(180, 180, 180));  // Cleared room
-                else if (roomType == 1) g2.setColor(new Color(140, 140, 140));  // Normal room
+                else if (roomType == 1) g2.setColor(new Color(105, 105, 105));  // Normal room
                 else if (roomType == 2) g2.setColor(new Color(34, 160, 34, 200));  // Start room
                 else if (roomType == 3) g2.setColor(new Color(218, 165, 32, 200));  // Loot room 
                 else if (roomType == 4) g2.setColor(new Color(178, 34, 34, 200));  // Boss room 

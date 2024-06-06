@@ -404,4 +404,5 @@ public class Player extends Entity {
         this.worldX = worldWidth / 2;
         this.worldY = worldHeight / 2;
     }
+
 }

@@ -33,6 +33,7 @@ public class UI {
 
     // Styling
     public BufferedImage gameTitle;
+    public BufferedImage gameTitleBG;
 
     // Loading 
     private int loadScreenTimer = 0;
@@ -65,6 +66,7 @@ public class UI {
     public UI(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
         this.gameTitle = this.gamePanel.assetManager.loadImage("../assets/icons/title.png");
+        this.gameTitleBG = this.gamePanel.assetManager.loadImage("../assets/icons/titleBG.png");
         this.gameFont = new Font("Virgil", Font.PLAIN, 40);
         this.setupButtons();
     }
@@ -238,13 +240,12 @@ public class UI {
     }
 
     private void drawTitleScreen(Graphics2D g2) {
-        g2.setColor(this.gamePanel.backgroundColor);
-        g2.fillRect(0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight);
+        g2.drawImage(this.gameTitleBG, 0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight, null);
         g2.setFont(gameFont);
         g2.setColor(Color.WHITE);
         // FontMetrics metrics = g2.getFontMetrics(g2.getFont());
         // int nameWidth = metrics.stringWidth("Realm Raiders");
-        
+
         g2.drawImage(this.gameTitle, this.gamePanel.screenWidth / 2 - 300 + 15, this.gamePanel.screenHeight / 8 - 150, 600, 300, null);
         // g2.drawString("Realm Raiders", this.gamePanel.screenWidth / 2 - nameWidth / 2, this.gamePanel.screenHeight / 4);
         this.addTitleButtons();
@@ -299,8 +300,7 @@ public class UI {
 
     private void drawEndScreen(Graphics2D g2) {
         // Draw the end screen
-        g2.setColor(this.gamePanel.backgroundColor);
-        g2.fillRect(0, 0, gamePanel.screenWidth, gamePanel.screenHeight);
+        g2.drawImage(this.gameTitleBG, 0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight, null);
         g2.setColor(Color.WHITE);
         g2.setFont(gameFont);
         String gameOverText = "Game Over";

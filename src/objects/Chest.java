@@ -53,7 +53,7 @@ public class Chest extends GameObject {
     }
 
     public GameObject getRandomChestItem() {
-        if (this.randomNum(0, 100) > 25) {
+        if (this.randomNum(1, 100) >= 50) {
             this.chestItem = new Weapon(this.gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse, this.gamePanel.player);
             ((Weapon) this.chestItem).initializeAsRandomWeapon();
             ((Weapon) this.chestItem).worldX = (int) this.worldX;
