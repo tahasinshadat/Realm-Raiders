@@ -16,9 +16,9 @@ public class Minimap {
     private GamePanel gamePanel;
     private int minimapTileSize;
     private int padding;
-    private int[][] sectionMap;
+    public int[][] sectionMap;
     private Room currentRoom; // Player Section tracking
-    private Set<String> discoveredRooms; // Track discovered rooms
+    public Set<String> discoveredRooms; // Track discovered rooms
     private BufferedImage skullIcon;
     private BufferedImage chestIcon;
 

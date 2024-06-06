@@ -405,4 +405,46 @@ public class Player extends Entity {
         this.worldY = worldHeight / 2;
     }
 
+    public String getPlayerProperties() {
+        StringBuilder properties = new StringBuilder();
+        properties.append("maxShield: ").append(this.maxShield).append("\n");
+        properties.append("maxHealth: ").append(this.maxHealth).append("\n");
+        properties.append("maxMana: ").append(this.maxMana).append("\n");
+        properties.append("shield: ").append(this.shield).append("\n");
+        properties.append("health: ").append(this.health).append("\n");
+        properties.append("mana: ").append(this.mana).append("\n");
+        properties.append("worldX: ").append(this.worldX).append("\n");
+        properties.append("worldY: ").append(this.worldY).append("\n");
+        properties.append("speed: ").append(this.speed).append("\n");
+        properties.append("diagnolSpeed: ").append(this.diagnolSpeed).append("\n");
+        properties.append("direction: ").append(this.direction).append("\n");
+        return properties.toString();
+    }
+
+    public void setPlayerPropertiesFromString(String properties) {
+        String[] lines = properties.split("\n");
+        for (String line : lines) {
+            String[] parts = line.split(": ");
+            if (parts.length == 2) {
+                String key = parts[0].trim();
+                String value = parts[1].trim();
+    
+                switch (key) {
+                    case "maxShield" -> this.maxShield = Integer.parseInt(value);
+                    case "maxHealth" -> this.maxHealth = Integer.parseInt(value);
+                    case "maxMana" -> this.maxMana = Integer.parseInt(value);
+                    case "shield" -> this.shield = Integer.parseInt(value);
+                    case "health" -> this.health = Integer.parseInt(value);
+                    case "mana" -> this.mana = Integer.parseInt(value);
+                    case "worldX" -> this.worldX = Double.parseDouble(value);
+                    case "worldY" -> this.worldY = Double.parseDouble(value);
+                    case "speed" -> this.speed = Double.parseDouble(value);
+                    case "diagnolSpeed" -> this.diagnolSpeed = Double.parseDouble(value);
+                    case "direction" -> this.direction = value;
+                }
+            }
+        }
+    }
+    
+    
 }

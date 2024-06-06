@@ -54,7 +54,6 @@ public class Weapon extends GameObject {
         // x and y of player on screen
         this.screenX = this.gamePanel.screenWidth / 2 - this.gamePanel.tileSize / 2;
         this.screenY = this.gamePanel.screenHeight / 2 - this.gamePanel.tileSize / 2;
-
     }
 
     public void setData(double weaponAttackSpeed, double weaponProjectileSpeed, double weaponDamage) {
@@ -64,6 +63,39 @@ public class Weapon extends GameObject {
         this.setMetaData();
         this.setImage();
     }
+
+    public String getWeaponProperties() {
+        StringBuilder properties = new StringBuilder();
+        properties.append("WeaponClass: ").append(this.weaponClass).append("\n");
+        properties.append("WeaponRarity: ").append(this.weaponRarity).append("\n");
+        properties.append("WeaponAttackSpeed: ").append(this.weaponAttackSpeed).append("\n");
+        properties.append("WeaponProjectileSpeed: ").append(this.weaponProjectileSpeed).append("\n");
+        properties.append("WeaponDamage: ").append(this.weaponDamage).append("\n");
+        properties.append("WeaponName: ").append(this.weaponName).append("\n");
+        return properties.toString();  
+    }
+
+    public void setWeaponPropertiesFromString(String propertiesString) {
+        String[] lines = propertiesString.split("\n");
+        for (String line : lines) {
+            if (line.startsWith("WeaponClass: ")) {
+                this.weaponClass = line.substring(13);
+            } else if (line.startsWith("WeaponRarity: ")) {
+                this.weaponRarity = line.substring(15);
+            } else if (line.startsWith("WeaponAttackSpeed: ")) {
+                this.weaponAttackSpeed = Integer.parseInt(line.substring(19));
+            } else if (line.startsWith("WeaponProjectileSpeed: ")) {
+                this.weaponProjectileSpeed = Double.parseDouble(line.substring(23));
+            } else if (line.startsWith("WeaponDamage: ")) {
+                this.weaponDamage = Double.parseDouble(line.substring(14));
+            } else if (line.startsWith("WeaponName: ")) {
+                this.weaponName = line.substring(12);
+            }
+        }
+        this.setData(this.weaponAttackSpeed, this.weaponProjectileSpeed, this.weaponDamage);
+        this.setTextColor();  // Set text color based on weapon rarity
+    }
+    
 
     public double[] getData() {
         return new double[]{this.weaponAttackSpeed, this.weaponProjectileSpeed, this.weaponDamage};

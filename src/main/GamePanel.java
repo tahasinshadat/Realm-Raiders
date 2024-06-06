@@ -289,6 +289,21 @@ public class GamePanel extends JPanel implements Runnable {
         gameObjectsToAdd.clear();
     }
 
+    public String getGamePanelProperties() {
+        StringBuilder properties = new StringBuilder();
+        properties.append("tileSize: ").append(this.tileSize).append("\n");
+        properties.append("currentPreset: ").append(this.currentPreset).append("\n");
+        properties.append("sectionSize: ").append(this.sectionSize).append("\n");
+        properties.append("sections: ").append(this.sections).append("\n");
+        properties.append("worldSize: ").append(this.worldSize).append("\n");
+        properties.append("gameState: ").append(this.gameState).append("\n");
+        properties.append("score: ").append(this.score).append("\n");
+        properties.append("currentLevel: ").append(this.currentLevel).append("\n");
+        properties.append("gameDifficulty: ").append(this.gameDifficulty).append("\n");
+        return properties.toString();
+    }
+    
+
     @Override
     public void paintComponent(Graphics g) { // what gets drawn last is on top
         super.paintComponent(g); // Reference the parent class of this class (JPanel) - It's JPanel's Method

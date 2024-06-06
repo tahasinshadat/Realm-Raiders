@@ -233,6 +233,41 @@ public class Room {
     private int randomNum(int min, int max) { // Inclusive
         return (int) (Math.random() * ((max - min) + 1)) + min;
     }
+
+    public String getRoomProperties() {
+        StringBuilder properties = new StringBuilder();
+        properties.append("isCleared: ").append(this.isCleared).append("\n");
+        properties.append("isLootRoom: ").append(this.isLootRoom).append("\n");
+        properties.append("isBossRoom: ").append(this.isBossRoom).append("\n");
+        properties.append("isStartRoom: ").append(this.isStartRoom).append("\n");
+        properties.append("size: ").append(this.size).append("\n");
+        properties.append("sectionX: ").append(this.sectionX).append("\n");
+        properties.append("sectionY: ").append(this.sectionY).append("\n");
+        properties.append("roomInitialized: ").append(this.roomInitialized).append("\n");
+        properties.append("roomCleared: ").append(this.roomCleared).append("\n");
+        return properties.toString();
+    }
+    
+    public void setRoomPropertiesFromString(String properties) {
+        String[] lines = properties.split("\n");
+        for (String line : lines) {
+            String[] keyValue = line.split(": ");
+            String key = keyValue[0];
+            String value = keyValue[1];
+    
+            switch (key) {
+                case "isCleared" -> this.isCleared = Boolean.parseBoolean(value);
+                case "isLootRoom" -> this.isLootRoom = Boolean.parseBoolean(value);
+                case "isBossRoom" -> this.isBossRoom = Boolean.parseBoolean(value);
+                case "isStartRoom" -> this.isStartRoom = Boolean.parseBoolean(value);
+                case "size" -> this.size = Integer.parseInt(value);
+                case "sectionX" -> this.sectionX = Integer.parseInt(value);
+                case "sectionY" -> this.sectionY = Integer.parseInt(value);
+                case "roomInitialized" -> this.roomInitialized = Boolean.parseBoolean(value);
+                case "roomCleared" -> this.roomCleared = Boolean.parseBoolean(value);
+            }
+        }
+    }
     
     @Override
     public String toString() {
