@@ -171,7 +171,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (this.currentLevel % this.levelEnhancer == 0) {
             this.sections += 2;
             this.currentPreset = (1 + (int) (Math.random() * 3)); // Choose Random Preset
-            this.tileManager.initPreset(currentPreset);;
+            this.tileManager.initPreset(currentPreset);
             this.mapCreator.preset(this.currentPreset);
             this.updateWorldSize();
         }
@@ -186,7 +186,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.player.resetPosition();
     }
 
-    private void updateWorldSize() {
+    public void updateWorldSize() {
         this.worldSize = this.sectionSize * this.sections;
 
         this.maxWorldCol = this.worldSize;

@@ -6,16 +6,19 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import elements.Minimap;
+import elements.TileManager;
 import main.GamePanel;
 import objects.Weapon;
 
 public class DataHandler {
 
     public GamePanel gamePanel;
-    private String saveFilePath = "../realm_raiders_save_data/saveFile.txt";
+    private String saveFilePath = "./realm_raiders_save_data/saveFile.txt"; // off of root
 
     public DataHandler(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
@@ -58,6 +61,8 @@ public class DataHandler {
                 }
                 writer.newLine();
             }
+            writer.write("END OF MAP");
+            writer.newLine();
             
             // Save room properties
             writer.write("roomProperties:");
@@ -68,6 +73,8 @@ public class DataHandler {
                 writer.write(room.getRoomProperties());
                 writer.newLine();
             }
+            writer.write("END roomProperties");
+            writer.newLine();
             
             // Save minimap sectionMap 2D array
             int[][] sectionMap = this.gamePanel.minimap.sectionMap;
@@ -127,14 +134,139 @@ public class DataHandler {
     }
 
     public void loadWorldData(BufferedReader reader) { // load world, minimap, and game objects in previous game state from world save data
-        
+        String line;
+        try {
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+
+                if (line.startsWith("tileSize:")) {
+                    // credit to polygenelubricants at https://stackoverflow.com/questions/2338790/get-int-from-string-also-containing-letters-in-java
+                    // for the parseInt with characters
+                    this.gamePanel.tileSize = Integer.parseInt(line.replaceAll("[\\D]", ""));
+                    continue;
+                }
+
+                if (line.startsWith("currentPreset")) {
+                    this.gamePanel.currentPreset = Integer.parseInt(line.replaceAll("[\\D]", ""));
+                    this.gamePanel.tileManager.initPreset(this.gamePanel.currentPreset);
+                    this.gamePanel.mapCreator.preset(this.gamePanel.currentPreset);
+                    continue;
+                }
+
+                if (line.startsWith("sectionSize:")) {
+                    this.gamePanel.sectionSize = Integer.parseInt(line.replaceAll("[\\D]", ""));
+
+                    line = reader.readLine(); // sections
+                    this.gamePanel.sections = Integer.parseInt(line.replaceAll("[\\D]", ""));
+                    this.gamePanel.updateWorldSize();
+                    continue;
+                }
+
+                if (line.startsWith("score:")) {
+                    this.gamePanel.score = Integer.parseInt(line.replaceAll("[\\D]", ""));
+
+                    line = reader.readLine(); // current level
+                    this.gamePanel.currentLevel = Integer.parseInt(line.replaceAll("[\\D]", ""));
+
+                    line = reader.readLine(); // gameDifficulty
+                    this.gamePanel.gameDifficulty = Integer.parseInt(line.replaceAll("[\\D]", ""));
+                    continue;
+                }
+
+                if (line.startsWith("worldMap:")) {
+                    this.gamePanel.mapCreator.setWorldSize(this.gamePanel.sections,this.gamePanel.sectionSize);
+                    this.gamePanel.tileManager = new TileManager(gamePanel);
+                    this.gamePanel.tileManager.initPreset(this.gamePanel.currentPreset);
+                    
+                    line = reader.readLine(); // first row of map
+                    for (int i = 0; !line.equals("END OF MAP"); i++) { // while not end
+
+                        String[] row = line.split(" ");
+
+                        for (int col = 0; col < row.length; col++) {
+                            this.gamePanel.tileManager.mapTileNum[i][col] = Integer.parseInt(row[col]);
+                        }
+                        line = reader.readLine();
+                    }
+                    continue;
+                }
+
+                if (line.startsWith("roomProperties:")) {
+                    line = reader.readLine(); // first room section
+                    this.gamePanel.mapCreator.rooms.clear();
+
+                    while (!line.equals("END roomProperties")) {
+                        // String[] key = line.split(",");
+
+                        line = reader.readLine();
+                        boolean isCleared = Boolean.parseBoolean(line.substring("isCleared: ".length()));
+                        
+                        line = reader.readLine();
+                        boolean isLootRoom = Boolean.parseBoolean(line.substring("isLootRoom: ".length()));
+                        
+                        line = reader.readLine();
+                        boolean isBossRoom = Boolean.parseBoolean(line.substring("isBossRoom: ".length()));
+                        
+                        line = reader.readLine();
+                        boolean isStartRoom = Boolean.parseBoolean(line.substring("isStartRoom: ".length()));
+
+                        line = reader.readLine();
+                        int size = Integer.parseInt(line.replaceAll("[\\D]", ""));
+
+                        line = reader.readLine();
+                        int x = Integer.parseInt(line.replaceAll("[\\D]", ""));
+
+                        line = reader.readLine();
+                        int y = Integer.parseInt(line.replaceAll("[\\D]", ""));
+
+                        line = reader.readLine();
+                        boolean roomInitialized = Boolean.parseBoolean(line.substring("roomInitialized: ".length()));
+
+                        line = reader.readLine();
+                        boolean roomCleared = Boolean.parseBoolean(line.substring("roomCleared: ".length()));
+
+                        this.gamePanel.mapCreator.rooms.add(new Room(this.gamePanel, size, x, y, roomInitialized, isCleared, roomCleared));
+
+                        line = reader.readLine(); // null
+                        line = reader.readLine(); // next room or end
+                    }
+                    // System.out.println(this.gamePanel.mapCreator.rooms);
+                    continue;
+                }
+
+                if (line.startsWith("sectionMap:")) {
+                    this.gamePanel.minimap = new Minimap(this.gamePanel, 20);
+                    for (int row = 0; row < this.gamePanel.sections; row++) {
+                        line = reader.readLine();
+                        String[] sRow = line.split(" ");
+                        for (int col = 0; col < this.gamePanel.sections; col++) {
+                            this.gamePanel.minimap.sectionMap[row][col] = Integer.parseInt(sRow[col]);
+                        }
+                    }
+
+                    line = reader.readLine(); // discoveredRooms
+                    this.gamePanel.minimap.discoveredRooms = new HashSet<>();
+                    line = reader.readLine(); // first discovered room (guaranteed at least 1 due to start room)
+                    while (line != null) {
+                        this.gamePanel.minimap.discoveredRooms.add(line);
+                        line = reader.readLine(); // get next line
+                    }
+
+                    continue;
+                }
+
+                this.gamePanel.gameState = this.gamePanel.PLAYING_STATE;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void loadProgress() {
         try (BufferedReader reader = new BufferedReader(new FileReader(saveFilePath))) {
-            this.loadWorldData(reader);
             this.loadPlayerData(reader);
             this.loadWeaponData(reader);
+            this.loadWorldData(reader);
             System.out.println("Game progress loaded successfully.");
         } catch (IOException e) {
             System.out.println("Save file not found!");

@@ -69,6 +69,30 @@ public class Room {
         }
     }
 
+    public Room(GamePanel gamePanel, int size, int x, int y, boolean roomInitialized, boolean isCleared, boolean roomCleared) {
+        this.gamePanel = gamePanel;
+
+        this.size = size;
+        if (this.size == this.gamePanel.lootRoomSize) this.isLootRoom = true;
+        else if (this.size == this.gamePanel.endRoomSize) this.isBossRoom = true;
+        else if (this.size == this.gamePanel.startingRoomSize) this.isStartRoom = true;
+
+        this.roomInitialized = roomInitialized;
+        this.isCleared = isCleared;
+        this.roomCleared = roomCleared;
+
+        this.sectionX = x;
+        this.sectionY = y;
+
+        this.sectionsTopLeftX = (sectionX <= 0) ? 0 : (sectionX * this.gamePanel.sectionSize) - 1;
+        this.sectionsTopLeftY = (sectionY <= 0) ? 0 : (sectionY * this.gamePanel.sectionSize) - 1; 
+
+        this.roomLeft = this.sectionsTopLeftX + ( (this.gamePanel.sectionSize - size) / 2);
+        this.roomRight = this.roomLeft + size - 1;
+        this.roomTop = this.sectionsTopLeftY + ( (this.gamePanel.sectionSize - size) / 2);
+        this.roomBottom = this.roomTop + size - 1;
+    }
+
     public void update() {
         // System.out.println(this.isPlayerInRoom( (int) (this.gamePanel.player.worldX / this.gamePanel.tileSize), (int) (this.gamePanel.player.worldY / this.gamePanel.tileSize) ));
         if (!this.isBossRoom && !this.roomInitialized && !this.isCleared && !this.isLootRoom && !this.isStartRoom && this.isPlayerInRoom((int) this.gamePanel.player.worldX, (int) this.gamePanel.player.worldY)) {
