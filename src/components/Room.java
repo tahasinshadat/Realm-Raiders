@@ -64,33 +64,9 @@ public class Room {
         this.roomTop = this.sectionsTopLeftY + ( (this.gamePanel.sectionSize - size) / 2);
         this.roomBottom = this.roomTop + size - 1;
 
-        if (this.isLootRoom || this.isStartRoom) {
+        if ((this.isLootRoom || this.isStartRoom) && this.size != 0) { // if size = 0, then loading from file, don't spawn chest
             this.spawnChest();
         }
-    }
-
-    public Room(GamePanel gamePanel, int size, int x, int y, boolean roomInitialized, boolean isCleared, boolean roomCleared) {
-        this.gamePanel = gamePanel;
-
-        this.size = size;
-        if (this.size == this.gamePanel.lootRoomSize) this.isLootRoom = true;
-        else if (this.size == this.gamePanel.endRoomSize) this.isBossRoom = true;
-        else if (this.size == this.gamePanel.startingRoomSize) this.isStartRoom = true;
-
-        this.roomInitialized = roomInitialized;
-        this.isCleared = isCleared;
-        this.roomCleared = roomCleared;
-
-        this.sectionX = x;
-        this.sectionY = y;
-
-        this.sectionsTopLeftX = (sectionX <= 0) ? 0 : (sectionX * this.gamePanel.sectionSize) - 1;
-        this.sectionsTopLeftY = (sectionY <= 0) ? 0 : (sectionY * this.gamePanel.sectionSize) - 1; 
-
-        this.roomLeft = this.sectionsTopLeftX + ( (this.gamePanel.sectionSize - size) / 2);
-        this.roomRight = this.roomLeft + size - 1;
-        this.roomTop = this.sectionsTopLeftY + ( (this.gamePanel.sectionSize - size) / 2);
-        this.roomBottom = this.roomTop + size - 1;
     }
 
     public void update() {
@@ -275,6 +251,7 @@ public class Room {
     public void setRoomPropertiesFromString(String properties) {
         String[] lines = properties.split("\n");
         for (String line : lines) {
+            // System.out.println(line);
             String[] keyValue = line.split(": ");
             String key = keyValue[0];
             String value = keyValue[1];

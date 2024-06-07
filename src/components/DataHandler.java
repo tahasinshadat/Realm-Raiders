@@ -137,7 +137,7 @@ public class DataHandler {
         String line;
         try {
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                // System.out.println(line);
 
                 if (line.startsWith("tileSize:")) {
                     // credit to polygenelubricants at https://stackoverflow.com/questions/2338790/get-int-from-string-also-containing-letters-in-java
@@ -192,43 +192,25 @@ public class DataHandler {
                 }
 
                 if (line.startsWith("roomProperties:")) {
-                    line = reader.readLine(); // first room section
                     this.gamePanel.mapCreator.rooms.clear();
 
                     while (!line.equals("END roomProperties")) {
-                        // String[] key = line.split(",");
+                        line = reader.readLine(); // start room
 
-                        line = reader.readLine();
-                        boolean isCleared = Boolean.parseBoolean(line.substring("isCleared: ".length()));
+                        Room room = new Room(gamePanel, 0, 0, 0);
+                        String roomData = "";
+                        while (!(line = reader.readLine()).equals("")) {
+                            // System.out.println(line);
+                            roomData += line + "\n";
+                        }
+
+                        roomData = roomData.substring(0, roomData.length()-1);
+                        // System.out.println(roomData);
+                        room.setRoomPropertiesFromString(roomData);
+                        this.gamePanel.mapCreator.rooms.add(room);
                         
-                        line = reader.readLine();
-                        boolean isLootRoom = Boolean.parseBoolean(line.substring("isLootRoom: ".length()));
-                        
-                        line = reader.readLine();
-                        boolean isBossRoom = Boolean.parseBoolean(line.substring("isBossRoom: ".length()));
-                        
-                        line = reader.readLine();
-                        boolean isStartRoom = Boolean.parseBoolean(line.substring("isStartRoom: ".length()));
-
-                        line = reader.readLine();
-                        int size = Integer.parseInt(line.replaceAll("[\\D]", ""));
-
-                        line = reader.readLine();
-                        int x = Integer.parseInt(line.replaceAll("[\\D]", ""));
-
-                        line = reader.readLine();
-                        int y = Integer.parseInt(line.replaceAll("[\\D]", ""));
-
-                        line = reader.readLine();
-                        boolean roomInitialized = Boolean.parseBoolean(line.substring("roomInitialized: ".length()));
-
-                        line = reader.readLine();
-                        boolean roomCleared = Boolean.parseBoolean(line.substring("roomCleared: ".length()));
-
-                        this.gamePanel.mapCreator.rooms.add(new Room(this.gamePanel, size, x, y, roomInitialized, isCleared, roomCleared));
-
-                        line = reader.readLine(); // null
-                        line = reader.readLine(); // next room or end
+                        line = reader.readLine(); // next room start
+                        continue;
                     }
                     // System.out.println(this.gamePanel.mapCreator.rooms);
                     continue;
@@ -268,6 +250,7 @@ public class DataHandler {
             this.loadWeaponData(reader);
             this.loadWorldData(reader);
             System.out.println("Game progress loaded successfully.");
+            System.out.println(this.gamePanel.obj);
         } catch (IOException e) {
             System.out.println("Save file not found!");
             e.printStackTrace();
