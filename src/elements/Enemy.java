@@ -314,6 +314,7 @@ public class Enemy extends Entity {
     }
 
     public BufferedImage getImage() {
+        if (this.direction == null) return getImageFromDirection(drawDirection);
         if (this.direction.equals("up-left")) {
             this.drawDirection = "left";
             this.wasRight = false;
