@@ -45,7 +45,23 @@ public class Enemy extends Entity {
     public boolean isDead = false;
 
     private Weapon weapon;
+    
+    private String drawDirection;
+    private boolean wasRight;
     public static BufferedImage bulletImage;
+
+    public static BufferedImage bossLeft;
+    public static BufferedImage bossRight;
+    public static BufferedImage meleeLeft1;
+    public static BufferedImage meleeLeft2;
+    public static BufferedImage meleeRight1;
+    public static BufferedImage meleeRight2;
+    
+    public static BufferedImage rangedLeft1;
+    public static BufferedImage rangedLeft2;
+    public static BufferedImage rangedRight1;
+    public static BufferedImage rangedRight2;
+    public static BufferedImage towerImage;
 
     // Enemy Info
     public static int enemyTypes = 3;
@@ -144,6 +160,10 @@ public class Enemy extends Entity {
                 this.speed = 8;
                 this.trueSpeed = this.speed;
                 this.attackSpeed = 5;
+                this.right1 = bossRight;
+                this.right2 = bossRight;
+                this.left1 = bossLeft;
+                this.left2 = bossLeft;
             }
             case 1 -> { // melee unit
                 this.health = 100;
@@ -292,6 +312,67 @@ public class Enemy extends Entity {
         }
         this.direction = directions[7];
     }
+
+    public BufferedImage getImage() {
+        if (this.direction.equals("up-left")) {
+            this.drawDirection = "left";
+            this.wasRight = false;
+
+        } else if (this.direction.equals("up-right")) {
+            this.drawDirection = "right";
+            this.wasRight = true;
+
+        } else if (this.direction.equals("down-left")) {
+            this.drawDirection = "left";
+            this.wasRight = false;
+
+        } else if (this.direction.equals("down-right")) {
+            this.drawDirection = "right";
+            this.wasRight = true;
+
+        } else if (this.direction.equals("up") ){
+            if (this.wasRight) this.drawDirection = "right";
+            else this.drawDirection = "left";
+            
+        } else if (this.direction.equals("down") ){
+            if (this.wasRight) this.drawDirection = "right";
+            else this.drawDirection = "left";
+
+        } else if (this.direction.equals("left") ){
+            this.drawDirection = "left";
+            this.wasRight = false;
+
+        } else if (this.direction.equals("right") ){
+            this.drawDirection = "right";
+            this.wasRight = true;
+        }
+        return getImageFromDirection(drawDirection);
+    }
+
+    public BufferedImage getImageFromDirection(String drawDirection) {
+        if (this.type == 0) {
+            if (drawDirection.equals("left")) return bossLeft;
+            else return bossRight;
+        } else if (this.type == 1) {
+            if (drawDirection.equals("left")) {
+                if (spriteNum == 1) return meleeLeft1;
+                else return meleeLeft2;
+            } else {
+                if (spriteNum == 1) return meleeRight1;
+                else return meleeRight2;
+            }
+        } else if (this.type == 2) {
+            if (drawDirection.equals("left")) {
+                if (spriteNum == 1) return rangedLeft1;
+                else return rangedLeft2;
+            } else {
+                if (spriteNum == 1) return rangedRight1;
+                else return rangedRight2;
+            }
+        } else {
+            return towerImage;
+        }
+    }
     
     public void draw(Graphics2D g2) {
         int playerCenterOffset = this.size / 2;
@@ -302,8 +383,19 @@ public class Enemy extends Entity {
         this.screenY = (this.worldY - this.gamePanel.player.worldY) + this.gamePanel.player.screenY + playerCenterOffset;
 
         // Draw the enemy
-        g2.setColor(this.type == 0 ? Color.GREEN : Color.BLUE);
-        g2.fillRect((int) screenX - this.size / 2, (int) screenY - this.size / 2, this.size, this.size);
+        // g2.setColor(this.type == 0 ? Color.GREEN : Color.BLUE);
+        // g2.fillRect((int) screenX - this.size / 2, (int) screenY - this.size / 2, this.size, this.size);
+        g2.drawImage(getImage(), (int) screenX - this.size / 2, (int) screenY - this.size / 2, this.size, this.size, null);
+        
+        this.spriteCounter++;
+        if (spriteCounter > 10) {
+            if (spriteNum == 1) {
+                spriteNum++;
+            } else {
+                spriteNum = 1;
+            }
+            this.spriteCounter = 0;
+        }
 
         // Draw the enemy name
         g2.setFont(new Font("Arial", Font.BOLD, 12));

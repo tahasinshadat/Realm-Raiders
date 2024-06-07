@@ -43,11 +43,11 @@ public class MapCreator {
     public void preset(int num) {
         if (num == 1) {
             this.floorVarieties = 5;
-            this.wallVarieties = 1;
+            this.wallVarieties = 2;
 
         } else if (num == 2) {
-            this.floorVarieties = 3;
-            this.wallVarieties = 2;
+            this.floorVarieties = 4;
+            this.wallVarieties = 3;
 
         } else if (num == 3) {
             this.floorVarieties = 1;

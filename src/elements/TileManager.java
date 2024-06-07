@@ -51,8 +51,11 @@ public class TileManager {
                     this.tile[4].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType1/tile5.png"));
                     // Walls
                     this.tile[5] = new Tile();
-                    this.tile[5].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType1/tile.png"));
+                    this.tile[5].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType1/tile1.png"));
                     this.tile[5].collision = true;
+                    this.tile[6] = new Tile();
+                    this.tile[6].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType1/tile2.png"));
+                    this.tile[6].collision = true;
                     
                 }
                 case 2 -> {
@@ -63,13 +66,18 @@ public class TileManager {
                     this.tile[1].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType2/tile2.png"));
                     this.tile[2] = new Tile();
                     this.tile[2].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType2/tile3.png"));
-                    // Walls
                     this.tile[3] = new Tile();
-                    this.tile[3].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType2/tile1.png"));
-                    this.tile[3].collision = true;
+                    this.tile[3].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/floorType2/tile4.png"));
+                    // Walls
                     this.tile[4] = new Tile();
-                    this.tile[4].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType2/tile2.png"));
+                    this.tile[4].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType2/tile1.png"));
                     this.tile[4].collision = true;
+                    this.tile[5] = new Tile();
+                    this.tile[5].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType2/tile2.png"));
+                    this.tile[5].collision = true;
+                    this.tile[6] = new Tile();
+                    this.tile[6].image = ImageIO.read(getClass().getResourceAsStream("../assets/tiles/wallType2/tile3.png"));
+                    this.tile[6].collision = true;
                 }
                 case 3 -> {
                     // Floors

@@ -135,6 +135,7 @@ public class DataHandler {
 
     public void loadWorldData(BufferedReader reader) { // load world, minimap, and game objects in previous game state from world save data
         String line;
+        this.gamePanel.obj.clear();
         try {
             while ((line = reader.readLine()) != null) {
                 // System.out.println(line);
@@ -169,7 +170,7 @@ public class DataHandler {
                     this.gamePanel.currentLevel = Integer.parseInt(line.replaceAll("[\\D]", ""));
 
                     line = reader.readLine(); // gameDifficulty
-                    this.gamePanel.gameDifficulty = Integer.parseInt(line.replaceAll("[\\D]", ""));
+                    this.gamePanel.gameDifficulty = Double.parseDouble(line.split(": ")[1]);
                     continue;
                 }
 
