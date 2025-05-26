@@ -12,119 +12,197 @@ import java.util.Set;
 
 import elements.Minimap;
 import elements.TileManager;
+import main.DatabaseManager;
 import main.GamePanel;
 import objects.Weapon;
 
 public class DataHandler {
 
     public GamePanel gamePanel;
-    private String saveFilePath = "./realm_raiders_save_data/saveFile.txt"; // off of root
+    private DatabaseManager dbManager; 
+    // private String saveFilePath = "./realm_raiders_save_data/saveFile.txt"; // off of root
 
-    public DataHandler(GamePanel gamePanel) {
+    public DataHandler(GamePanel gamePanel, DatabaseManager dbManager) {
         this.gamePanel = gamePanel;
+        this.dbManager = dbManager;
+    }
+    
+    //
+    //// SAVING FUNCTIONS
+    //
+    public void storePlayerData(StringBuilder sb) { // save player data (location, health, shield, mana, current weapon)
+        // try {
+        //     writer.write(this.gamePanel.player.getPlayerProperties());
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        sb.append(this.gamePanel.player.getPlayerProperties());
+        sb.append("\n");
     }
 
-    // SAVING FUNCTIONS
-    public void savePlayerData(BufferedWriter writer) { // save player data (location, health, shield, mana, current weapon)
-        try {
-            writer.write(this.gamePanel.player.getPlayerProperties());
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void storeWeaponData(StringBuilder sb) { // save weapon data (speed, damage, rarity)
+        // try {
+        //     for (Weapon weapon : this.gamePanel.player.weaponInv) {
+        //         writer.write(weapon.getWeaponProperties()); 
+        //         writer.newLine();
+        //     }
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        for (Weapon weapon : this.gamePanel.player.weaponInv) {
+            sb.append(weapon.getWeaponProperties());
+            sb.append("\n");
         }
     }
 
-    public void saveWeaponData(BufferedWriter writer) { // save weapon data (speed, damage, rarity)
-        try {
-            for (Weapon weapon : this.gamePanel.player.weaponInv) {
-                writer.write(weapon.getWeaponProperties()); 
-                writer.newLine();
+    public void storeWorldData(StringBuilder sb) { // save room positions and states + current objects on map + miniMap state + score, current level, current preset, gameDifficulty, etc
+        // try {
+        //     // Save game panel properties
+        //     writer.write(this.gamePanel.getGamePanelProperties());
+        //     writer.newLine();
+            
+        //     // Save mapTileNum 2D array
+        //     int[][] worldMap = this.gamePanel.mapCreator.getWorldMap();
+        //     writer.write("worldMap:");
+        //     writer.newLine();
+        //     for (int[] row : worldMap) {
+        //         for (int tile : row) {
+        //             writer.write(tile + " ");
+        //         }
+        //         writer.newLine();
+        //     }
+        //     writer.write("END OF MAP");
+        //     writer.newLine();
+            
+        //     // Save room properties
+        //     writer.write("roomProperties:");
+        //     writer.newLine();
+        //     for (Room room : this.gamePanel.mapCreator.rooms) {
+        //         writer.write(room.getRoomKey());
+        //         writer.newLine();
+        //         writer.write(room.getRoomProperties());
+        //         writer.newLine();
+        //     }
+        //     writer.write("END roomProperties");
+        //     writer.newLine();
+            
+        //     // Save minimap sectionMap 2D array
+        //     int[][] sectionMap = this.gamePanel.minimap.sectionMap;
+        //     writer.write("sectionMap:");
+        //     writer.newLine();
+        //     for (int[] row : sectionMap) {
+        //         for (int section : row) {
+        //             writer.write(section + " ");
+        //         }
+        //         writer.newLine();
+        //     }
+            
+        //     // Save minimap discoveredRooms set
+        //     Set<String> discoveredRooms = this.gamePanel.minimap.discoveredRooms;
+        //     writer.write("discoveredRooms:");
+        //     writer.newLine();
+        //     for (String room : discoveredRooms) {
+        //         writer.write(room);
+        //         writer.newLine();
+        //     }
+
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        
+        // Save game panel properties
+        sb.append(this.gamePanel.getGamePanelProperties());
+        sb.append("\n");
+
+        // Save mapTileNum 2D array
+        int[][] worldMap = this.gamePanel.mapCreator.getWorldMap();
+        sb.append("worldMap:");
+        for (int[] row : worldMap) {
+            for (int tile : row) {
+                sb.append(tile + " ");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            sb.append("\n");
         }
-    }
+        sb.append("END OF MAP\n");
 
-
-    public void saveWorldData(BufferedWriter writer) { // save room positions and states + current objects on map + miniMap state + score, current level, current preset, gameDifficulty, etc
-        try {
-            // Save game panel properties
-            writer.write(this.gamePanel.getGamePanelProperties());
-            writer.newLine();
-            
-            // Save mapTileNum 2D array
-            int[][] worldMap = this.gamePanel.mapCreator.getWorldMap();
-            writer.write("worldMap:");
-            writer.newLine();
-            for (int[] row : worldMap) {
-                for (int tile : row) {
-                    writer.write(tile + " ");
-                }
-                writer.newLine();
-            }
-            writer.write("END OF MAP");
-            writer.newLine();
-            
-            // Save room properties
-            writer.write("roomProperties:");
-            writer.newLine();
-            for (Room room : this.gamePanel.mapCreator.rooms) {
-                writer.write(room.getRoomKey());
-                writer.newLine();
-                writer.write(room.getRoomProperties());
-                writer.newLine();
-            }
-            writer.write("END roomProperties");
-            writer.newLine();
-            
-            // Save minimap sectionMap 2D array
-            int[][] sectionMap = this.gamePanel.minimap.sectionMap;
-            writer.write("sectionMap:");
-            writer.newLine();
-            for (int[] row : sectionMap) {
-                for (int section : row) {
-                    writer.write(section + " ");
-                }
-                writer.newLine();
-            }
-            
-            // Save minimap discoveredRooms set
-            Set<String> discoveredRooms = this.gamePanel.minimap.discoveredRooms;
-            writer.write("discoveredRooms:");
-            writer.newLine();
-            for (String room : discoveredRooms) {
-                writer.write(room);
-                writer.newLine();
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        // Save room properties
+        sb.append("roomProperties:\n");
+        for (Room room : this.gamePanel.mapCreator.rooms) {
+            sb.append(room.getRoomKey());
+            sb.append("\n");
+            sb.append(room.getRoomProperties());
+            sb.append("\n");
         }
+        sb.append("END roomProperties\n");
+        
+        // Save minimap sectionMap 2D array
+        int[][] sectionMap = this.gamePanel.minimap.sectionMap;
+        sb.append("sectionMap:");
+        sb.append("\n");
+        for (int[] row : sectionMap) {
+            for (int section : row) {
+                sb.append(section + " ");
+            }
+            sb.append("\n");
+        }
+        sb.append("END sectionMap\n");
+        
+        // Save minimap discoveredRooms set
+        Set<String> discoveredRooms = this.gamePanel.minimap.discoveredRooms;
+        sb.append("discoveredRooms:");
+        sb.append("\n");
+        for (String room : discoveredRooms) {
+            sb.append(room);
+            sb.append("\n");
+        }
+        sb.append("END discoveredRooms\n");
+
     }
 
 
     public void saveProgress() {
-        try {
-            // Create the data directory if it doesn't exist
-            File directory = new File("realm_raiders_save_data");
-            directory.mkdirs();
+        // try {
+        //     // Create the data directory if it doesn't exist
+        //     File directory = new File("realm_raiders_save_data");
+        //     directory.mkdirs();
 
-            // Create a new save file in the data directory
-            String saveFilePath = "realm_raiders_save_data/saveFile.txt";
-            BufferedWriter writer = new BufferedWriter(new FileWriter(saveFilePath));
+        //     // Create a new save file in the data directory
+        //     String saveFilePath = "realm_raiders_save_data/saveFile.txt";
+        //     BufferedWriter writer = new BufferedWriter(new FileWriter(saveFilePath));
 
-            this.savePlayerData(writer);
-            this.saveWeaponData(writer);
-            this.saveWorldData(writer);
+        //     this.savePlayerData(writer);
+        //     this.saveWeaponData(writer);
+        //     this.saveWorldData(writer);
             
-            writer.close();
-            System.out.println("Game progress saved successfully.");
+        //     writer.close();
+        //     System.out.println("Game progress saved successfully.");
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        if (this.dbManager == null) {
+            System.err.println("DatabaseManager not initialized in DataHandler. Cannot save to DB.");
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        this.storePlayerData(sb);
+        this.storeWeaponData(sb);
+        this.storeWorldData(sb);
+        String gameStateData = sb.toString();
+        boolean success = dbManager.saveGame(this.gamePanel.user.userId, gameStateData);
+        // System.out.println(gameStateData);
+
+        if (!success) {
+            System.err.println("Failed to save game progress");
         }
     }
 
-    // LOADING FUNCTIONS
+
+    //
+    //// LOADING FUNCTIONS
+    //
     public void loadPlayerData(BufferedReader reader) { // load player with all data from players save data
         
     }
@@ -246,16 +324,16 @@ public class DataHandler {
     }
 
     public void loadProgress() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(saveFilePath))) {
-            this.loadPlayerData(reader);
-            this.loadWeaponData(reader);
-            this.loadWorldData(reader);
-            System.out.println("Game progress loaded successfully.");
-            System.out.println(this.gamePanel.obj);
-        } catch (IOException e) {
-            System.out.println("Save file not found!");
-            e.printStackTrace();
-        }
+        // try (BufferedReader reader = new BufferedReader(new FileReader(saveFilePath))) {
+        //     this.loadPlayerData(reader);
+        //     this.loadWeaponData(reader);
+        //     this.loadWorldData(reader);
+        //     System.out.println("Game progress loaded successfully.");
+        //     System.out.println(this.gamePanel.obj);
+        // } catch (IOException e) {
+        //     System.out.println("Save file not found!");
+        //     e.printStackTrace();
+        // }
     }
 }
 

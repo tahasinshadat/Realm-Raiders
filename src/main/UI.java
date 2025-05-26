@@ -132,6 +132,7 @@ public class UI {
         });
 
         this.quitButton.addActionListener((ActionEvent e) -> {
+            this.gamePanel.dbManager.disconnect();
             System.exit(0); // Close the game
         });
 

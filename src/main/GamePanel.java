@@ -11,6 +11,7 @@ import elements.Enemy;
 import elements.Minimap;
 import elements.Player;
 import elements.TileManager;
+import elements.User;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -54,6 +55,9 @@ public class GamePanel extends JPanel implements Runnable {
     public int worldWidth = this.originalScaledTileSize * this.maxWorldCol;
     public int worldHeight = this.originalScaledTileSize * this.maxWorldRow;
     public final int FPS = 60; // lowered FPS
+    
+    // database
+    public DatabaseManager dbManager = new DatabaseManager("realm_raiders_data.db");
 
     // Game Components
     public TileManager tileManager = new TileManager(this);
@@ -65,7 +69,7 @@ public class GamePanel extends JPanel implements Runnable {
     public AssetManager assetManager = new AssetManager(this);
     public UI gameUI = new UI(this);
     public Minimap minimap;
-    public DataHandler dataHandler = new DataHandler(this);
+    public DataHandler dataHandler = new DataHandler(this, dbManager);
     
     // Entities
     public ArrayList<GameObject> obj = new ArrayList<>();
@@ -93,8 +97,10 @@ public class GamePanel extends JPanel implements Runnable {
     public final int[] enemyAmtRange = {3, 6};
     public final int[] spawnTimeRange = {2, 5};
 
-    // database
-    public DatabaseManager dbManager = new DatabaseManager("realm_raiders_data.db");
+    //
+    //// TEST USER
+    //
+    public User user = new User(0, "TEST", "TEST", "test");
 
     // add test weapon for testing
     public Weapon testWeapon;
@@ -119,12 +125,10 @@ public class GamePanel extends JPanel implements Runnable {
         if (this.dbManager.connect()) {
             this.dbManager.initializeTables();
         } else {
-            System.out.println("Error Connecting to Dataabas");
+            System.out.println("Error Connecting to Database");
         }
 
-        this.dbManager.disconnect();
-        
-
+        // this.dbManager.disconnect();
         // Add some enemies to the map for testing
         // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
         // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 2, "BOSS", true));
@@ -214,6 +218,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void endGameThread() {
         if (this.gameThread != null && gameThread.isAlive()) {
+            // this.dbManager.disconnect();
             this.gameThread.interrupt();
             this.gameThread = null;
         }

@@ -1,11 +1,14 @@
 package main;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import elements.User;
+import java.sql.Timestamp;
+import java.util.Date;
 
 // idk:
 import java.sql.PreparedStatement;
@@ -38,14 +41,29 @@ public class DatabaseManager {
 
         this.databaseUrl = "jdbc:sqlite:database/" + dbName;
 
-        File dbDirectory = new File("database");
+        File dbDirectory = new File("../database/");
+        File db = new File("../database/realm_raiders_data.db");
         if (!dbDirectory.exists()) {
+            // create folder
             boolean dirCreated = dbDirectory.mkdirs();
             if (dirCreated) {
                 System.out.println("Directory 'database' created successfully.");
             } else {
                 System.err.println("Failed to create directory 'database'. Check permissions.");
             }
+            
+            // create db file
+            try {
+                boolean dbCreated = db.createNewFile();
+                if (dirCreated) {
+                    System.out.println("Directory 'database' created successfully.");
+                } else {
+                    System.err.println("Failed to create directory 'database'. Check permissions.");
+                }
+            } catch (IOException e) {
+                System.err.println("Failed to create file 'realm_raiders_data.db'. Check permissions.");
+            }
+
         }
 
         // Load the SQLite JDBC driver
@@ -89,6 +107,40 @@ public class DatabaseManager {
         }
     }
 
+    private boolean execStatement(String statementString) {
+        if (connection == null) {
+            if (!connect()) {
+                return false;
+            }
+        }
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(statementString);
+            System.out.println(statementString + " executed");
+            return true;
+        } catch (SQLException e) {
+            // System.err.println("Error executing statement: " + statementString + " " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Timestamp getCurrentTimeStamp() {
+        java.util.Date date = new java.util.Date();
+        return new Timestamp(date.getTime());
+    }
+
+    // public boolean writeToDatabase(String userId, String saveId, String table, String gameStateData, Timestamp timeStamp) {
+        
+    //     // return execStatment("INSERT INTO " + table
+    //     //                     + "VALUES (" + userId + ", " + gameStateData + ", " + );
+    // }
+
+    
+    // public boolean readFromDatabase(String userId, String saveId, String table) {
+        
+    // }
+    
     // Initialize necessary tables
     public void initializeTables() {
 
@@ -108,25 +160,88 @@ public class DatabaseManager {
         String createGameSavesTableSQL = "CREATE TABLE IF NOT EXISTS game_saves ("
                 + "save_id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "user_id INTEGER NOT NULL,"
-                + "save_name TEXT NOT NULL,"
                 + "save_data TEXT NOT NULL," // Or BLOB
                 + "last_saved_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,"
                 + "FOREIGN KEY (user_id) REFERENCES users(user_id)"
                 + ");";
 
-        String createSaveNameIndexSQL = "CREATE INDEX IF NOT EXISTS idx_user_save_name "
-                                      + "ON game_saves (user_id, save_name);";
+        String createSaveIdIndexSQL = "CREATE INDEX IF NOT EXISTS idx_user_save_name "
+                                      + "ON game_saves (user_id, save_id);";
 
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createUserTableSQL);
             System.out.println("'users' table checked/created successfully.");
             stmt.execute(createGameSavesTableSQL);
             System.out.println("'game_saves' table checked/created successfully.");
-            stmt.execute(createSaveNameIndexSQL);
-            System.out.println("Index 'idx_user_save_name' on 'game_saves' checked/created successfully.");
+            stmt.execute(createSaveIdIndexSQL);
+            System.out.println("Index 'idx_user_save_id' on 'game_saves' checked/created successfully.");
         } catch (SQLException e) {
             System.err.println("Error creating/checking tables: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Saves the current game state for a given user.
+     * @param userId The ID of the user saving the game.
+     * @param saveName The name for this save slot.
+     * @param gameStateData A string (e.g., JSON) or byte array representing the game state.
+     * @return true if saving is successful, false otherwise.
+     */
+    // public boolean saveGame(int userId, String gameStateData) {
+        
+    //     // Implementation to insert or update a record in the 'game_saves' table.
+    //     // Handle cases where saveName for a user might already exist (overwrite or create new).
+
+    //     return execStatement("INSERT INTO game_saves"
+    //                     + "VALUES (" + userId + ", " + gameStateData + ", " + getCurrentTimeStamp());
+    // }
+
+    private int findSaveSlotIdSecure(int userId) {
+        if (connection == null && !connect()) {
+            System.err.println("Failed to connect (findSaveSlotIdSecure).");
+            return -1;
+        }
+        String sql = "SELECT save_id FROM game_saves WHERE user_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("save_id");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding save slot (secure) for user_id=" + userId + ": " + e.getMessage());
+            // e.printStackTrace();
+        }
+        return -1; // Not found
+    }
+
+    public boolean saveGame(int userId, String gameStateData) {
+        if (connection == null && !connect()) {
+             System.err.println("Failed to connect (saveGame), cannot save game.");
+            return false;
+        }
+
+        // Basic escaping for single quotes in string literals for SQLite.
+        // THIS IS NOT A SUBSTITUTE FOR PREPAREDSTATEMENTS FOR SECURITY.
+        // String escapedGameStateData = gameStateData.replace("'", "''");
+        
+        // Check if a save slot already exists.
+        // For this check, using a PreparedStatement is still much safer and cleaner,
+        // even if the subsequent write uses execStatement.
+
+        String currentTimeStampString = getCurrentTimeStamp().toString();
+        int existingSaveId = findSaveSlotIdSecure(userId);
+
+        if (existingSaveId != -1) {
+            // Update existing save slot
+            String sql = "UPDATE game_saves SET save_data = '" + gameStateData +
+                  "', last_saved_timestamp = CURRENT_TIMESTAMP WHERE save_id = " + existingSaveId + ";";
+            return execStatement(sql);
+        } else {
+            String sql = "INSERT INTO game_saves (user_id, save_data, last_saved_timestamp) VALUES (" +
+                  userId + ", '" + gameStateData + "', '" + currentTimeStampString + "');";
+            return execStatement(sql);
         }
     }
 
@@ -140,6 +255,7 @@ public class DatabaseManager {
     public boolean registerUser(String username, String plainPassword, String email) {
         // 1. Hash the plainPassword (e.g., using BCrypt)
         // 2. Insert the new user into the 'users' table
+
         return false;
     }
 
@@ -162,18 +278,6 @@ public class DatabaseManager {
     //     return null;
     // }
 
-    /**
-     * Saves the current game state for a given user.
-     * @param userId The ID of the user saving the game.
-     * @param saveName The name for this save slot.
-     * @param gameStateData A string (e.g., JSON) or byte array representing the game state.
-     * @return true if saving is successful, false otherwise.
-     */
-    public boolean saveGame(int userId, String saveName, String gameStateData) {
-        // Implementation to insert or update a record in the 'game_saves' table.
-        // Handle cases where saveName for a user might already exist (overwrite or create new).
-        return false;
-    }
 
     /**
      * Retrieves a list of save game summaries for a given user.
