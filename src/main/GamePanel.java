@@ -93,6 +93,9 @@ public class GamePanel extends JPanel implements Runnable {
     public final int[] enemyAmtRange = {3, 6};
     public final int[] spawnTimeRange = {2, 5};
 
+    // database
+    public DatabaseManager dbManager = new DatabaseManager("realm_raiders_data.db");
+
     // add test weapon for testing
     public Weapon testWeapon;
 
@@ -112,6 +115,15 @@ public class GamePanel extends JPanel implements Runnable {
         this.mapCreator.setEnvironment();
         this.tileManager.mapTileNum = mapCreator.getWorldMap();
         this.minimap = new Minimap(this, 20);
+
+        if (this.dbManager.connect()) {
+            this.dbManager.initializeTables();
+        } else {
+            System.out.println("Error Connecting to Dataabas");
+        }
+
+        this.dbManager.disconnect();
+        
 
         // Add some enemies to the map for testing
         // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
