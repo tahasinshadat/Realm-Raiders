@@ -2,6 +2,9 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -15,6 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Map;
 
 // Spring Security's BCrypt:
@@ -75,6 +79,10 @@ public class DatabaseManager {
         }
     }
 
+    //
+    //// DATABASE SETUP 
+    //
+
     // Establish a connection to the database
     public boolean connect() {
         try {
@@ -106,68 +114,37 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
-
-    private boolean execStatement(String statementString) {
-        if (connection == null) {
-            if (!connect()) {
-                return false;
-            }
-        }
-
-        try (Statement stmt = connection.createStatement()) {
-            stmt.execute(statementString);
-            System.out.println(statementString + " executed");
-            return true;
-        } catch (SQLException e) {
-            // System.err.println("Error executing statement: " + statementString + " " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public Timestamp getCurrentTimeStamp() {
-        java.util.Date date = new java.util.Date();
-        return new Timestamp(date.getTime());
-    }
-
-    // public boolean writeToDatabase(String userId, String saveId, String table, String gameStateData, Timestamp timeStamp) {
-        
-    //     // return execStatment("INSERT INTO " + table
-    //     //                     + "VALUES (" + userId + ", " + gameStateData + ", " + );
-    // }
-
-    
-    // public boolean readFromDatabase(String userId, String saveId, String table) {
-        
-    // }
     
     // Initialize necessary tables
     public void initializeTables() {
-
+        
         System.out.println("Initializing tables: ");
         
         // users table:
         System.out.println("Initializing User Table: ");
         String createUserTableSQL = "CREATE TABLE IF NOT EXISTS users ("
-                + "user_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + "username TEXT NOT NULL UNIQUE,"
-                + "password_hash TEXT NOT NULL,"
-                + "email TEXT"
-                + ");";
-
+        + "user_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        + "username TEXT NOT NULL UNIQUE,"
+        + "password_hash TEXT NOT NULL,"
+        + "email TEXT,"
+        + "save1 INTEGER DEFAULT -1,"
+        + "save2 INTEGER DEFAULT -1,"
+        + "save3 INTEGER DEFAULT -1"
+        + ");";
+        
         // game_saves table:
         System.out.println("Initializing Game Saves Table: ");
         String createGameSavesTableSQL = "CREATE TABLE IF NOT EXISTS game_saves ("
-                + "save_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + "user_id INTEGER NOT NULL,"
-                + "save_data TEXT NOT NULL," // Or BLOB
-                + "last_saved_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,"
-                + "FOREIGN KEY (user_id) REFERENCES users(user_id)"
-                + ");";
-
+        + "save_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        + "user_id INTEGER NOT NULL,"
+        + "save_data TEXT NOT NULL," // Or BLOB
+        + "last_saved_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,"
+        + "FOREIGN KEY (user_id) REFERENCES users(user_id)"
+        + ");";
+        
         String createSaveIdIndexSQL = "CREATE INDEX IF NOT EXISTS idx_user_save_name "
                                       + "ON game_saves (user_id, save_id);";
-
+                                      
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createUserTableSQL);
             System.out.println("'users' table checked/created successfully.");
@@ -181,146 +158,269 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * Saves the current game state for a given user.
-     * @param userId The ID of the user saving the game.
-     * @param saveName The name for this save slot.
-     * @param gameStateData A string (e.g., JSON) or byte array representing the game state.
-     * @return true if saving is successful, false otherwise.
-     */
-    // public boolean saveGame(int userId, String gameStateData) {
-        
-    //     // Implementation to insert or update a record in the 'game_saves' table.
-    //     // Handle cases where saveName for a user might already exist (overwrite or create new).
-
-    //     return execStatement("INSERT INTO game_saves"
-    //                     + "VALUES (" + userId + ", " + gameStateData + ", " + getCurrentTimeStamp());
-    // }
-
-    private int findSaveSlotIdSecure(int userId) {
+    //
+    //// SAVE GAME
+    //
+    /*
+    public boolean saveGame(int userId, int saveId, String gameStateData) {
         if (connection == null && !connect()) {
-            System.err.println("Failed to connect (findSaveSlotIdSecure).");
-            return -1;
+            System.err.println("Failed to connect (saveGame), cannot save game.");
+            return false;
         }
-        String sql = "SELECT save_id FROM game_saves WHERE user_id = ?";
+
+        String currentTimeStampString = getCurrentTimeStamp().toString();
+        
+        if (saveId != -1) {
+            // Update existing save slot
+            String sql = "UPDATE game_saves SET save_data = ?" +
+            ", last_saved_timestamp = CURRENT_TIMESTAMP WHERE save_id = ?;";
+            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                pstmt.setString(1, gameStateData);
+                pstmt.setInt(2, saveId);
+                pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE constraint failed: users.username")) {
+                System.err.println("Username '" + username + "' already exists.");
+            } else {
+                System.err.println("Error registering user: " + e.getMessage());
+            }
+            return false;
+        }
+        } else {
+            String sql = "INSERT INTO game_saves (user_id, save_data, last_saved_timestamp) VALUES (" +
+            userId + ", '" + gameStateData + "', '" + currentTimeStampString + "');";
+            return execStatement(sql);
+        }
+    }
+    */
+
+    public boolean saveGameToSlot(int userId, int slotNumber, String gameStateData) {
+        if (connection == null && !connect()) return false;
+        if (slotNumber < 1 || slotNumber > 3) return false;
+        
+        int[] userSlots = getUserSaveSlots(userId);
+        int existingGameSaveIdInUserTable = userSlots[slotNumber - 1];
+        String sql;
+
+        try {
+            if (existingGameSaveIdInUserTable != -1 && gameSaveExists(existingGameSaveIdInUserTable)) {
+                // Slot has a valid game_save_id, and that record exists: UPDATE it
+                sql = "UPDATE game_saves SET save_data = ?, last_saved_timestamp = CURRENT_TIMESTAMP WHERE save_id = ? AND user_id = ?";
+                try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                    pstmt.setString(1, gameStateData);
+                    pstmt.setInt(2, existingGameSaveIdInUserTable);
+                    pstmt.setInt(3, userId); // Ensure the save being updated belongs to this user
+                    int affectedRows = pstmt.executeUpdate();
+                    if (affectedRows > 0) {
+                        System.out.println("Game data updated in game_saves for save_id: " + existingGameSaveIdInUserTable);
+                        return true;
+                    } else {
+                        System.err.println("Failed to update game_save " + existingGameSaveIdInUserTable + " (maybe user_id mismatch or save_id gone).");
+                        // If update failed, this slot might be orphaned, consider treating as new save
+                        // existingGameSaveIdInUserTable = -1; // Force insert below
+                    }
+                }
+            }
+            
+            // If existingGameSaveIdInUserTable was -1, or became -1 due to update failure, INSERT new game_save record
+            sql = "INSERT INTO game_saves (user_id, save_data) VALUES (?, ?)";
+            try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                pstmt.setInt(1, userId);
+                pstmt.setString(2, gameStateData);
+                int affectedRows = pstmt.executeUpdate();
+
+                if (affectedRows == 0) {
+                    System.err.println("Creating new game_save failed, no rows affected.");
+                    return false;
+                }
+
+                ResultSet generatedKeys = pstmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    int newGameSaveId = generatedKeys.getInt(1);
+                    // Now update the users table to point save<slotNumber> to this newGameSaveId
+                    if (updateUserSaveSlot(userId, slotNumber, newGameSaveId)) {
+                        System.out.println("New game data inserted (save_id: " + newGameSaveId + ") and linked to user " + userId + ", slot " + slotNumber);
+                        return true;
+                    } else {
+                        System.err.println("Inserted new game_save (" + newGameSaveId + ") but failed to update user's slot " + slotNumber);
+                        // CRITICAL: Potentially rollback or delete the orphaned game_save entry here
+                        // For simplicity now, just returning error.
+                        if (existingGameSaveIdInUserTable != -1) {
+                            sql = "DELETE FROM game_saves WHERE save_id = ?;";
+                            try (PreparedStatement pstmt2 = connection.prepareStatement(sql)) {
+                                pstmt2.setInt(1, existingGameSaveIdInUserTable);
+                                pstmt2.execute();
+                            } catch (SQLException e) {
+                                System.err.println("ERROR DELETING FAULTY SAVE_ID: " + existingGameSaveIdInUserTable);
+                                e.printStackTrace();
+                            }
+                        }
+
+                        return false;
+                    }
+                } else {
+                    // System.err.println("Failed to retrieve generated key for new game_save.");
+                    return false;
+                }
+            }
+
+        } catch (SQLException e) {
+            // System.err.println("Error in saveGameToSlot for user " + userId + ", slot " + slotNumber + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+
+    //
+    //// AUTH
+    //
+    private String hashPassword(String password) {
+        return password;
+    }
+    
+    public boolean registerUser(String username, String password, String email) {
+        if (connection == null && !connect()) return false;
+        String hashedPassword = hashPassword(password);
+        if (hashedPassword == null) return false;
+        
+        String sql = "INSERT INTO users(username, password_hash, email, save1, save2, save3) VALUES(?,?,?,?,?,?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, hashedPassword);
+            pstmt.setString(3, email);
+            pstmt.setInt(4, -1);
+            pstmt.setInt(5, -1);
+            pstmt.setInt(6, -1);
+            pstmt.executeUpdate();
+            // System.out.println("User " + username + " registered successfully.");
+            return true;
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE constraint failed: users.username")) {
+                System.err.println("Username '" + username + "' already exists.");
+            } else {
+                System.err.println("Error registering user: " + e.getMessage());
+            }
+            return false;
+        }
+    }
+    
+    public User loginUser(String username, String password) {
+        if (connection == null && !connect()) return null;
+        String sql = "SELECT * FROM users WHERE username = ?";
+        
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                String hashedPassword = hashPassword(password);
+                String userPassword = rs.getString("password_hash");
+                
+                if (hashedPassword.equals(userPassword)) {
+                    User user = new User(rs.getInt("user_id"), username, null, rs.getString("email"));
+                    user.saveData[0] = rs.getInt("save1");
+                    user.saveData[1] = rs.getInt("save2");
+                    user.saveData[2] = rs.getInt("save3");
+                    return user;
+                } else {
+                    System.err.println("Wrong Password");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error with user: " + e.getMessage());
+        }
+        return null;
+    }
+    
+    public boolean updateUserSaveSlots(int userId, int slotNumber, int saveId) {
+        return false;
+    }
+    
+    public int[] getUserSaveSlots(int userId) {
+        if (connection == null && !connect()) return new int[]{-1, -1, -1};
+        String sql = "SELECT save1, save2, save3, FROM users WHERE user_id = ?";
+
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt("save_id");
+                return new int[]{rs.getInt("save1"), rs.getInt("save2"), rs.getInt("save3")};
             }
         } catch (SQLException e) {
-            System.err.println("Error finding save slot (secure) for user_id=" + userId + ": " + e.getMessage());
-            // e.printStackTrace();
+            System.err.println("Error with user: " + e.getMessage());
         }
-        return -1; // Not found
+
+        return new int[]{-1, -1, -1};
     }
 
-    public boolean saveGame(int userId, String gameStateData) {
-        if (connection == null && !connect()) {
-             System.err.println("Failed to connect (saveGame), cannot save game.");
+    public boolean updateUserSaveSlot(int userId, int slotNumber, int saveId) {
+        if (connection == null && !connect()) return false;
+        if (slotNumber < 1 || slotNumber > 3) {
+            System.err.println("Invalid slot number: " + slotNumber + ". Must be 1, 2, or 3.");
             return false;
         }
 
-        // Basic escaping for single quotes in string literals for SQLite.
-        // THIS IS NOT A SUBSTITUTE FOR PREPAREDSTATEMENTS FOR SECURITY.
-        // String escapedGameStateData = gameStateData.replace("'", "''");
-        
-        // Check if a save slot already exists.
-        // For this check, using a PreparedStatement is still much safer and cleaner,
-        // even if the subsequent write uses execStatement.
-
-        String currentTimeStampString = getCurrentTimeStamp().toString();
-        int existingSaveId = findSaveSlotIdSecure(userId);
-
-        if (existingSaveId != -1) {
-            // Update existing save slot
-            String sql = "UPDATE game_saves SET save_data = '" + gameStateData +
-                  "', last_saved_timestamp = CURRENT_TIMESTAMP WHERE save_id = " + existingSaveId + ";";
-            return execStatement(sql);
-        } else {
-            String sql = "INSERT INTO game_saves (user_id, save_data, last_saved_timestamp) VALUES (" +
-                  userId + ", '" + gameStateData + "', '" + currentTimeStampString + "');";
-            return execStatement(sql);
+        String slotColumn = "save" + slotNumber;
+        String sql = "UPDATE users SET " + slotColumn + " = ? WHERE user_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, saveId); // The game_save.save_id to link
+            pstmt.setInt(2, userId);
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                System.out.println("User " + userId + " slot " + slotNumber + " updated to point to game_save_id: " + saveId);
+                return true;
+            } else {
+                System.err.println("Failed to update slot " + slotNumber + " for user " + userId + " (user not found or value unchanged).");
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error updating user save slot " + slotNumber + " for user " + userId + ": " + e.getMessage());
+            return false;
         }
     }
 
-    /**
-     * Registers a new user in the database.
-     * @param username The username for the new user.
-     * @param plainPassword The plain text password for the new user.
-     * @param email The email for the new user (optional).
-     * @return true if registration is successful, false otherwise (e.g., username exists).
-     */
-    public boolean registerUser(String username, String plainPassword, String email) {
-        // 1. Hash the plainPassword (e.g., using BCrypt)
-        // 2. Insert the new user into the 'users' table
-
-        return false;
+    private boolean gameSaveExists(int gameSaveId) {
+        if (gameSaveId == -1) return false;
+        if (connection == null && !connect()) return false;
+        String sql = "SELECT 1 FROM game_saves WHERE save_id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, gameSaveId);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next(); // True if a row is found
+        } catch (SQLException e) {
+            System.err.println("Error checking if game_save_id " + gameSaveId + " exists: " + e.getMessage());
+            return false;
+        }
     }
-
-    /**
-     * Attempts to log in a user.
-     * @param username The username of the user.
-     * @param plainPassword The plain text password of the user.
-     * @return The user_id if login is successful, -1 or throw exception otherwise.
-     */
-    public int loginUser(String username, String plainPassword) {
-        // 1. Retrieve the user from the 'users' table by username.
-        // 2. If user exists, hash the provided plainPassword and compare with stored hash.
-        // 3. Return user_id on success.
-        return -1;
-    }
-
-    // Optional: Method to get more user details
-    // public User getUserDetails(int userId) {
-    //     // Implementation
-    //     return null;
-    // }
-
-
-    /**
-     * Retrieves a list of save game summaries for a given user.
-     * @param userId The ID of the user whose save slots are to be retrieved.
-     * @return A list of GameSaveSummary objects, or an empty list if none.
-     */
-    // public List<GameSaveSummary> getSaveSlots(int userId) {
-    //     // Implementation to query 'game_saves' table for the user.
-    //     List<GameSaveSummary> saveSlots = new ArrayList<>();
-    //     return saveSlots;
-    // }
-
-    /**
-     * Loads a specific game save's data.
-     * @param saveId The ID of the game save to load.
-     * @return A string (e.g., JSON) or byte array representing the game state, or null if not found.
-     */
+    
     public String loadGameData(int saveId) {
-        // Implementation to retrieve 'save_data' from 'game_saves' table by save_id.
+        if (connection == null && !connect()) {
+            System.err.println("Failed to connect (saveGame), cannot save game.");
+            return null;
+        }
+        
+        if (saveId == -1) {
+            return null;
+        }
+        
+        String sql = "SELECT save_data FROM game_saves WHERE save_id='" + saveId + "'";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, saveId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("save_data");
+            }
+            System.err.println("No save data for save_id: " + saveId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
-
-    /**
-     * Deletes a specific game save.
-     * @param saveId The ID of the game save to delete.
-     * @return true if deletion is successful, false otherwise.
-     */
-    public boolean deleteGameSave(int saveId) {
-        // Implementation to delete a record from 'game_saves' table.
-        return false;
+    
+    public Timestamp getCurrentTimeStamp() {
+        java.util.Date date = new java.util.Date();
+        return new Timestamp(date.getTime());
     }
-
-    // Helper method for password hashing (example, you'd use a proper library)
-    // private String hashPassword(String plainPassword) {
-    //     // Use a strong hashing library like BCrypt or Argon2
-    //     // Placeholder:
-    //     return "hashed_" + plainPassword;
-    // }
-
-    // Helper method for checking passwords (example)
-    // private boolean checkPassword(String plainPassword, String hashedPassword) {
-    //     // Use the same hashing library to compare
-    //     // Placeholder:
-    //     return ("hashed_" + plainPassword).equals(hashedPassword);
-    // }
 }

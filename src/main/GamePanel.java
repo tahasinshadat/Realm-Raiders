@@ -19,8 +19,15 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 import objects.GameObject;
 import objects.Weapon;
+
+import network.NetworkManager;
+import network.Server;
+import network.Client;
+import network.MessageHandler;
 
 public class GamePanel extends JPanel implements Runnable {
     
@@ -56,39 +63,52 @@ public class GamePanel extends JPanel implements Runnable {
     public int worldHeight = this.originalScaledTileSize * this.maxWorldRow;
     public final int FPS = 60; // lowered FPS
     
-    // database
-    public DatabaseManager dbManager = new DatabaseManager("realm_raiders_data.db");
-
+    // Database
+    public DatabaseManager dbManager;
+    
     // Game Components
-    public TileManager tileManager = new TileManager(this);
-    public CollisionHandler collisionHandler = new CollisionHandler(this);
-    public KeyHandler keyHandler = new KeyHandler(this);
-    public MouseInteractions mouse = new MouseInteractions(this);
+    public TileManager tileManager;
+    public CollisionHandler collisionHandler;
+    public KeyHandler keyHandler;
+    public MouseInteractions mouse;
     public Thread gameThread;
-    public MapCreator mapCreator = new MapCreator(this, true, this.currentPreset);
-    public AssetManager assetManager = new AssetManager(this);
-    public UI gameUI = new UI(this);
+    public MapCreator mapCreator;
+    public AssetManager assetManager;
+    public UI gameUI;
     public Minimap minimap;
-    public DataHandler dataHandler = new DataHandler(this, dbManager);
+    public DataHandler dataHandler;
     
     // Entities
     public ArrayList<GameObject> obj = new ArrayList<>();
     public ArrayList<GameObject> objToRemove = new ArrayList<>();
-    public Player player = new Player(this, this.keyHandler, this.mouse);
     public ArrayList<Entity> enemies = new ArrayList<>();
     public ArrayList<Entity> enemiesToRemove = new ArrayList<>();
+    public Player player;
 
-    // Game States
+    //
+    //// GAME STATES
+    //
     public static final int TITLE_STATE = 0;
     public static final int PLAYING_STATE = 1;
     public static final int PAUSE_STATE = 2;
     public static final int END_STATE = 3;
     public static final int MENU_SCREEN_STATE = 4;
     public static final int LOAD_STATE = 5;
+    public static final int LOGIN_STATE = 6;
+    public static final int SIGNUP_STATE = 7;
+    public static final int MULTIPLAYER_MENU_STATE = 8;
+    public static final int HOST_LOBBY_STATE = 9;
+    public static final int JOIN_LOBBY_STATE = 10;
+    public static final int SAVE_SLOT_SELECTION_STATE = 11;
+
+
     public int gameState = GamePanel.TITLE_STATE;
+    public User user = null;
     public boolean paused = false;
 
-    // Game Progress Checking:
+    //
+    //// Game Progress Checking:
+    //
     public final int levelEnhancer = 3;
     public int score = 0;
     public int currentLevel = 0;
@@ -96,11 +116,6 @@ public class GamePanel extends JPanel implements Runnable {
     public final int[] waveRange = {2, 4};
     public final int[] enemyAmtRange = {3, 6};
     public final int[] spawnTimeRange = {2, 5};
-
-    //
-    //// TEST USER
-    //
-    public User user = new User(0, "TEST", "TEST", "test");
 
     // add test weapon for testing
     public Weapon testWeapon;
@@ -110,31 +125,40 @@ public class GamePanel extends JPanel implements Runnable {
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(this.screenWidth, this.screenHeight));
-        this.setBackground(Color.black);
+        this.setBackground(backgroundColor);
         this.setDoubleBuffered(true); // Rendered in the background, and then shown
-        this.setBackground(Color.decode("#010b19"));
-        this.addKeyListener(keyHandler);
         this.setFocusable(true);
 
-        this.mapCreator.setWorldSize(this.sections, this.sectionSize);
-        this.worldSize = this.mapCreator.getWorldSize();
-        this.mapCreator.setEnvironment();
-        this.tileManager.mapTileNum = mapCreator.getWorldMap();
-        this.minimap = new Minimap(this, 20);
-
+        // Initialize core components
+        this.dbManager = new DatabaseManager("realm_raiders_data.db");
         if (this.dbManager.connect()) {
             this.dbManager.initializeTables();
         } else {
             System.out.println("Error Connecting to Database");
         }
 
-        // this.dbManager.disconnect();
-        // Add some enemies to the map for testing
-        // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
-        // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 2, "BOSS", true));
-        // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Orc", false));
-        // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 2, "Archer", false));
-        // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Orc", false));
+        this.keyHandler = new KeyHandler(this);
+        this.mouse = new MouseInteractions(this);
+        this.addKeyListener(keyHandler);
+        this.addMouseListener(mouse);
+        this.addMouseWheelListener(mouse);
+
+        // Initialize game world and visual components
+        this.assetManager = new AssetManager(this); // Load assets first
+        this.tileManager = new TileManager(this);
+        this.mapCreator = new MapCreator(this, true, this.currentPreset);
+        this.mapCreator.setWorldSize(this.sections, this.sectionSize);
+        this.worldSize = this.mapCreator.getWorldSize();
+        this.updateWorldSize(); 
+        this.mapCreator.setEnvironment();
+        this.tileManager.mapTileNum = mapCreator.getWorldMap();
+        this.minimap = new Minimap(this, 20);
+
+        this.player = new Player(this, this.keyHandler, this.mouse); // Initialize player
+        this.collisionHandler = new CollisionHandler(this);
+        this.dataHandler = new DataHandler(this, this.dbManager);
+        
+        this.gameUI = new UI(this);
     }
 
     public void newGame() {
@@ -153,7 +177,7 @@ public class GamePanel extends JPanel implements Runnable {
         // Reinstantiate assets
         this.assetManager = new AssetManager(this);
         this.assetManager.reset();
-        this.gameUI.removeButtons();
+        // this.gameUI.removeButtons();
         
         // // Add initial enemies or any other initial setup
         // enemies.add(new Enemy(this, (int) player.worldX, (int) player.worldY - 100, 1, "Goblin", false));
@@ -224,12 +248,12 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
-    public void saveProgress() {
-        this.dataHandler.saveProgress();
+    public void saveProgress(int slot) {
+        this.dataHandler.saveProgress(this.user.userId, slot);
     }
 
-    public void loadProgress() {
-        this.dataHandler.loadProgress();
+    public void loadProgress(int slot) {
+        this.dataHandler.loadProgress(this.dbManager.getUserSaveSlots(this.user.userId)[slot-1]); 
     }
 
     public void loadGame() {

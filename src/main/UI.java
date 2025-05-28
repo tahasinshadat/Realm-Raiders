@@ -96,7 +96,7 @@ public class UI {
         });
 
         this.loadGameButton.addActionListener((ActionEvent e) -> {
-            this.gamePanel.loadProgress();
+            this.gamePanel.loadProgress(1);
             this.gamePanel.loadGame();
             this.gamePanel.gameState = GamePanel.PLAYING_STATE;
             this.removeButtons();
@@ -124,7 +124,7 @@ public class UI {
         });
 
         this.saveAndQuitButton.addActionListener((ActionEvent e) -> {
-            this.gamePanel.saveProgress();
+            this.gamePanel.saveProgress(1); // TODO: Add slot selection screens and stuff
             this.gamePanel.gameState = GamePanel.TITLE_STATE;
             this.gamePanel.requestFocus();
             this.removeButtons();

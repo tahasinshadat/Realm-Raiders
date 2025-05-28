@@ -32,7 +32,7 @@ public class Player extends Entity {
     public ArrayList<Weapon> weaponInv = new ArrayList<Weapon>();
     public Weapon equippedWeapon;
     // public Weapon meleeWeapon;
-    public int maxWeapons = 2;
+    public int maxWeapons = 2; // TODO: Add to saving and loading
     public Weapon startWeapon;
 
     public int maxShield = 300;

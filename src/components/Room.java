@@ -1,6 +1,7 @@
 package components;
 
 import elements.Enemy;
+import elements.TileManager;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;

@@ -32,7 +32,7 @@ public class Minimap {
         this.loadIcons();
     }
 
-    private void initializeSectionMap() {
+    public void initializeSectionMap() {
         for (Room room : this.gamePanel.mapCreator.rooms) {
             if (room.isBossRoom) this.sectionMap[room.sectionX][room.sectionY] = 4;
             else if (room.isLootRoom) this.sectionMap[room.sectionX][room.sectionY] = 3;

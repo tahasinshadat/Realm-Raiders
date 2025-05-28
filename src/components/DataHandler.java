@@ -1,6 +1,7 @@
 package components;
 
 import java.io.BufferedReader;
+import java.io.StringReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import elements.Minimap;
+import elements.Player;
 import elements.TileManager;
 import main.DatabaseManager;
 import main.GamePanel;
@@ -20,6 +22,7 @@ public class DataHandler {
 
     public GamePanel gamePanel;
     private DatabaseManager dbManager; 
+    private String gameData = null;
     // private String saveFilePath = "./realm_raiders_save_data/saveFile.txt"; // off of root
 
     public DataHandler(GamePanel gamePanel, DatabaseManager dbManager) {
@@ -36,8 +39,13 @@ public class DataHandler {
         // } catch (IOException e) {
         //     e.printStackTrace();
         // }
+        
+        sb.append("START PLAYERS\n");
+
         sb.append(this.gamePanel.player.getPlayerProperties());
         sb.append("\n");
+
+        sb.append("\nEND PLAYERS\n\n");
     }
 
     public void storeWeaponData(StringBuilder sb) { // save weapon data (speed, damage, rarity)
@@ -49,10 +57,15 @@ public class DataHandler {
         // } catch (IOException e) {
         //     e.printStackTrace();
         // }
+        
+        sb.append("START WEAPONS\n");
+
         for (Weapon weapon : this.gamePanel.player.weaponInv) {
             sb.append(weapon.getWeaponProperties());
             sb.append("\n");
         }
+        
+        sb.append("\nEND WEAPONS\n\n");
     }
 
     public void storeWorldData(StringBuilder sb) { // save room positions and states + current objects on map + miniMap state + score, current level, current preset, gameDifficulty, etc
@@ -116,7 +129,7 @@ public class DataHandler {
 
         // Save mapTileNum 2D array
         int[][] worldMap = this.gamePanel.mapCreator.getWorldMap();
-        sb.append("worldMap:");
+        sb.append("worldMap:\n");
         for (int[] row : worldMap) {
             for (int tile : row) {
                 sb.append(tile + " ");
@@ -159,8 +172,7 @@ public class DataHandler {
 
     }
 
-
-    public void saveProgress() {
+    public void saveProgress(int userId, int slot) {
         // try {
         //     // Create the data directory if it doesn't exist
         //     File directory = new File("realm_raiders_save_data");
@@ -191,7 +203,9 @@ public class DataHandler {
         this.storeWeaponData(sb);
         this.storeWorldData(sb);
         String gameStateData = sb.toString();
-        boolean success = dbManager.saveGame(this.gamePanel.user.userId, gameStateData);
+        boolean success = dbManager.saveGameToSlot(userId, 
+                                             this.dbManager.getUserSaveSlots(userId)[slot-1], 
+                                             gameStateData);
         // System.out.println(gameStateData);
 
         if (!success) {
@@ -203,12 +217,62 @@ public class DataHandler {
     //
     //// LOADING FUNCTIONS
     //
-    public void loadPlayerData(BufferedReader reader) { // load player with all data from players save data
-        
+
+    private void fetchGameData(int saveId) {
+        this.gameData = this.dbManager.loadGameData(saveId);
     }
 
-    public void loadWeaponData(BufferedReader reader) { // load players weapons with all data from weapons save data
+    public void loadPlayerData(BufferedReader reader) throws IOException { // load player with all data from players save data
+        StringBuilder playerPropertiesBlock = new StringBuilder();
+        String line;
+
+        // Player data is the first block and ends with a blank line
+        while ((line = reader.readLine()) != null && !line.trim().isEmpty()) {
+            playerPropertiesBlock.append(line).append("\n");
+        }
+
+        if (playerPropertiesBlock.length() > 0) {
+            if (this.gamePanel.player == null) {
+                this.gamePanel.player = new Player(this.gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse);
+            }
+            this.gamePanel.player.setPlayerPropertiesFromString(playerPropertiesBlock.toString().trim());
+            // System.out.println("Player data loaded successfully.");
+        } else {
+            System.err.println("Player data block is empty or not found.");
+            if (this.gamePanel.player == null) { // Initialize a default player if data is missing/corrupt
+                this.gamePanel.player = new Player(this.gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse);
+                this.gamePanel.player.setDefaults();
+            }
+        }
+    }
+
+    public void loadWeaponData(BufferedReader reader) throws IOException { // load players weapons with all data from weapons save data
+        StringBuilder weaponPropertiesBlock = new StringBuilder();
+        String line;
         
+        reader.reset();
+
+        if (this.gamePanel.player == null) {
+            this.gamePanel.player = new Player(this.gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse);
+        }
+        this.gamePanel.player.weaponInv.clear();
+
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith("START WEAPONS")) break;
+        }
+        
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith("END WEAPONS")) break;
+            if (line.trim().isEmpty()) {
+                Weapon newWeapon = new Weapon(this.gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse, this.gamePanel.player);
+                newWeapon.setWeaponPropertiesFromString(weaponPropertiesBlock.toString().trim());
+                this.gamePanel.player.addWeapon(newWeapon);
+
+                weaponPropertiesBlock.setLength(0);
+            } else {
+                weaponPropertiesBlock.append(line).append("\n");
+            }
+        }
     }
 
     public void loadWorldData(BufferedReader reader) { // load world, minimap, and game objects in previous game state from world save data
@@ -234,7 +298,6 @@ public class DataHandler {
 
                 if (line.startsWith("sectionSize:")) {
                     this.gamePanel.sectionSize = Integer.parseInt(line.replaceAll("[\\D]", ""));
-
                     line = reader.readLine(); // sections
                     this.gamePanel.sections = Integer.parseInt(line.replaceAll("[\\D]", ""));
                     this.gamePanel.updateWorldSize();
@@ -316,14 +379,14 @@ public class DataHandler {
                     continue;
                 }
 
-                this.gamePanel.gameState = this.gamePanel.PLAYING_STATE;
+                this.gamePanel.gameState = GamePanel.PLAYING_STATE;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void loadProgress() {
+    public void loadProgress(int saveId) {
         // try (BufferedReader reader = new BufferedReader(new FileReader(saveFilePath))) {
         //     this.loadPlayerData(reader);
         //     this.loadWeaponData(reader);
@@ -334,6 +397,16 @@ public class DataHandler {
         //     System.out.println("Save file not found!");
         //     e.printStackTrace();
         // }
+
+        this.fetchGameData(saveId);
+        BufferedReader reader = new BufferedReader(new StringReader(this.gameData));
+        try {
+            this.loadPlayerData(reader);
+            this.loadWeaponData(reader);
+            this.loadWorldData(reader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
