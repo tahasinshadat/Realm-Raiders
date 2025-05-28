@@ -88,21 +88,35 @@ public class GamePanel extends JPanel implements Runnable {
     //
     //// GAME STATES
     //
-    public static final int TITLE_STATE = 0;
-    public static final int PLAYING_STATE = 1;
-    public static final int PAUSE_STATE = 2;
-    public static final int END_STATE = 3;
-    public static final int MENU_SCREEN_STATE = 4;
-    public static final int LOAD_STATE = 5;
-    public static final int LOGIN_STATE = 6;
-    public static final int SIGNUP_STATE = 7;
-    public static final int MULTIPLAYER_MENU_STATE = 8;
-    public static final int HOST_LOBBY_STATE = 9;
-    public static final int JOIN_LOBBY_STATE = 10;
-    public static final int SAVE_SLOT_SELECTION_STATE = 11;
+    // public static final int TITLE_STATE = 0;
+    // public static final int PLAYING_STATE = 1;
+    // public static final int PAUSE_STATE = 2;
+    // public static final int END_STATE = 3;
+    // public static final int MENU_SCREEN_STATE = 4;
+    // public static final int LOAD_STATE = 5;
+    // public static final int LOGIN_STATE = 6;
+    // public static final int SIGNUP_STATE = 7;
+    // public static final int MULTIPLAYER_MENU_STATE = 8;
+    // public static final int HOST_LOBBY_STATE = 9;
+    // public static final int JOIN_LOBBY_STATE = 10;
+    // public static final int SAVE_SLOT_SELECTION_STATE = 11;
+    public enum GameState {
+        TITLE,
+        PLAYING,
+        PAUSE,
+        END,
+        MENU_SCREEN,
+        LOAD,
+        LOGIN,
+        SIGNUP,
+        MULTIPLAYER_MENU,
+        HOST_LOBBY,
+        JOIN_LOBBY,
+        SAVE_SLOT_SELECTION
+    }
 
 
-    public int gameState = GamePanel.TITLE_STATE;
+    private GameState gameState = GameState.LOGIN;
     public User user = null;
     public boolean paused = false;
 
@@ -159,6 +173,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.dataHandler = new DataHandler(this, this.dbManager);
         
         this.gameUI = new UI(this);
+        this.setGameState(GamePanel.MENU_SCREEN_STATE);
     }
 
     public void newGame() {
@@ -173,11 +188,20 @@ public class GamePanel extends JPanel implements Runnable {
         // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
     }
 
+    public void setGameState(int newState) {
+        this.gameState = newState;
+        if (this.gameUI != null) {
+            this.gameUI.updateUIComponents(); // update its visible Swing components
+        } else {
+            System.err.println("Warning: gameUI is null when trying to set game state to " + newState + ". UI components will not be updated immediately.");
+        }
+        this.repaint();
+    }
+
     public void cleanup() {
         // Reinstantiate assets
         this.assetManager = new AssetManager(this);
         this.assetManager.reset();
-        // this.gameUI.removeButtons();
         
         // // Add initial enemies or any other initial setup
         // enemies.add(new Enemy(this, (int) player.worldX, (int) player.worldY - 100, 1, "Goblin", false));
@@ -316,7 +340,7 @@ public class GamePanel extends JPanel implements Runnable {
 
             this.addGameObjectsInQueue();
 
-            // test.update();
+            this.gameUI.updateUIComponents();
         }
     }
 
@@ -351,17 +375,22 @@ public class GamePanel extends JPanel implements Runnable {
         Graphics2D g2 = (Graphics2D) g;
 
         if (
-            this.gameState == GamePanel.TITLE_STATE || 
-            this.gameState == GamePanel.PAUSE_STATE || 
-            this.gameState == GamePanel.LOAD_STATE ||
-            this.gameState == GamePanel.MENU_SCREEN_STATE || 
-            this.gameState == GamePanel.END_STATE
-        ) {
-            gameUI.draw(g2); // Draw GUI
+        this.gameState == GamePanel.TITLE_STATE || 
+        this.gameState == GamePanel.PAUSE_STATE || 
+        this.gameState == GamePanel.LOAD_STATE ||
+        this.gameState == GamePanel.MENU_SCREEN_STATE || 
+        this.gameState == GamePanel.END_STATE || 
+        this.gameState == GamePanel.LOGIN_STATE ||
+        this.gameState == GamePanel.SIGNUP_STATE ||
+        this.gameState == GamePanel.MULTIPLAYER_MENU_STATE ||
+        this.gameState == GamePanel.HOST_LOBBY_STATE ||
+        this.gameState == GamePanel.JOIN_LOBBY_STATE ||
+        this.gameState == GamePanel.SAVE_SLOT_SELECTION_STATE
+    ) {
+            this.gameUI.draw(g2); // Draw GUI
         } else {
 
             this.drawGameFrame(g2); // Draw GUI + Game
-
             this.gameUI.draw(g2); // Draw in game UI
             
         }
