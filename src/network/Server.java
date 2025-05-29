@@ -2,6 +2,8 @@ package network;
 
 import java.io.*;
 import java.net.*;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Server {
     private ServerSocket serverSocket;
@@ -10,7 +12,7 @@ public class Server {
     private PrintWriter out;
 
     public String startSession() throws IOException {
-        String code = NetworkManager.generateCode();
+        String code = NetworkManager.generateSessionCode();
         String publicIP = NetworkManager.getPublicIP();
 
         NetworkManager.registerSession(code, publicIP);
@@ -36,6 +38,10 @@ public class Server {
     public String receive() throws IOException {
         return in.readLine();
     }
+    
+    public void receiveChunk(StringBuilder sb) {
+        for (String s : in.lines().toList()) sb.append(s);
+    }
 
     public boolean isConnected() {
         return socket != null && socket.isConnected() && !socket.isClosed();
@@ -57,5 +63,10 @@ public class Server {
 
     public void handleClientMessage(String msg) {
         System.out.println("Client: " + msg);
+    }
+
+    public String handleLobbyMsgs(String msg) {
+        System.out.println("Client: " + msg);
+        return msg;
     }
 }

@@ -22,17 +22,17 @@ public class Portal extends GameObject {
     public void update() {
         updateValuesOnZoom();
         // keyhandler.interactionButtonPressed always false for some reason
-        // if (this.gamePanel.keyHandler.interactionButtonPressed && this.canInteract(this.gamePanel.player.worldX, this.gamePanel.player.worldY) && !this.utilizedPortal) {
-        //     this.gamePanel.gameState = GamePanel.LOAD_STATE;
-        //     this.gamePanel.player.clearProjectiles();
-        //     this.utilizedPortal = true;
-        // }
+        if (this.gamePanel.keyHandler.interactionButtonPressed && this.canInteract(this.gamePanel.player.worldX, this.gamePanel.player.worldY) && !this.utilizedPortal) {
+            this.gamePanel.gameState = GamePanel.GameState.LOAD;
+            this.gamePanel.player.clearProjectiles();
+            this.utilizedPortal = true;
+        }
     }
 
     @Override
     public void interact() {
         if (!this.utilizedPortal) {
-            this.gamePanel.gameState = GamePanel.LOAD_STATE;
+            this.gamePanel.gameState = GamePanel.GameState.LOAD;
             this.gamePanel.player.clearProjectiles();
             this.utilizedPortal = true;
         }

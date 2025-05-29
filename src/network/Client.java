@@ -31,18 +31,35 @@ public class Client {
         return in.readLine();
     }
 
+    public void receiveChunk(StringBuilder sb) {
+        for (String s : in.lines().toList()) sb.append(s);
+    }
+
     public boolean isConnected() {
         return socket != null && socket.isConnected() && !socket.isClosed();
     }
 
     public void close() throws IOException {
-        in.close();
-        out.close();
-        socket.close();
+        if (socket != null) {
+            in.close();
+            out.close();
+            socket.close();
+        }
     }
 
     public void handleRemoteServerMessage(String msg) {
         // apply game updates from server
         System.out.println("Server: " + msg);
     }
+
+    public void sendReadyState(boolean ready) throws IOException {
+        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+        out.writeUTF("READY:" + ready); // simple text protocol
+        out.flush();
+    }
+
+    public String getLocalIp() { 
+        return socket.getLocalAddress().getHostAddress(); 
+    }
+
 }

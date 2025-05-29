@@ -173,39 +173,18 @@ public class DataHandler {
     }
 
     public void saveProgress(int userId, int slot) {
-        // try {
-        //     // Create the data directory if it doesn't exist
-        //     File directory = new File("realm_raiders_save_data");
-        //     directory.mkdirs();
-
-        //     // Create a new save file in the data directory
-        //     String saveFilePath = "realm_raiders_save_data/saveFile.txt";
-        //     BufferedWriter writer = new BufferedWriter(new FileWriter(saveFilePath));
-
-        //     this.savePlayerData(writer);
-        //     this.saveWeaponData(writer);
-        //     this.saveWorldData(writer);
-            
-        //     writer.close();
-        //     System.out.println("Game progress saved successfully.");
-
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        // }
         if (this.dbManager == null) {
             System.err.println("DatabaseManager not initialized in DataHandler. Cannot save to DB.");
             return;
         }
 
         StringBuilder sb = new StringBuilder();
-
         this.storePlayerData(sb);
         this.storeWeaponData(sb);
         this.storeWorldData(sb);
         String gameStateData = sb.toString();
-        boolean success = dbManager.saveGameToSlot(userId, 
-                                             this.dbManager.getUserSaveSlots(userId)[slot-1], 
-                                             gameStateData);
+
+        boolean success = this.dbManager.saveGameToSlot(userId, slot, gameStateData);
         // System.out.println(gameStateData);
 
         if (!success) {
@@ -250,6 +229,7 @@ public class DataHandler {
         StringBuilder weaponPropertiesBlock = new StringBuilder();
         String line;
         
+        reader.mark(100000);
         reader.reset();
 
         if (this.gamePanel.player == null) {
@@ -379,7 +359,7 @@ public class DataHandler {
                     continue;
                 }
 
-                this.gamePanel.gameState = GamePanel.PLAYING_STATE;
+                this.gamePanel.gameState = GamePanel.GameState.PLAYING;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -387,18 +367,11 @@ public class DataHandler {
     }
 
     public void loadProgress(int saveId) {
-        // try (BufferedReader reader = new BufferedReader(new FileReader(saveFilePath))) {
-        //     this.loadPlayerData(reader);
-        //     this.loadWeaponData(reader);
-        //     this.loadWorldData(reader);
-        //     System.out.println("Game progress loaded successfully.");
-        //     System.out.println(this.gamePanel.obj);
-        // } catch (IOException e) {
-        //     System.out.println("Save file not found!");
-        //     e.printStackTrace();
-        // }
-
         this.fetchGameData(saveId);
+        if (this.gameData == null) {
+            System.err.println("No game data returned for saveId: " + saveId);
+            return;
+        }
         BufferedReader reader = new BufferedReader(new StringReader(this.gameData));
         try {
             this.loadPlayerData(reader);

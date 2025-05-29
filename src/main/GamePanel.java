@@ -12,12 +12,20 @@ import elements.Minimap;
 import elements.Player;
 import elements.TileManager;
 import elements.User;
+import main.GamePanel.GameState;
+import ui.UI;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -88,6 +96,21 @@ public class GamePanel extends JPanel implements Runnable {
     //
     //// GAME STATES
     //
+    public enum GameState {
+        TITLE,
+        PLAYING,
+        PAUSE,
+        END,
+        MAIN_MENU,
+        LOAD,
+        LOGIN,
+        SIGNUP,
+        MULTIPLAYER_MENU,
+        HOST_LOBBY,
+        JOIN_LOBBY,
+        SAVE_SLOT_SELECTION
+    }
+    public GameState gameState = GameState.TITLE;
     // public static final int TITLE_STATE = 0;
     // public static final int PLAYING_STATE = 1;
     // public static final int PAUSE_STATE = 2;
@@ -100,25 +123,24 @@ public class GamePanel extends JPanel implements Runnable {
     // public static final int HOST_LOBBY_STATE = 9;
     // public static final int JOIN_LOBBY_STATE = 10;
     // public static final int SAVE_SLOT_SELECTION_STATE = 11;
-    public enum GameState {
-        TITLE,
-        PLAYING,
-        PAUSE,
-        END,
-        MENU_SCREEN,
-        LOAD,
-        LOGIN,
-        SIGNUP,
-        MULTIPLAYER_MENU,
-        HOST_LOBBY,
-        JOIN_LOBBY,
-        SAVE_SLOT_SELECTION
-    }
 
-
-    private GameState gameState = GameState.LOGIN;
+    //
+    //// Auth
+    //
     public User user = null;
     public boolean paused = false;
+    public int currentSlot = -1;
+    public boolean loggedIn = false;
+
+    //
+    //// Network Classes
+    //
+    public Server networkServer;
+    public Client networkClient;
+    public String sessionCode;
+    public ArrayList<String> connectedClientsList;
+    public final List<LobbyClient> lobbyClients = Collections.synchronizedList(new java.util.ArrayList<>());
+    public volatile boolean localReady = false;
 
     //
     //// Game Progress Checking:
@@ -142,21 +164,21 @@ public class GamePanel extends JPanel implements Runnable {
         this.setBackground(backgroundColor);
         this.setDoubleBuffered(true); // Rendered in the background, and then shown
         this.setFocusable(true);
-
+        
         // Initialize core components
         this.dbManager = new DatabaseManager("realm_raiders_data.db");
         if (this.dbManager.connect()) {
             this.dbManager.initializeTables();
         } else {
-            System.out.println("Error Connecting to Database");
+            this.gameUI.logError("Error Connecting to Database");
         }
-
+        
         this.keyHandler = new KeyHandler(this);
         this.mouse = new MouseInteractions(this);
         this.addKeyListener(keyHandler);
         this.addMouseListener(mouse);
         this.addMouseWheelListener(mouse);
-
+        
         // Initialize game world and visual components
         this.assetManager = new AssetManager(this); // Load assets first
         this.tileManager = new TileManager(this);
@@ -167,37 +189,22 @@ public class GamePanel extends JPanel implements Runnable {
         this.mapCreator.setEnvironment();
         this.tileManager.mapTileNum = mapCreator.getWorldMap();
         this.minimap = new Minimap(this, 20);
-
+        
         this.player = new Player(this, this.keyHandler, this.mouse); // Initialize player
         this.collisionHandler = new CollisionHandler(this);
         this.dataHandler = new DataHandler(this, this.dbManager);
         
+        this.networkServer = new Server();
+        this.networkClient = new Client();
+        
         this.gameUI = new UI(this);
-        this.setGameState(GamePanel.MENU_SCREEN_STATE);
+        this.gameUI.logInfo("game assets loaded.");
+        this.requestFocusInWindow();
     }
 
-    public void newGame() {
-        // this.endGameThread(); // DO NOT UNCOMMENT
-        this.resetProperties();
-        this.cleanup();
-        this.generateNewLevel();
-        this.setupGame();
-        this.gameState = GamePanel.PLAYING_STATE;
-        // this.startGameThread(); // DO NOT UNCOMMENT
-        this.requestFocus();
-        // enemies.add(new Enemy(this, (int) this.player.worldX, (int) this.player.worldY - 100, 1, "Goblin", false));
-    }
-
-    public void setGameState(int newState) {
-        this.gameState = newState;
-        if (this.gameUI != null) {
-            this.gameUI.updateUIComponents(); // update its visible Swing components
-        } else {
-            System.err.println("Warning: gameUI is null when trying to set game state to " + newState + ". UI components will not be updated immediately.");
-        }
-        this.repaint();
-    }
-
+    //
+    //// Game Cleaning
+    //
     public void cleanup() {
         // Reinstantiate assets
         this.assetManager = new AssetManager(this);
@@ -222,6 +229,43 @@ public class GamePanel extends JPanel implements Runnable {
         // this.obj.add(testWeapon);
         // System.out.println("Added test weapon!");
         // System.out.println(this.obj);
+    }
+
+
+
+    //
+    ////  Game Instansitaion
+    //
+    
+    public void newGame() {
+        this.gameUI.logInfo("newGame");
+        this.resetProperties();
+        this.cleanup();
+        this.generateNewLevel();
+        this.setupGame();
+        this.setGameState(GameState.PLAYING);
+        this.requestFocus();
+
+        if (this.gameThread == null || !this.gameThread.isAlive()) {
+            this.startGameThread();
+        }
+    }
+
+    public void setGameState(GameState newState) {
+        if (this.gameState == newState) return;
+
+        this.gameState = newState;
+
+        if (gameUI != null) gameUI.rebuild();
+
+        // If moving away from a network lobby, clean up:
+        if (newState != GameState.HOST_LOBBY && networkServer != null && !networkServer.isConnected()) { // Server needs isSocketClosed()
+            // stopHostingMultiplayer(); // Or handle cleanup somehow idk yet
+        }
+        if (newState != GameState.JOIN_LOBBY && networkClient != null && !networkClient.isConnected()) { // Client needs isSocketClosed() or similar
+            // disconnectClient(); // Or handle cleanup
+        }
+        this.repaint();
     }
 
     public void generateNewLevel() { // Passed Previous Level So Load New One
@@ -259,7 +303,13 @@ public class GamePanel extends JPanel implements Runnable {
         this.worldHeight = this.originalScaledTileSize * this.maxWorldRow;
     }
 
+
+
+    //
+    //// Threading 
+    //
     public void startGameThread() {
+        this.gameUI.logInfo("thread started");
         this.gameThread = new Thread(this); // Pass in itself (the game panel) to instantiate the thread
         this.gameThread.start();
     }
@@ -272,6 +322,166 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+
+
+    //
+    //// NETWORK: Server & Client Functions
+    //
+    public void prepareToHostMultiplayer() {
+        leaveHostLobby();
+        networkServer = new Server();
+        try {
+            sessionCode = NetworkManager.startMultiplayerSession(networkServer);
+            setGameState(GameState.HOST_LOBBY);
+        } catch (IOException ex) {
+            gameUI.logError("Could not host: " + ex.getMessage());
+        }
+    }
+
+
+    public void stopHostingMultiplayer() {
+        if (networkServer != null) {
+            try {
+                networkServer.close(); // Server needs a comprehensive close method
+            } catch (IOException e) {
+                this.gameUI.logError("Error closing server: " + e.getMessage());
+            }
+            networkServer = null;
+        }
+        this.sessionCode = null;
+        // connectedClientsList.clear();
+        if (gameUI != null) {
+            // gameUI.updateHostLobbyStatus(null, null);
+        }
+    }
+
+    public boolean joinMultiplayerGame(String code) {
+        if (networkClient == null) networkClient = new Client();
+        try {
+            NetworkManager.joinMultiplayerSession(networkClient, code);
+            return true;
+        } catch (IOException e) {
+            gameUI.logError("Join failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Disconnect a client that is in a lobby
+    public void leaveJoinLobby() {
+        try {
+            if (networkClient != null) networkClient.close();   // implement close() in Client if missing
+        } catch (Exception ignored) {}
+        networkClient = null;
+        lobbyClients.clear();
+        setGameState(GameState.MULTIPLAYER_MENU);
+    }
+
+    // Host uses this to dissolve his lobby and kick clients
+    public void leaveHostLobby() {
+        try {
+            if (networkServer != null) networkServer.close();   // close sockets, etc.
+        } catch (Exception ignored) {}
+        networkServer = null;
+        sessionCode = null;
+        lobbyClients.clear();
+        setGameState(GameState.MULTIPLAYER_MENU);
+    }
+
+
+
+    //
+    //// NETWORK: UI & Classes
+    //
+    public static final class LobbyClient {
+        public final String username;
+        public String ip;
+        public volatile boolean ready;
+
+        public LobbyClient(String username, String ip) {
+            this.username = username;
+            this.ip = ip;
+            this.ready = false;
+        }
+    }
+
+    public void addOrUpdateLobbyClient(String user, String ip, boolean ready) {
+        synchronized (lobbyClients) {
+            for (LobbyClient c : lobbyClients) {
+                if (c.username.equals(user)) {                     // update
+                    c.ip = ip;
+                    c.ready = ready;
+                    return;
+                }
+            }
+            lobbyClients.add(new LobbyClient(user, ip)); // new client
+        }
+    }
+
+    public boolean allClientsReady() {
+        synchronized (lobbyClients) {
+            if (lobbyClients.isEmpty()) return false; // host alone -> not ready
+            for (LobbyClient c : lobbyClients) if (!c.ready) return false;
+            return true;
+        }
+    }
+
+    public boolean isHost() { 
+        return networkServer != null && sessionCode != null; 
+    }
+
+    public boolean isConnected() { 
+        return networkClient != null && networkClient.isConnected(); 
+    }
+
+    public String  getSessionCode() { 
+        return sessionCode != null ? sessionCode : "------"; 
+    }
+
+    public void setOwnReady(boolean ready) throws IOException {
+        this.localReady = ready;
+        // inform host / server
+        if (networkClient != null) networkClient.sendReadyState(ready);
+        addOrUpdateLobbyClient(
+            user == null ? "Player" : user.username,
+            networkClient != null ? networkClient.getLocalIp() : "127.0.0.1",
+            ready
+        );
+    }
+
+    public void startMultiplayerGame() { // todo: send “game-start” to all clients and move to PLAYING but for now just switch state locally
+        setGameState(GameState.PLAYING);
+    }
+
+    public void leaveMultiplayerLobby() {  // called by back button in host lobby
+        if (this.isHost()) {
+            this.leaveHostLobby();
+        }
+        this.leaveJoinLobby();
+    }
+
+
+
+    //
+    //// NETWORK: Server & Client Communication 
+    //
+    public void sendMapDataToClients(Server server) {
+        StringBuilder sb = new StringBuilder();
+        this.dataHandler.storeWorldData(sb);
+        server.send(sb.toString().trim());
+    }
+
+    public void collectMapDataClient(Client client) {
+        StringBuilder sb = new StringBuilder();
+        client.receiveChunk(sb);
+        BufferedReader reader = new BufferedReader(new StringReader(sb.toString()));
+        this.dataHandler.loadWorldData(reader);
+    }
+
+
+
+    //
+    //// Game Saving & Loading
+    //
     public void saveProgress(int slot) {
         this.dataHandler.saveProgress(this.user.userId, slot);
     }
@@ -284,6 +494,11 @@ public class GamePanel extends JPanel implements Runnable {
         
     }
 
+
+
+    //
+    //// Game Rendering & Updating
+    //
     @Override
     public void run() { // The GAME LOOP (the core of the game) - Automatically called when we create a thread
 
@@ -321,10 +536,9 @@ public class GamePanel extends JPanel implements Runnable {
 
     }
 
-    // public Room test = new Room(this, 22, 2, 1);
-
     public void update() {
-        if (this.gameState == GamePanel.PLAYING_STATE) {
+        // if (gameUI != null) gameUI.rebuild();
+        if (this.gameState == GameState.PLAYING) {
             this.player.update();
             for (Entity enemy : enemies) {
                 ((Enemy) enemy).update();
@@ -340,11 +554,60 @@ public class GamePanel extends JPanel implements Runnable {
 
             this.addGameObjectsInQueue();
 
-            this.gameUI.updateUIComponents();
         }
     }
 
+    @Override
+    public void paintComponent(Graphics g) { // what gets drawn last is on top
+        super.paintComponent(g); // Reference the parent class of this class (JPanel) - It's JPanel's Method
+        Graphics2D g2 = (Graphics2D) g.create();
+
+        if (
+            this.gameState == GameState.TITLE || 
+            this.gameState == GameState.LOAD ||
+            this.gameState == GameState.MAIN_MENU || 
+            this.gameState == GameState.END || 
+            this.gameState == GameState.LOGIN ||
+            this.gameState == GameState.SIGNUP ||
+            this.gameState == GameState.MULTIPLAYER_MENU ||
+            this.gameState == GameState.HOST_LOBBY ||
+            this.gameState == GameState.JOIN_LOBBY ||
+            this.gameState == GameState.SAVE_SLOT_SELECTION
+        ) {
+            this.gameUI.draw(g2); // Draw GUI
+        } else {
+            
+            this.drawGameFrame(g2); // Draw GUI + Game
+            this.gameUI.draw(g2); // Draw in game UI 
+        }
+
+        g2.dispose();
+    }
+
+    public void drawGameFrame(Graphics2D g2) {
+        this.tileManager.draw(g2); // Draw Tiles
+
+        for (int i = 0; i < this.obj.size(); i++) { // draw game objects
+            // System.out.println("Drawing " + object + " On ground? " + object.onGround);
+            obj.get(i).draw(g2);
+        }
+
+        this.player.draw(g2); // Draw the Player
+
+        for (Entity enemy : enemies) { // Draw Enemies
+            ((Enemy) enemy).draw(g2);
+        }
+
+        this.minimap.draw(g2); // Draw the minimap
+    }
+
+
+
+    //
+    //// Object Management
+    //
     private ArrayList<GameObject> gameObjectsToAdd = new ArrayList<>();
+
     public boolean addObjectAfterFrame(GameObject object) {
         return gameObjectsToAdd.add(object);
     }
@@ -369,53 +632,10 @@ public class GamePanel extends JPanel implements Runnable {
     }
     
 
-    @Override
-    public void paintComponent(Graphics g) { // what gets drawn last is on top
-        super.paintComponent(g); // Reference the parent class of this class (JPanel) - It's JPanel's Method
-        Graphics2D g2 = (Graphics2D) g;
-
-        if (
-        this.gameState == GamePanel.TITLE_STATE || 
-        this.gameState == GamePanel.PAUSE_STATE || 
-        this.gameState == GamePanel.LOAD_STATE ||
-        this.gameState == GamePanel.MENU_SCREEN_STATE || 
-        this.gameState == GamePanel.END_STATE || 
-        this.gameState == GamePanel.LOGIN_STATE ||
-        this.gameState == GamePanel.SIGNUP_STATE ||
-        this.gameState == GamePanel.MULTIPLAYER_MENU_STATE ||
-        this.gameState == GamePanel.HOST_LOBBY_STATE ||
-        this.gameState == GamePanel.JOIN_LOBBY_STATE ||
-        this.gameState == GamePanel.SAVE_SLOT_SELECTION_STATE
-    ) {
-            this.gameUI.draw(g2); // Draw GUI
-        } else {
-
-            this.drawGameFrame(g2); // Draw GUI + Game
-            this.gameUI.draw(g2); // Draw in game UI
-            
-        }
-
-        g2.dispose();
-    }
-
-
-    public void drawGameFrame(Graphics2D g2) {
-        this.tileManager.draw(g2); // Draw Tiles
-
-        for (int i = 0; i < this.obj.size(); i++) { // draw game objects
-            // System.out.println("Drawing " + object + " On ground? " + object.onGround);
-            obj.get(i).draw(g2);
-        }
-
-        this.player.draw(g2); // Draw the Player
-
-        for (Entity enemy : enemies) { // Draw Enemies
-            ((Enemy) enemy).draw(g2);
-        }
-
-        this.minimap.draw(g2); // Draw the minimap
-    }
-
+    
+    //
+    //// Miscellenious
+    //
     public void zoom(int zoomAmt) {
         int oldWorldWidth = this.tileSize * this.maxWorldCol; // 10080
         this.tileSize += zoomAmt;
@@ -434,5 +654,5 @@ public class GamePanel extends JPanel implements Runnable {
         this.player.worldX = newPlayerWorldX;
         this.player.worldY = newPlayerWorldY;
     }
-
+    
 }

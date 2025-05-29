@@ -3,18 +3,21 @@ package network;
 import java.io.*;
 import java.net.*;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class NetworkManager {
     private static final String PASTE_SERVICE = "https://paste.rs";  // Free and anonymous pastebin
     private static final int PORT = 5005;
 
-    public static String generateCode() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random rand = new Random();
-        StringBuilder code = new StringBuilder();
-        for (int i = 0; i < 6; i++) code.append(chars.charAt(rand.nextInt(chars.length())));
-        return code.toString();
+    public static String generateSessionCode() {
+        String pool = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        StringBuilder sb = new StringBuilder(6);
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+        for (int i = 0; i < 6; i++)
+            sb.append(pool.charAt(rnd.nextInt(pool.length())));
+        return sb.toString();
     }
+
 
     public static String getPublicIP() throws IOException {
         URL url = URI.create("https://api.ipify.org").toURL(); // free & public API that returns your public IP address as a plain string
@@ -39,18 +42,27 @@ public class NetworkManager {
     }
 
     // ==== Server Side ====
+    // NetworkManager.java  (only the server-side part changed)
     public static String startMultiplayerSession(Server server) throws IOException {
-        String code = generateCode();
-        String publicIP = getPublicIP();
 
+        String code     = generateSessionCode();
+        String publicIP = getPublicIP();
         registerSession(code, publicIP);
         System.out.println("Session Code: " + code);
 
-        server.startListening(PORT);
-        startReceivingThread(server, server::handleClientMessage);
+        /* run the blocking accept() & the receive-loop in their own thread */
+        new Thread(() -> {
+            try {
+                server.startListening(PORT);                       // waits for client
+                startReceivingThread(server, server::handleClientMessage);
+            } catch (IOException e) {
+                System.err.println("Server stopped: " + e.getMessage());
+            }
+        }, "Host-Accept").start();
 
-        return code;
+        return code;        // <-- returns instantly, so sessionCode is set right away
     }
+
 
 
     // ==== Client Side ====
@@ -60,6 +72,7 @@ public class NetworkManager {
 
         client.connect(ip, PORT);
         startReceivingThread(client, client::handleRemoteServerMessage);
+        client.send(ip + " Joined");
     }
 
 

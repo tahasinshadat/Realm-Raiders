@@ -7,8 +7,6 @@ public class Main {
         GamePanel gamePanel = new GamePanel();
         Window window = new Window(gamePanel, "Realm Raiders");
         window.init();
-        gamePanel.setupGame();
-        gamePanel.startGameThread();
         
     }
 }

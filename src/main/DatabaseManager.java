@@ -340,7 +340,7 @@ public class DatabaseManager {
     
     public int[] getUserSaveSlots(int userId) {
         if (connection == null && !connect()) return new int[]{-1, -1, -1};
-        String sql = "SELECT save1, save2, save3, FROM users WHERE user_id = ?";
+        String sql = "SELECT save1, save2, save3 FROM users WHERE user_id = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
@@ -405,7 +405,7 @@ public class DatabaseManager {
             return null;
         }
         
-        String sql = "SELECT save_data FROM game_saves WHERE save_id='" + saveId + "'";
+        String sql = "SELECT save_data FROM game_saves WHERE save_id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, saveId);
             ResultSet rs = pstmt.executeQuery();

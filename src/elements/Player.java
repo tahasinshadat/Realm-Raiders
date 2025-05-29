@@ -230,7 +230,7 @@ public class Player extends Entity {
 
         this.updateEquippedWeapon(); // update equipped weapon on scroll
 
-        if (this.dead) this.gamePanel.gameState = GamePanel.END_STATE; // End of Game
+        if (this.dead) this.gamePanel.gameState = GamePanel.GameState.END; // End of Game
 
         this.frameCount++;
     }

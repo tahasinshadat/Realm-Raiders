@@ -3,6 +3,7 @@ package components;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import main.GamePanel;
+import ui.UI;
 
 public class KeyHandler implements KeyListener {
     
@@ -27,7 +28,7 @@ public class KeyHandler implements KeyListener {
     public void keyPressed(KeyEvent event) {
         int code = event.getKeyCode();
 
-        if (!(this.gamePanel.gameState == GamePanel.LOAD_STATE)) {
+        if (!(this.gamePanel.gameState == GamePanel.GameState.LOAD)) {
             if (code == KeyEvent.VK_W) this.upPressed = true;
             if (code == KeyEvent.VK_S) this.downPressed = true;
             if (code == KeyEvent.VK_A) this.leftPressed = true;
@@ -49,9 +50,9 @@ public class KeyHandler implements KeyListener {
             }
             if (code == KeyEvent.VK_ESCAPE) this.gamePanel.paused = !this.gamePanel.paused;
             if (this.gamePanel.paused) {
-                this.gamePanel.gameState = GamePanel.PAUSE_STATE;
+                this.gamePanel.gameState = GamePanel.GameState.PAUSE;
             } else {
-                this.gamePanel.gameState = GamePanel.PLAYING_STATE;
+                this.gamePanel.gameState = GamePanel.GameState.PLAYING;
             }
         }
     
