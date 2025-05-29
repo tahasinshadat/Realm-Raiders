@@ -138,7 +138,6 @@ public class GamePanel extends JPanel implements Runnable {
     public Server networkServer;
     public Client networkClient;
     public String sessionCode;
-    public ArrayList<String> connectedClientsList;
     public final List<LobbyClient> lobbyClients = Collections.synchronizedList(new java.util.ArrayList<>());
     public volatile boolean localReady = false;
 
@@ -195,8 +194,9 @@ public class GamePanel extends JPanel implements Runnable {
         this.dataHandler = new DataHandler(this, this.dbManager);
         
         this.networkServer = new Server();
+        this.networkServer.setGamePanel(this);
         this.networkClient = new Client();
-        
+
         this.gameUI = new UI(this);
         this.gameUI.logInfo("game assets loaded.");
         this.requestFocusInWindow();
@@ -328,10 +328,12 @@ public class GamePanel extends JPanel implements Runnable {
     //// NETWORK: Server & Client Functions
     //
     public void prepareToHostMultiplayer() {
-        leaveHostLobby();
+        leaveHostLobby(); // Clean up any previous host state
         networkServer = new Server();
+        networkServer.setGamePanel(this); // Ensure the server has a reference to this GamePanel
         try {
             sessionCode = NetworkManager.startMultiplayerSession(networkServer);
+            addOrUpdateLobbyClient(user == null ? "Host" : user.username, "127.0.0.1", false);
             setGameState(GameState.HOST_LOBBY);
         } catch (IOException ex) {
             gameUI.logError("Could not host: " + ex.getMessage());
@@ -341,17 +343,13 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void stopHostingMultiplayer() {
         if (networkServer != null) {
-            try {
-                networkServer.close(); // Server needs a comprehensive close method
-            } catch (IOException e) {
-                this.gameUI.logError("Error closing server: " + e.getMessage());
-            }
+            networkServer.close();
             networkServer = null;
         }
         this.sessionCode = null;
-        // connectedClientsList.clear();
+        lobbyClients.clear(); // Clear lobby clients when host stops
         if (gameUI != null) {
-            // gameUI.updateHostLobbyStatus(null, null);
+            gameUI.rebuild(); // Refresh UI
         }
     }
 
@@ -359,6 +357,11 @@ public class GamePanel extends JPanel implements Runnable {
         if (networkClient == null) networkClient = new Client();
         try {
             NetworkManager.joinMultiplayerSession(networkClient, code);
+            if (user != null) {
+                networkClient.send("JOIN:" + user.username);
+            } else {
+                networkClient.send("JOIN:Player");
+            }
             return true;
         } catch (IOException e) {
             gameUI.logError("Join failed: " + e.getMessage());
@@ -410,10 +413,12 @@ public class GamePanel extends JPanel implements Runnable {
                 if (c.username.equals(user)) {                     // update
                     c.ip = ip;
                     c.ready = ready;
+                    if (gameUI != null) SwingUtilities.invokeLater(() -> gameUI.rebuild());                   
                     return;
                 }
             }
             lobbyClients.add(new LobbyClient(user, ip)); // new client
+            if (gameUI != null) SwingUtilities.invokeLater(() -> gameUI.rebuild());  
         }
     }
 
@@ -449,6 +454,9 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void startMultiplayerGame() { // todo: send “game-start” to all clients and move to PLAYING but for now just switch state locally
+        if (isHost() && networkServer != null) {
+            networkServer.send("GAME_START:");
+        }
         setGameState(GameState.PLAYING);
     }
 

@@ -42,7 +42,6 @@ public class NetworkManager {
     }
 
     // ==== Server Side ====
-    // NetworkManager.java  (only the server-side part changed)
     public static String startMultiplayerSession(Server server) throws IOException {
 
         String code     = generateSessionCode();
@@ -50,19 +49,19 @@ public class NetworkManager {
         registerSession(code, publicIP);
         System.out.println("Session Code: " + code);
 
-        /* run the blocking accept() & the receive-loop in their own thread */
+        /* Start the server's listening loop in its own thread.
+           The server.startListening(PORT) method itself now handles
+           accepting clients and spawning individual ClientHandler threads for receiving. */
         new Thread(() -> {
             try {
-                server.startListening(PORT);                       // waits for client
-                startReceivingThread(server, server::handleClientMessage);
+                server.startListening(PORT); // This now handles accepting and managing client connections
             } catch (IOException e) {
                 System.err.println("Server stopped: " + e.getMessage());
             }
         }, "Host-Accept").start();
 
-        return code;        // <-- returns instantly, so sessionCode is set right away
+        return code;
     }
-
 
 
     // ==== Client Side ====
@@ -81,9 +80,9 @@ public class NetworkManager {
         new Thread(() -> {
             try {
                 while (true) {
-                    String msg = connection instanceof Server
-                        ? ((Server) connection).receive()
-                        : ((Client) connection).receive();
+                    String msg = connection instanceof Client // Only expect Client here now
+                        ? ((Client) connection).receive()
+                        : null; // Server side no longer uses this method for receiving
 
                     if (msg != null) handler.handle(msg);
                 }

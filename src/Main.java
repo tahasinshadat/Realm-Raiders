@@ -10,3 +10,4 @@ public class Main {
         
     }
 }
+// find src -name "*.class" -type f -delete
