@@ -361,12 +361,6 @@ public class DataHandler {
 
                     continue;
                 }
-
-                this.gamePanel.cleanup();
-                this.gamePanel.gameState = GamePanel.GameState.PLAYING;
-                if (this.gamePanel.gameThread == null || !this.gamePanel.gameThread.isAlive()) {
-                    this.gamePanel.startGameThread();
-                }
             }
         } catch (IOException e) {
             e.printStackTrace();

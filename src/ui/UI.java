@@ -501,6 +501,7 @@ public class UI {
                         gamePanel.loadProgress(slot);
                     }
                     gamePanel.setGameState(GamePanel.GameState.PLAYING);
+                    this.gamePanel.requestFocus();
                 });
         }
 

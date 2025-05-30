@@ -260,6 +260,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (this.gameState == newState) return;
 
         this.gameState = newState;
+        if (this.gameState != GameState.PAUSE) this.paused = false;
 
         if (gameUI != null) gameUI.rebuild();
 
@@ -500,8 +501,12 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void loadProgress(int slot) {
-        // this.cleanup();
+        this.cleanup();
         this.dataHandler.loadProgress(this.dbManager.getUserSaveSlots(this.user.userId)[slot-1]); 
+        this.setGameState(GamePanel.GameState.PLAYING);
+        if (this.gameThread == null || !this.gameThread.isAlive()) {
+            this.startGameThread();
+        }
         this.requestFocus();
     }
 
