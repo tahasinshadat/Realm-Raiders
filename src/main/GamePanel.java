@@ -501,7 +501,9 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void loadProgress(int slot) {
-        this.cleanup();
+        this.assetManager = new AssetManager(this);
+        this.assetManager.reset();
+        
         this.dataHandler.loadProgress(this.dbManager.getUserSaveSlots(this.user.userId)[slot-1]); 
         this.setGameState(GamePanel.GameState.PLAYING);
         if (this.gameThread == null || !this.gameThread.isAlive()) {
