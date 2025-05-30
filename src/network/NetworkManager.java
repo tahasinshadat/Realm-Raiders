@@ -20,7 +20,7 @@ public class NetworkManager {
 
 
     public static String getPublicIP() throws IOException {
-        URL url = URI.create("https://api.ipify.org").toURL(); // free & public API that returns your public IP address as a plain string
+        URL url = URI.create("http://checkip.amazonaws.com").toURL(); // free & public API that returns your public IP address as a plain string
         BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
         return in.readLine().trim();
     }
@@ -44,7 +44,7 @@ public class NetworkManager {
     // ==== Server Side ====
     public static String startMultiplayerSession(Server server) throws IOException {
 
-        String code     = generateSessionCode();
+        String code = generateSessionCode();
         String publicIP = getPublicIP();
         registerSession(code, publicIP);
         System.out.println("Session Code: " + code);
@@ -71,7 +71,6 @@ public class NetworkManager {
 
         client.connect(ip, PORT);
         startReceivingThread(client, client::handleRemoteServerMessage);
-        client.send(ip + " Joined");
     }
 
 

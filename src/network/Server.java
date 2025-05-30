@@ -41,7 +41,7 @@ public class Server {
 
     // This method now continuously listens for and accepts new clients
     public void startListening(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
+        serverSocket = new ServerSocket(port, 50, InetAddress.getByName("0.0.0.0"));
         System.out.println("Server started on port " + port + ". Waiting for clients...");
 
         // Start a new thread to continuously accept clients

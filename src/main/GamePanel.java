@@ -209,6 +209,11 @@ public class GamePanel extends JPanel implements Runnable {
         // Reinstantiate assets
         this.assetManager = new AssetManager(this);
         this.assetManager.reset();
+        this.keyHandler = new KeyHandler(this);
+        this.mouse = new MouseInteractions(this);
+        this.addKeyListener(keyHandler);
+        this.addMouseListener(mouse);
+        this.addMouseWheelListener(mouse);
         
         // // Add initial enemies or any other initial setup
         // enemies.add(new Enemy(this, (int) player.worldX, (int) player.worldY - 100, 1, "Goblin", false));
@@ -333,7 +338,7 @@ public class GamePanel extends JPanel implements Runnable {
         networkServer.setGamePanel(this); // Ensure the server has a reference to this GamePanel
         try {
             sessionCode = NetworkManager.startMultiplayerSession(networkServer);
-            addOrUpdateLobbyClient(user == null ? "Host" : user.username, "127.0.0.1", false);
+            addOrUpdateLobbyClient(user == null ? "Host" : user.username, NetworkManager.getPublicIP(), false);
             setGameState(GameState.HOST_LOBBY);
         } catch (IOException ex) {
             gameUI.logError("Could not host: " + ex.getMessage());
@@ -448,7 +453,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (networkClient != null) networkClient.sendReadyState(ready);
         addOrUpdateLobbyClient(
             user == null ? "Player" : user.username,
-            networkClient != null ? networkClient.getLocalIp() : "127.0.0.1",
+            networkClient != null ? networkClient.getLocalIp() : NetworkManager.getPublicIP(),
             ready
         );
     }
@@ -495,14 +500,10 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void loadProgress(int slot) {
+        // this.cleanup();
         this.dataHandler.loadProgress(this.dbManager.getUserSaveSlots(this.user.userId)[slot-1]); 
         this.requestFocus();
     }
-
-    public void loadGame() {
-        
-    }
-
 
 
     //

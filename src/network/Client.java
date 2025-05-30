@@ -52,10 +52,8 @@ public class Client {
         System.out.println("Server: " + msg);
     }
 
-    public void sendReadyState(boolean ready) throws IOException {
-        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-        out.writeUTF("READY:" + ready); // simple text protocol
-        out.flush();
+    public void sendReadyState(boolean ready) {
+        send("READY:" + ready);
     }
 
     public String getLocalIp() { 

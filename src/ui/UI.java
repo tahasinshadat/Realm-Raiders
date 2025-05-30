@@ -35,28 +35,13 @@ public class UI {
     GamePanel gamePanel;
     Font gameFont;
 
-    // Buttons
-    private JButton newGameButton;
-    private JButton loadGameButton;
-    private JButton controlsButton;
-    private JButton backButton;
-    private JButton backToTitleScreenButton;
-    private JButton saveAndQuitButton;
-    private JButton quitButton;
-
     // Login & Signup inputs and buttons
     private JTextField loginUsernameField;
     private JPasswordField loginPasswordField;
-    private JButton loginSubmitButton;
-    private JButton loginToSignupButton;
-    private JButton loginBackButton;
-
     private JTextField signupUsernameField;
     private JTextField signupEmailField;
     private JPasswordField signupPasswordField;
     private JPasswordField signupConfirmPasswordField;
-    private JButton signupSubmitButton;
-    private JButton signupBackButton;
     
     // In Game UI - HUD
     private static final int BASE_SHIELD = 300;
@@ -235,14 +220,6 @@ public class UI {
     //
     //// Draw Functions
     //
-    private void drawLoginScreen(Graphics2D g2)  { 
-        drawScreenBackground(g2, "Log In");  
-    }
-
-    private void drawSignupScreen(Graphics2D g2) { 
-        drawScreenBackground(g2, "Sign Up"); 
-    }
-
     private void drawTitleScreen(Graphics2D g2) {
         g2.drawImage(this.gameTitleBG, 0, 0, this.gamePanel.screenWidth, this.gamePanel.screenHeight, null);
         g2.drawImage(this.gameTitle, this.gamePanel.screenWidth / 2 - 300 + 15, this.gamePanel.screenHeight / 8 - 150, 600, 300, null);
@@ -509,8 +486,8 @@ public class UI {
 
         for (int i = 0; i < 3; i++) {
             final int slot = i + 1;
-            int    saveId  = gamePanel.user.saveData[i];
-            String label   = (saveId == -1) ? "Empty Slot " + slot : "Load Save " + slot;
+            int saveId = gamePanel.user.saveData[i];
+            String label = (saveId == -1) ? "Empty Slot " + slot : "Load Save " + slot;
 
             this.makeButton(label,
                 centerX() - 100, centerY() - 80 + 50*i, 200, 40,
@@ -696,15 +673,11 @@ public class UI {
         }).start();
 
         // Ready / Unready toggle
-        JButton readyBtn = makeButton("Ready",
-            centerX() - 100, centerY() + 40, 200, 40, null);
-        readyBtn.addActionListener(ev -> {
+        JButton readyBtn = makeButton("Ready", centerX() - 100, centerY() + 40, 200, 40, null);
+        
+        readyBtn.addActionListener(e -> {
             boolean wantReady = readyBtn.getText().equals("Ready");
-            try {
-                gamePanel.networkClient.sendReadyState(wantReady);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            gamePanel.networkClient.sendReadyState(wantReady);
             readyBtn.setText(wantReady ? "Unready" : "Ready");
         });
 
