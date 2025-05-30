@@ -94,6 +94,7 @@ public class Weapon extends GameObject {
         }
         this.setData(this.weaponAttackSpeed, this.weaponProjectileSpeed, this.weaponDamage);
         this.setTextColor();  // Set text color based on weapon rarity
+        this.setImage();
     }
     
 

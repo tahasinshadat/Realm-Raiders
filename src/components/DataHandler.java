@@ -65,7 +65,7 @@ public class DataHandler {
             sb.append("\n");
         }
         
-        sb.append("\nEND WEAPONS\n\n");
+        sb.append("END WEAPONS\n\n");
     }
 
     public void storeWorldData(StringBuilder sb) { // save room positions and states + current objects on map + miniMap state + score, current level, current preset, gameDifficulty, etc
@@ -215,7 +215,7 @@ public class DataHandler {
                 this.gamePanel.player = new Player(this.gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse);
             }
             this.gamePanel.player.setPlayerPropertiesFromString(playerPropertiesBlock.toString().trim());
-            // System.out.println("Player data loaded successfully.");
+            System.out.println("Player data loaded successfully.");
         } else {
             System.err.println("Player data block is empty or not found.");
             if (this.gamePanel.player == null) { // Initialize a default player if data is missing/corrupt
@@ -246,8 +246,10 @@ public class DataHandler {
             if (line.trim().isEmpty()) {
                 Weapon newWeapon = new Weapon(this.gamePanel, this.gamePanel.keyHandler, this.gamePanel.mouse, this.gamePanel.player);
                 newWeapon.setWeaponPropertiesFromString(weaponPropertiesBlock.toString().trim());
-                this.gamePanel.player.addWeapon(newWeapon);
-
+                newWeapon.onGround = false;
+                this.gamePanel.player.weaponInv.add(newWeapon);
+                this.gamePanel.player.equippedWeapon = this.gamePanel.player.weaponInv.get(0);
+                
                 weaponPropertiesBlock.setLength(0);
             } else {
                 weaponPropertiesBlock.append(line).append("\n");
@@ -307,6 +309,7 @@ public class DataHandler {
 
                         for (int col = 0; col < row.length; col++) {
                             this.gamePanel.tileManager.mapTileNum[i][col] = Integer.parseInt(row[col]);
+                            this.gamePanel.mapCreator.worldMap[i][col] = Integer.parseInt(row[col]);
                         }
                         line = reader.readLine();
                     }
@@ -359,7 +362,11 @@ public class DataHandler {
                     continue;
                 }
 
+                this.gamePanel.cleanup();
                 this.gamePanel.gameState = GamePanel.GameState.PLAYING;
+                if (this.gamePanel.gameThread == null || !this.gamePanel.gameThread.isAlive()) {
+                    this.gamePanel.startGameThread();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

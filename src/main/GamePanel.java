@@ -496,6 +496,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void loadProgress(int slot) {
         this.dataHandler.loadProgress(this.dbManager.getUserSaveSlots(this.user.userId)[slot-1]); 
+        this.requestFocus();
     }
 
     public void loadGame() {

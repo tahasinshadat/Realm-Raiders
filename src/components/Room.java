@@ -27,6 +27,7 @@ public class Room {
     public int enemiesInRoom;
     public boolean roomInitialized = false;
     public boolean roomCleared = false;
+    public boolean rewardChestOpened = false;
 
     // Room boundaries
     public int roomTop, roomBottom, roomLeft, roomRight;
@@ -57,6 +58,15 @@ public class Room {
         this.sectionX = x;
         this.sectionY = y;
 
+        this.setRoomBoundaries();
+
+        if ((this.isLootRoom || this.isStartRoom) && this.size != 0) { // if size = 0, then loading from save, don't spawn chest
+            this.spawnChest();
+        }
+    }
+
+    public void setRoomBoundaries() {
+        // System.out.println("SETTING BOUNDARIES");
         this.sectionsTopLeftX = (sectionX <= 0) ? 0 : (sectionX * this.gamePanel.sectionSize) - 1;
         this.sectionsTopLeftY = (sectionY <= 0) ? 0 : (sectionY * this.gamePanel.sectionSize) - 1; 
 
@@ -64,10 +74,6 @@ public class Room {
         this.roomRight = this.roomLeft + size - 1;
         this.roomTop = this.sectionsTopLeftY + ( (this.gamePanel.sectionSize - size) / 2);
         this.roomBottom = this.roomTop + size - 1;
-
-        if ((this.isLootRoom || this.isStartRoom) && this.size != 0) { // if size = 0, then loading from file, don't spawn chest
-            this.spawnChest();
-        }
     }
 
     public void update() {
@@ -97,8 +103,10 @@ public class Room {
         if (this.portal != null) this.portal.update();
         if (this.chest != null) this.chest.update();
         if (this.isCleared) this.roomCleared();
-        if (this.chest != null && this.chest.chestOpened && !this.isStartRoom) this.isCleared = true;
-        
+        if (this.chest != null && this.chest.chestOpened) {
+            this.isCleared = true;
+            this.rewardChestOpened = true;
+        }
     }
 
     public void generateEnemies(int totalWaves, int enemiesPerWave, int framesBetweenSpawns) { // sets flag to true, and specifies enemy amount and time between spawns
@@ -224,6 +232,8 @@ public class Room {
     }
 
     public boolean isPlayerInRoom(int playerWorldX, int playerWorldY) {
+        // System.out.println(this.roomLeft);
+        // System.out.println(this.roomRight);
         return playerWorldX / this.gamePanel.tileSize > this.roomLeft + 1 && 
                playerWorldX / this.gamePanel.tileSize < this.roomRight - 1 &&
 
@@ -246,6 +256,7 @@ public class Room {
         properties.append("sectionY: ").append(this.sectionY).append("\n");
         properties.append("roomInitialized: ").append(this.roomInitialized).append("\n");
         properties.append("roomCleared: ").append(this.roomCleared).append("\n");
+        properties.append("rewardChestOpened: ").append(this.rewardChestOpened).append("\n");
         return properties.toString();
     }
     
@@ -267,7 +278,19 @@ public class Room {
                 case "sectionY" -> this.sectionY = Integer.parseInt(value);
                 case "roomInitialized" -> this.roomInitialized = Boolean.parseBoolean(value);
                 case "roomCleared" -> this.roomCleared = Boolean.parseBoolean(value);
+                case "rewardChestOpened" -> this.rewardChestOpened = Boolean.parseBoolean(value);
             }
+        }
+
+        this.setRoomBoundaries();
+        if ((this.isLootRoom || this.isStartRoom) && !roomCleared) {
+            this.spawnChest();
+        }
+        else if (this.isBossRoom && this.roomCleared) {
+            this.revealPortal();
+        }
+        else if (this.roomCleared && !this.rewardChestOpened) {
+            this.spawnChest();
         }
     }
     

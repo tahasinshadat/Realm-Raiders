@@ -183,6 +183,8 @@ public class Player extends Entity {
         this.collisionEnabled = false;
         this.gamePanel.collisionHandler.checkTile(this);
 
+        // System.out.println(this.worldX + ", " + this.worldY);
+
         // If there is no collision, move
         if (collisionEnabled == false) {
 
@@ -224,6 +226,7 @@ public class Player extends Entity {
         }
 
         for (Weapon weapon : weaponInv) weapon.update(); // update projectiles of all weapons
+        // for (Weapon weapon : weaponInv) System.out.println(weapon); 
 
         if (this.frameCount % 300 == 0 && !this.dead) this.regenerateShield(); // every 5 seconds regenerate shield a little bit
         if (mouse.isLeftMouseClicked()) equippedWeapon.shoot();

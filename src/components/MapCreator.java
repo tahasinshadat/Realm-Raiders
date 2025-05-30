@@ -16,7 +16,7 @@ public class MapCreator {
     private int wallVarieties = 1;
     private int wallCount = 0;
     private int[][] newRoom; // One Singluar New Room
-    private int[][] worldMap; // Rooms combined
+    public int[][] worldMap; // Rooms combined
     private GamePanel gamePanel;
     private int sections;
     
