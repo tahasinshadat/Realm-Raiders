@@ -48,8 +48,8 @@ public class Client {
 
     public void close() throws IOException {
         if (socket != null) {
-            in.close();
             out.close();
+            in.close();
             socket.close();
         }
     }
@@ -66,7 +66,7 @@ public class Client {
         // System.out.println(msg);
         if (msg.startsWith("PLAYER_JOINED:")) {
             String[] contents = msg.substring("PLAYER_JOINED:".length()).split(":");
-            System.out.println(contents[0]);
+            // System.out.println(contents[0]);
             gamePanel.addOrUpdateLobbyClient(contents[0], contents[1], false);
         }
         else if (msg.startsWith("CLIENTS:")) {
@@ -75,6 +75,10 @@ public class Client {
                 String[] clientInfo = client.split(":");
                 gamePanel.addOrUpdateLobbyClient(clientInfo[0], clientInfo[1], Boolean.parseBoolean(clientInfo[2]));
             }
+        } 
+        else if (msg.startsWith("PLAYER_LEFT:")) {
+            String[] contents = msg.substring("PLAYER_LEFT:".length()).split(":");
+            gamePanel.lobbyClients.removeIf(lc -> lc.username.equals(contents[0]));
         }
         else { // ready state
             String[] contents = msg.split(":");

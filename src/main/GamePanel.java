@@ -378,9 +378,8 @@ public class GamePanel extends JPanel implements Runnable {
     // Disconnect a client that is in a lobby
     public void leaveJoinLobby() {
         try {
+            networkClient.send("LEAVE:" + user.username);
             if (networkClient != null) networkClient.close();   // implement close() in Client if missing
-            // ^ issue with this, blocking for some reason
-            System.out.println("LEAVING");
         } catch (Exception ignored) {}
         
         networkClient = null;

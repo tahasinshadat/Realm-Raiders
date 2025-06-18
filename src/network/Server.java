@@ -106,6 +106,11 @@ public class Server {
             }
             sender.sendToClient(clients);
             send("LOBBY_UPDATE:PLAYER_JOINED:" + username + ":" + sender.getIpAddress());
+        } else if (msg.startsWith("LEAVE:")) {
+            String username = msg.substring("LEAVE:".length());
+            if (gamePanel != null) {
+                gamePanel.lobbyClients.removeIf(lc -> lc.username.equals(username));
+            }
         }
     }
 
@@ -118,7 +123,7 @@ public class Server {
         }
         System.out.println("Client " + client.getClientId() + " disconnected. Remaining clients: " + connectedClients.size());
         // Broadcast client removal to remaining clients
-        send("PLAYER_LEFT:" + client.getUsername());
+        send("LOBBY_UPDATE:PLAYER_LEFT:" + client.getUsername());
     }
 
     public boolean isConnected() {
@@ -197,6 +202,7 @@ public class Server {
                 if (in != null) in.close();
                 if (out != null) out.close();
                 if (clientSocket != null && !clientSocket.isClosed()) clientSocket.close();
+                this.gamePanel.setGameState(GamePanel.GameState.MULTIPLAYER_MENU);
             } catch (IOException e) {
                 System.err.println("Error closing client handler resources for " + clientId + ": " + e.getMessage());
             }
