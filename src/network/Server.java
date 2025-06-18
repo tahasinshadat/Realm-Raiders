@@ -1,6 +1,8 @@
 package network;
 
 import main.GamePanel; // Import GamePanel to allow server to update lobby UI
+import main.GamePanel.LobbyClient;
+
 import java.io.*;
 import java.net.*;
 import java.util.List;
@@ -73,6 +75,10 @@ public class Server {
         }
     }
 
+    public void send(ClientHandler client, String msg) {
+        client.sendToClient(msg);
+    }
+
     // Method to handle messages received from any client
     public void handleClientMessage(String msg, ClientHandler sender) {
         System.out.println("Received from client " + sender.getClientId() + ": " + msg);
@@ -93,7 +99,13 @@ public class Server {
                 gamePanel.addOrUpdateLobbyClient(username, sender.getIpAddress(), false); // Add new client to lobby list
             }
             // Broadcast new client's arrival to existing clients
-            send("PLAYER_JOINED:" + username + ":" + sender.getIpAddress());
+            String clients = "LOBBY_UPDATE:CLIENTS:";
+            for (int i = 0; i < gamePanel.lobbyClients.size() - 1; i++) {
+                LobbyClient c = gamePanel.lobbyClients.get(i);
+                clients += c.username + ":" + c.ip + ":" + c.ready + ";";
+            }
+            sender.sendToClient(clients);
+            send("LOBBY_UPDATE:PLAYER_JOINED:" + username + ":" + sender.getIpAddress());
         }
     }
 

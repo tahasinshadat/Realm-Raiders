@@ -195,7 +195,7 @@ public class GamePanel extends JPanel implements Runnable {
         
         this.networkServer = new Server();
         this.networkServer.setGamePanel(this);
-        this.networkClient = new Client();
+        this.networkClient = new Client(this);
 
         this.gameUI = new UI(this);
         this.gameUI.logInfo("game assets loaded.");
@@ -260,7 +260,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (this.gameState == newState) return;
 
         this.gameState = newState;
-        if (this.gameState != GameState.PAUSE) this.paused = false;
+        if (this.gameState == GameState.PLAYING) this.paused = false;
 
         if (gameUI != null) gameUI.rebuild();
 
@@ -360,7 +360,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public boolean joinMultiplayerGame(String code) {
-        if (networkClient == null) networkClient = new Client();
+        if (networkClient == null) networkClient = new Client(this);
         try {
             NetworkManager.joinMultiplayerSession(networkClient, code);
             if (user != null) {
@@ -379,7 +379,10 @@ public class GamePanel extends JPanel implements Runnable {
     public void leaveJoinLobby() {
         try {
             if (networkClient != null) networkClient.close();   // implement close() in Client if missing
+            // ^ issue with this, blocking for some reason
+            System.out.println("LEAVING");
         } catch (Exception ignored) {}
+        
         networkClient = null;
         lobbyClients.clear();
         setGameState(GameState.MULTIPLAYER_MENU);

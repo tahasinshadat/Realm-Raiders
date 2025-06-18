@@ -611,11 +611,11 @@ public class UI {
                 @Override public void keyTyped(KeyEvent e) {
                     char c = e.getKeyChar();
 
-                    if (!Character.isLetterOrDigit(c) ||
-                        codeField.getText().length() >= 6) {
-                        e.consume();
-                        return;
-                    }
+                    // if (!Character.isLetterOrDigit(c) ||
+                    //     codeField.getText().length() >= 6) {
+                    //     e.consume();
+                    //     return;
+                    // }
                     e.setKeyChar(Character.toUpperCase(c));
                 }
             });
@@ -627,18 +627,23 @@ public class UI {
                 centerX() - 100, centerY() + 10, 200, 40,
                 e -> {
                     String code = codeField.getText().trim().toUpperCase();
-                    if (code.length() != 6) { logError("Code must be 6 characters."); return; }
+                    // if (code.length() != 6) { logError("Code must be 6 characters."); return; }
 
                     if (gamePanel.joinMultiplayerGame(code)) {
+                        // System.out.println("Joined lobby " + code);
                         this.logInfo("Joined lobby " + code);
                         gamePanel.setGameState(GamePanel.GameState.JOIN_LOBBY);
+                        addJoinLobbyScreen();
                     } else {
                         this.logError("Failed to join lobby " + code);
                     }
                 });
 
             makeButton("Back", centerX() - 100, centerY() + 70, 200, 40,
-                e -> gamePanel.setGameState(GamePanel.GameState.MULTIPLAYER_MENU));
+                e -> {
+                    gamePanel.setGameState(GamePanel.GameState.MULTIPLAYER_MENU);
+                    
+                });
 
             codeField.requestFocusInWindow();
             return;

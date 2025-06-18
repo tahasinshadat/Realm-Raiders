@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class NetworkManager {
     private static final String PASTE_SERVICE = "https://paste.rs";  // Free and anonymous pastebin
-    private static final int PORT = 5005;
+    private static final int PORT = 7777;
 
     public static String generateSessionCode() {
         String pool = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -66,10 +66,11 @@ public class NetworkManager {
 
     // ==== Client Side ====
     public static void joinMultiplayerSession(Client client, String code) throws IOException {
-        String ip = resolveIP(code);
-        if (ip == null || ip.isEmpty()) throw new IOException("Invalid session code.");
+        // String ip = resolveIP(code);
+        // if (ip == null || ip.isEmpty()) throw new IOException("Invalid session code.");
 
-        client.connect(ip, PORT);
+        // client.connect(ip, PORT);
+        client.connect(code, PORT); // code is ip
         startReceivingThread(client, client::handleRemoteServerMessage);
     }
 
